@@ -1,0 +1,36 @@
+@import url('./Assets/fonts/index.css');
+
+:root {
+    // Black and White Solids
+    --light-green: #ECF6EE;
+    --white: #FEFEFE;
+    --ultra-light-gray: #F8F8F8;
+    --light-gray: #E5E5E5;
+    --medium-gray: #B3B3B3;
+    --solid-gray: #858585;
+    --dark-grafit: #1E2024;
+    --solid-grafit: #383A3E;
+    --black: #080808;
+}
+
+body {
+    margin: 0;
+    font-family: 'SourceSansPro', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    //Переопределение стилей в antd
+    ::selection {
+        color: var(--black);
+        background: #CEE2FC;
+    }
+    .ant-layout {
+        background: transparent;
+    }
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
