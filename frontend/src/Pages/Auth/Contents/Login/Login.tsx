@@ -50,14 +50,20 @@ const Login = () => {
                 layout="vertical"
                 onFinish={onLogin}>
                 <FormItem
-                    name="username"
-                    label="Имя пользователя"
-                    required>
+                    name="email"
+                    label="E-mail"
+                    required
+                    rules={[
+                        {
+                            type: "email",
+                            message: "E-mail не подходит",
+                        },
+                    ]}>
                     <Input
                         allowClear
                         disabled={state.fetching}
                         className={styles.input}
-                        placeholder="Имя пользователя" 
+                        placeholder="E-mail" 
                     />
                 </FormItem>
                 <FormItem

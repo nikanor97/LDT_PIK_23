@@ -1,5 +1,5 @@
 export default {
-    auth: "/auth/v1/jwt/create/",
-    registration: "/auth/v1/users/",
-    refresh: "/auth/v1/jwt/refresh/",
+    auth: "/v1/users/token",
+    registration: "/v1/users/user",
+    refresh: "/v1/users/token-refresh",
 };

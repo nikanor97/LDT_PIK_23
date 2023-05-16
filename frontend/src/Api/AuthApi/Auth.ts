@@ -2,7 +2,6 @@ import Request from "../Request";
 import {Auth} from "./types";
 import Cookies from "universal-cookie";
 import Endpoints from "./endpoints";
-import {decode, jwtToken} from "@utils/JWT/decode";
 
 const cookies = new Cookies();
 
@@ -12,20 +11,20 @@ export default {
     refresh: (refresh: Auth.iRefresh) => {
         return Request.post<Auth.oRefresh>(`${Endpoints.refresh}`, {refresh})
             .then(({data}) => {
-                const decodedAccess:jwtToken = decode(data.access);
                 cookies.set(
                     "access",
-                    data.access,
+                    data.access_token,
                     {
-                        expires: new Date(decodedAccess.exp * 1000),
-                        path: "/"
+                        // TODO Пока нет SSL сертификата, убираю это
+                        // secure: true,
+                        expires: new Date(data.access_expires_at * 1000),
+                        path: "/",
                     });
-                const decodedRefresh:jwtToken = decode(data.refresh);
                 cookies.set(
                     "refresh",
-                    data.refresh,
+                    data.refresh_token,
                     {
-                        expires: new Date(decodedRefresh.exp * 1000),
+                        expires: new Date(data.refresh_expires_at * 1000),
                         path: "/"
                     });
             })

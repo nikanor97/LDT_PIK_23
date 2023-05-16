@@ -9,18 +9,22 @@ export declare namespace Auth {
         email: string
     }
     type iLogin = {
-        username: string,
+        email: string,
         password: string,
     }
     type oLogin = {
-        access: string,
-        refresh: string
+        access_token: string,
+        refresh_token: string,
+        access_expires_at: number,
+        refresh_expires_at: number
     }
     type iRefresh = {
         refresh: string
     }
     type oRefresh = {
-        access: string,
-        refresh: string
+        access_token: string,
+        refresh_token: string,
+        access_expires_at: number,
+        refresh_expires_at: number
     }
 }

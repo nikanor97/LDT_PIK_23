@@ -4,7 +4,6 @@ import Actions from "@actions";
 import {PayloadAction} from "@reduxjs/toolkit";
 import Api from "@api";
 import {iActions} from "@redux/Auth/types";
-import {decode, jwtToken} from "@utils/JWT/decode";
 import Cookies from "universal-cookie";
 import useNotification from "@root/Hooks/useNotification/useNotification";
 
@@ -18,33 +17,27 @@ const UserLogin = function* (action: PayloadAction<iActions.userLogin>) {
         const {data} = yield call(Api.Auth.login, payload);
         if (!data) throw new Error("Ошибка авторизации");
         yield put(Actions.User.setFetching(true));
-        const decodedAccess: jwtToken = decode(data.access);
         yield call(
             {
                 context: cookies,
                 fn: cookies.set,
             },
             "access",
-            data.access,
+            data.access_token,
             {
-                // TODO Пока нет SSL сертификата, убираю это
-                // secure: true,
-                expires: new Date(decodedAccess.exp * 1000),
+                expires: new Date(data.access_expires_at * 1000),
                 path: "/",
             }
         );
-        const decodedRefresh: jwtToken = decode(data.refresh);
         yield call(
             {
                 context: cookies,
                 fn: cookies.set,
             },
             "refresh",
-            data.refresh,
+            data.refresh_token,
             {
-                // TODO Пока нет SSL сертификата, убираю это
-                // secure: true,
-                expires: new Date(decodedRefresh.exp * 1000),
+                expires: new Date(data.refresh_expires_at * 1000),
                 path: "/",
             }
         );
