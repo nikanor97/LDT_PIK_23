@@ -1,0 +1,77 @@
+.modal {
+    background: var(--component-bg);
+    border-radius: 16px;
+    padding-bottom: 0;
+    .submit {
+        padding-top: 24px;
+        margin-bottom: 0;
+    }
+    :global {
+        .ant-modal-content {
+            background: transparent;
+            box-shadow: none;
+            color: var(--text-primary);
+        }
+        .ant-modal-header {
+            background: transparent;
+            border: 0;
+            padding: 24px 24px 8px 24px;
+            .ant-modal-title {
+                color: var(--text-primary);
+                font-style: normal;
+                font-weight: 700;
+                font-size: 22px; //TODO тут было 24
+                line-height: 32px;
+            }
+        }
+        .ant-modal-body {
+            padding-top: 0;
+        }
+        .ant-modal-close {
+            color: var(--text-primary);
+            margin: 8px 2px 0 0;
+        }
+        .ant-form-item-label {
+            > label {
+                color: var(--text-secondary);
+                &.ant-form-item-required {
+                    color: var(--text-primary);
+                    &:not(.ant-form-item-required-mark-optional) {
+                        &::before {
+                            content: unset;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.animation(@animationName, @time){
+    -webkit-animation: @animationName @time ease;
+    -moz-animation: @animationName @time ease;
+    -o-animation: @animationName @time ease;
+    animation: @animationName @time ease;
+}
+.animationOut {
+    .animation(openModal, 0.1s);
+    @keyframes openModal {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+}
+.animationOn {
+    .animation(closeModal, 0.1s);
+    @keyframes closeModal {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+}

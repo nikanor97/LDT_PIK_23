@@ -1,0 +1,32 @@
+.drawer {
+    :global {
+        .ant-drawer-content-wrapper {
+            .ant-drawer-content, .ant-drawer-header {
+                background: var(--component-bg);
+                color: var(--text-primary);
+            }
+            .ant-drawer-close {
+                color: var(--text-primary);
+            }
+            .ant-drawer-header {
+                border-bottom: unset;
+                position: relative;
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0px;
+                    right: 0px;
+                    height: 1px;
+                    background: #858585;
+                }
+                .ant-drawer-title {
+                    color: var(--text-primary);
+                }
+            }
+        }
+        .ant-drawer-mask {
+            background: rgba(0, 0, 0, 0.7);
+        }
+    }
+}

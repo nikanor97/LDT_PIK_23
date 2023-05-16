@@ -1,0 +1,100 @@
+import React from "react";
+import styles from "./Login.module.less";
+import {Form} from "antd";
+import Title from "@root/Components/Title/Title";
+import {Button, FormItem, Input} from "@root/Components/Controls";
+import Actions from "@actions";
+import {useAppDispatch, useAppSelector} from "@root/Hooks";
+import {Auth} from "@root/Api/AuthApi/types";
+import Navigation from "../../Modules/Navigation/Navigation";
+import routes from "@routes";
+import {useHistory} from "react-router-dom";
+
+const Login = () => {
+    const [form] = Form.useForm();
+    const dispatch = useAppDispatch();
+    const history = useHistory();
+    const state = useAppSelector((state) => state.Auth.login);
+
+    const setFieldsErrors = (errors: Error) => {
+        form.setFields(Object.entries(errors).map(([key, value]) => (
+            {
+                name: key,
+                errors: value
+            }))
+        );
+    };
+
+    const redirect = () => {
+        history.push("/");
+    };
+
+    const onLogin = (values: Auth.iLogin) => {
+        dispatch(Actions.Auth.userLogin({
+            ...values,
+            setFieldsErrors,
+            redirect
+        }));
+    };
+    
+    return (
+        <div className={styles.wrapper}>
+            <Title
+                variant="h1" 
+                className={styles.title}>
+                Авторизация
+            </Title>
+            <Form
+                form={form}
+                name="Login"
+                layout="vertical"
+                onFinish={onLogin}>
+                <FormItem
+                    name="username"
+                    label="Имя пользователя"
+                    required>
+                    <Input
+                        allowClear
+                        disabled={state.fetching}
+                        className={styles.input}
+                        placeholder="Имя пользователя" 
+                    />
+                </FormItem>
+                <FormItem
+                    name="password"
+                    label="Пароль"
+                    required>
+                    <Input.Password
+                        disabled={state.fetching}
+                        type="password"
+                        className={styles.input}
+                        placeholder="Пароль"
+                    />
+                </FormItem>
+                <div className={styles.controls}>
+                    <FormItem>
+                        <Button
+                            size="large"
+                            type="primary"
+                            loading={state.fetching}
+                            htmlType="submit"
+                            className={styles.button}>
+                            Войти
+                        </Button>
+                    </FormItem>
+                    <FormItem>
+                        <Button
+                            type="link">
+                            <Navigation route={routes.auth.registration}>
+                                Еще не зарегистрированы?
+                            </Navigation>
+                        </Button>
+                    </FormItem>
+                </div>
+            </Form>
+        </div>
+        
+    );
+};
+
+export default Login;

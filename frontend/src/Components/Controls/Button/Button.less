@@ -1,0 +1,160 @@
+.btn {
+    &.ant-btn {
+        border-radius: 8px;
+        font-family: 'SourceSansPro';
+        display: flex;
+        align-items: center;
+        box-shadow: none;
+        &-sm {
+            padding: 6px 8px;
+            height: 28px;
+            font-size: 14px;
+            line-height: 16px;
+        }
+        &-md {
+            padding: 8px;
+            height: 32px;
+            font-size: 14px;
+            line-height: 16px;
+        }
+        &-lg {
+            padding: 8px 16px;
+            height: 40px;
+            font-size: 16px;
+            line-height: 24px;
+        }
+        &-primary {
+            color: var(--white);
+            background: var(--button-primary);
+            border: transparent;
+            justify-content: center;
+            font-weight: 600;
+            &:not(disabled) {
+                &:hover {
+                    border: transparent;
+                    background: var(--button-primary-hover);
+                    color: var(--white);
+                }
+            }
+            &[disabled], &[disabled]:hover, &[disabled]:focus, &[disabled]:active {
+                background: var(--button-disabled);
+                border: transparent;
+                color: var(--button-disabled-text);
+            }
+        }
+
+        &-ghost {
+            color: var(--text-primary);
+            background: transparent;
+            border: transparent;
+            font-weight: 400;
+            justify-content: center;
+            &:not(disabled) {
+                &:hover {
+                    border: transparent;
+                    color: var(--text-primary);
+                    background: var(--button-ghost-hover);
+                }
+            }
+            &[disabled], &[disabled]:hover, &[disabled]:focus, &[disabled]:active {
+                background: var(--button-disabled);
+                border: var(--button-disabled-border);
+                color: var(--button-disabled-text);
+            }
+        }
+        &-link {
+            color: var(--text-primary);
+            background: transparent;
+            border: transparent;
+            font-weight: 400;
+            justify-content: center;
+            &:not(disabled) {
+                &:hover {
+                    color: var(--brand-main);
+                }
+            }
+            &[disabled], &[disabled]:hover, &[disabled]:focus, &[disabled]:active {
+                color: rgba(255, 255, 255, 0.2);
+            }
+
+        }
+        &-text {
+            color: var(--text-secondary);
+            border: transparent;
+            font-weight: normal;
+            justify-content: center;
+            &:not(disabled) {
+                &:hover {
+                    border: transparent;
+                    color: var(--brand-main);
+                }
+            }
+            &[disabled], &[disabled]:hover, &[disabled]:focus, &[disabled]:active {
+                border: transparent;
+                color: #858585;
+            }
+        }
+
+    }
+    &_secondary {
+        background: var(--button-secondary);
+        color: var(--text-primary);
+        border: 1px solid transparent;
+        box-shadow: 4px 4px 24px rgba(0, 0, 0, 0.12);
+        font-weight: 600;
+        justify-content: center;
+        &:not(disabled) {
+            &:hover {
+                color: var(--text-primary);
+                border: 1px solid transparent;
+                background: var(--button-secondary-hover);
+            }
+        }
+        &[disabled], &[disabled]:hover, &[disabled]:focus, &[disabled]:active {
+            background: var(--button-disabled);
+            color: var(--button-disabled-text);
+        }
+    }
+
+    &_stroke {
+        color: var(--text-primary);
+        background: var(--button-stroke);
+        border: var(--button-stroke-border);
+        font-weight: 400;
+        justify-content: center;
+        &:not(disabled) {
+            &:hover {
+                border: var(--button-stroke-hover-border);
+                color: var(--button-stroke-hover-text);
+                background: var(--button-stroke);
+            }
+        }
+        &[disabled], &[disabled]:hover, &[disabled]:focus, &[disabled]:active {
+            background: var(--button-disabled);
+            border: var(--button-disabled-border);
+            color: var(--button-disabled-text);
+        }
+    }
+    &_menu {
+        color: var(--text-primary);
+        background: transparent;
+        border: transparent;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 24px;
+        height: 48px;
+        justify-content: flex-start;
+        &:not(disabled) {
+            &:hover {
+                border: transparent;
+                background: var(--button-secondary-hover);
+                color: var(--text-primary);
+            }
+        }
+        &[disabled], &[disabled]:hover, &[disabled]:focus, &[disabled]:active {
+            background: rgba(255, 255, 255, 0.08);
+            border: transparent;
+            color: rgba(255, 255, 255, 0.2);
+        }
+    }
+}
