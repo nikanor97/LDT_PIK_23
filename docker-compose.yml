@@ -41,23 +41,23 @@ services:
     depends_on:
       - db
 
-  graylog-sidecar:
-    image: nikanor97/graylog-sidecar:1.0
-    volumes:
-      - backend-logs:/root/backend_logs
-    env_file:
-      - graylog.env
-#    depends_on:
-#      - backend
-    restart: on-failure
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-    network_mode: host
-
-volumes:
-  backend-logs:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: './backend/logs'
+#  graylog-sidecar:
+#    image: nikanor97/graylog-sidecar:1.0
+#    volumes:
+#      - backend-logs:/root/backend_logs
+#    env_file:
+#      - graylog.env
+##    depends_on:
+##      - backend
+#    restart: on-failure
+##    extra_hosts:
+##      - "host.docker.internal:host-gateway"
+#    network_mode: host
+#
+#volumes:
+#  backend-logs:
+#    driver: local
+#    driver_opts:
+#      type: 'none'
+#      o: 'bind'
+#      device: './backend/logs'
