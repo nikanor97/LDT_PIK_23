@@ -34,7 +34,7 @@ services:
     volumes:
       - ./backend:/code
       - .env:/code/.env
-      - backend-logs:/code/logs
+#      - backend-logs:/code/logs
     ports:
       - "${BACKEND_PORT_ON_HOST}:${BACKEND_PORT}"
     restart: on-failure
