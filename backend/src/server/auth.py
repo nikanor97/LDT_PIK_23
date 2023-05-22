@@ -17,7 +17,9 @@ class Auth:
         """
         is_valid = await self.is_access_token_valid(token)
         if not is_valid:
-            raise HTTPException(status_code=401, detail="Could not verify credentials")
+            raise HTTPException(
+                status_code=401, detail="Ошибка валидации учетных данных"
+            )
 
     async def is_access_token_valid(self, token: str):
         async with self._main_db_manager.users.make_autobegin_session() as session:

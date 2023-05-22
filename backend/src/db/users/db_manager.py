@@ -38,7 +38,9 @@ class UsersDbManager(BaseDbManager):
             created_user = await User.create(session, user)
             return created_user
         else:
-            raise ResourceAlreadyExists(f"User with email {user.email} already exists")
+            raise ResourceAlreadyExists(
+                f"Пользователь с электронной почтой {user.email} уже существует"
+            )
 
     async def create_project(
         self, session: AsyncSession, project: ProjectBase, user_id: uuid.UUID
@@ -94,7 +96,7 @@ class UsersDbManager(BaseDbManager):
     ) -> User:
         assert (
             user_id is not None or email is not None
-        ), "Either user_id or email should not be None"
+        ), "Либо user_id либо email должен быть не пустым"
 
         user: Optional[User] = None
         if user_id is not None:
@@ -103,7 +105,9 @@ class UsersDbManager(BaseDbManager):
             stmt = select(User).where(User.email == email)
             user = (await session.execute(stmt)).scalar_one_or_none()
             if user is None:
-                raise NoResultFound(f"User with email {email} was not found")
+                raise NoResultFound(
+                    f"Пользователь с электронной почтой {email} не зарегистрирован"
+                )
 
         assert user is not None
         return user
@@ -118,7 +122,7 @@ class UsersDbManager(BaseDbManager):
     ) -> list[UserRole]:
         assert (
             user_id is not None or project_id is not None
-        ), "Either user_id or project_id should not be None"
+        ), "Либо user_id либо project_id должен быть не пустым"
 
         stmt = select(UserRole)
 
@@ -148,7 +152,9 @@ class UsersDbManager(BaseDbManager):
         stmt = select(User).where(User.email == username)
         user: Optional[User] = (await session.execute(stmt)).scalar_one_or_none()
         if user is None:
-            raise NoResultFound(f"User with email {username} does not exist")
+            raise NoResultFound(
+                f"Пользователь с электронной почтой {username} не зарегистрирован"
+            )
 
         stmt = select(UserPassword.hashed_password).where(
             UserPassword.user_id == user.id
@@ -157,7 +163,7 @@ class UsersDbManager(BaseDbManager):
             await session.execute(stmt)
         ).scalar_one_or_none()
         if hashed_password is None:
-            raise NoResultFound(f"No hashed password for user with id {user.id} exist")
+            raise NoResultFound(f"Пароль для пользователя с id {user.id} не найден")
 
         if not verify_password(password, hashed_password):
             return None

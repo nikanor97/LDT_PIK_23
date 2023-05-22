@@ -10,7 +10,7 @@ from src.db.users.models import User, UserTokenBase
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/swagger-token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
 
 
 def verify_password(plain_password, hashed_password):
@@ -67,5 +67,5 @@ def get_user_id_from_token(token: str) -> uuid.UUID:
             raise JWTError()
     except Exception as e:
         # SHOULD NEVER HAPPEN CAUSE TOKEN IS ALWAYS CHECKED BEFORE EACH METHOD INVOCATION
-        raise JWTError("Could not validate credentials")
+        raise JWTError("Ошибка валидации учетных данных")
     return user_id
