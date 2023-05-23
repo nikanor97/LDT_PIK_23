@@ -1,0 +1,31 @@
+.pdf {
+    line-height: 1.2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    // Стандарт для типовых документов PDF как на обычных страницах, так и в модалках - потенциально можно пересмотреть если будет какое-то жесткое изменение
+    width: 595px;
+    background-color: #fefefe;
+    height: 70vh;
+    .react-pdf__message--error {
+        width: min-content;
+    }
+}   
+
+.error {
+    position: absolute;
+    // делаем сдвиг на размер элемента тк оболочка стала 0px и блок сдвинулся
+    margin-left: -164px;
+    top: 50%;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.loading {
+    & div:first-child { 
+        background: transparent;
+    }
+    height: 70vh;
+    background-color: var(--background);
+}
