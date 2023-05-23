@@ -1,10 +1,8 @@
 import enum
 import uuid
 from datetime import datetime
-from typing import Optional, TypeVar
+from typing import TypeVar
 
-import sqlalchemy
-from sqlalchemy import Column, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlmodel import Field, Relationship
 from src.db.common_sql_model import CommonSqlModel
@@ -22,27 +20,9 @@ class UsersSQLModel(CommonSqlModel):
 UsersSQLModel.metadata = UsersBase.metadata  # type: ignore
 
 
-class RoleTypeOption(str, enum.Enum):
-    author = "author"
-    view_only = "view_only"
-    verificator = "verificator"
-
-
 class TokenKindOption(str, enum.Enum):
     access = "access"
     refresh = "refresh"
-
-
-class ProjectBase(UsersSQLModel):
-    name: str = Field(nullable=False, index=True)
-    description: Optional[str] = Field(nullable=True, default=None)
-
-
-class Project(ProjectBase, TimeStampWithIdMixin, table=True):
-    __tablename__ = "projects"
-    roles: list["UserRole"] = Relationship(
-        back_populates="project", sa_relationship_kwargs={"lazy": "selectin"}
-    )
 
 
 class UserBase(UsersSQLModel):
@@ -52,34 +32,34 @@ class UserBase(UsersSQLModel):
 
 class User(UserBase, TimeStampWithIdMixin, table=True):
     __tablename__ = "users"
-    roles: list["UserRole"] = Relationship(
-        back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
-    )
+    # roles: list["UserRole"] = Relationship(
+    #     back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
+    # )
 
 
-class UserRoleBase(UsersSQLModel):
-    user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
-    project_id: uuid.UUID = Field(foreign_key="projects.id", index=True)
+# class UserRoleBase(UsersSQLModel):
+#     user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
+#     project_id: uuid.UUID = Field(foreign_key="projects.id", index=True)
+#
+#     role_type: RoleTypeOption = Field(
+#         sa_column=Column(sqlalchemy.Enum(RoleTypeOption), nullable=False)
+#     )
 
-    role_type: RoleTypeOption = Field(
-        sa_column=Column(sqlalchemy.Enum(RoleTypeOption), nullable=False)
-    )
 
-
-class UserRole(UserRoleBase, TimeStampWithIdMixin, table=True):
-    __tablename__ = "user_roles"
-    __table_args__ = (
-        Index(
-            "idx_user_project_role", "user_id", "project_id", "role_type", unique=True
-        ),
-    )
-
-    user: User = Relationship(
-        back_populates="roles", sa_relationship_kwargs={"lazy": "selectin"}
-    )
-    project: Project = Relationship(
-        back_populates="roles", sa_relationship_kwargs={"lazy": "selectin"}
-    )
+# class UserRole(UserRoleBase, TimeStampWithIdMixin, table=True):
+#     __tablename__ = "user_roles"
+#     __table_args__ = (
+#         Index(
+#             "idx_user_project_role", "user_id", "project_id", "role_type", unique=True
+#         ),
+#     )
+#
+#     user: User = Relationship(
+#         back_populates="roles", sa_relationship_kwargs={"lazy": "selectin"}
+#     )
+#     project: Project = Relationship(
+#         back_populates="roles", sa_relationship_kwargs={"lazy": "selectin"}
+#     )
 
 
 class UserTokenBase(UsersSQLModel):

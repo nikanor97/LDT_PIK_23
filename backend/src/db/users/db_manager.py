@@ -5,18 +5,12 @@ from typing import Optional
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
 
 from src.db.base_manager import BaseDbManager
 from src.db.exceptions import ResourceAlreadyExists
 from src.db.users.models import (
-    Project,
-    ProjectBase,
-    RoleTypeOption,
     User,
     UserBase,
-    UserRole,
-    UserRoleBase,
     UserPassword,
     UserToken,
     UserTokenBase,
@@ -42,50 +36,50 @@ class UsersDbManager(BaseDbManager):
                 f"Пользователь с электронной почтой {user.email} уже существует"
             )
 
-    async def create_project(
-        self, session: AsyncSession, project: ProjectBase, user_id: uuid.UUID
-    ) -> Project:
-        # Checking if user with this id exists
-        await User.by_id(session, user_id)
+    # async def create_project(
+    #     self, session: AsyncSession, project: ProjectBase, user_id: uuid.UUID
+    # ) -> Project:
+    #     # Checking if user with this id exists
+    #     await User.by_id(session, user_id)
+    #
+    #     new_project = Project.parse_obj(project)
+    #     session.add(new_project)
+    #
+    #     new_user_role = UserRole(
+    #         user_id=user_id, project_id=new_project.id, role_type=RoleTypeOption.author
+    #     )
+    #     session.add(new_user_role)
+    #
+    #     await session.commit()
+    #
+    #     return new_project
 
-        new_project = Project.parse_obj(project)
-        session.add(new_project)
-
-        new_user_role = UserRole(
-            user_id=user_id, project_id=new_project.id, role_type=RoleTypeOption.author
-        )
-        session.add(new_user_role)
-
-        await session.commit()
-
-        return new_project
-
-    async def create_user_role(
-        self, session: AsyncSession, user_role: UserRoleBase
-    ) -> UserRole:
-        # Checking if user with this id exists
-        await User.by_id(session, user_role.user_id)
-
-        # Checking if project with this id exists
-        await Project.by_id(session, user_role.project_id)
-
-        existing_user_role = (
-            await session.execute(
-                select(UserRole)
-                .where(UserRole.role_type == user_role.role_type)
-                .where(UserRole.user_id == user_role.user_id)
-                .where(UserRole.project_id == user_role.project_id)
-            )
-        ).scalar_one_or_none()
-        if existing_user_role is None:
-            created_user_role = await UserRole.create(session, user_role)
-            return created_user_role
-        else:
-            raise ResourceAlreadyExists(
-                f"User role with role_type {user_role.role_type}, "
-                f"user_id {user_role.user_id} and "
-                f"project_id {user_role.project_id} already exists"
-            )
+    # async def create_user_role(
+    #     self, session: AsyncSession, user_role: UserRoleBase
+    # ) -> UserRole:
+    #     # Checking if user with this id exists
+    #     await User.by_id(session, user_role.user_id)
+    #
+    #     # Checking if project with this id exists
+    #     await Project.by_id(session, user_role.project_id)
+    #
+    #     existing_user_role = (
+    #         await session.execute(
+    #             select(UserRole)
+    #             .where(UserRole.role_type == user_role.role_type)
+    #             .where(UserRole.user_id == user_role.user_id)
+    #             .where(UserRole.project_id == user_role.project_id)
+    #         )
+    #     ).scalar_one_or_none()
+    #     if existing_user_role is None:
+    #         created_user_role = await UserRole.create(session, user_role)
+    #         return created_user_role
+    #     else:
+    #         raise ResourceAlreadyExists(
+    #             f"User role with role_type {user_role.role_type}, "
+    #             f"user_id {user_role.user_id} and "
+    #             f"project_id {user_role.project_id} already exists"
+    #         )
 
     async def get_user(
         self,
@@ -112,39 +106,39 @@ class UsersDbManager(BaseDbManager):
         assert user is not None
         return user
 
-    async def get_user_roles(
-        self,
-        session: AsyncSession,
-        *,
-        user_id: Optional[uuid.UUID] = None,
-        project_id: Optional[uuid.UUID] = None,
-        role_type: Optional[RoleTypeOption] = None,
-    ) -> list[UserRole]:
-        assert (
-            user_id is not None or project_id is not None
-        ), "Либо user_id либо project_id должен быть не пустым"
+    # async def get_user_roles(
+    #     self,
+    #     session: AsyncSession,
+    #     *,
+    #     user_id: Optional[uuid.UUID] = None,
+    #     project_id: Optional[uuid.UUID] = None,
+    #     role_type: Optional[RoleTypeOption] = None,
+    # ) -> list[UserRole]:
+    #     assert (
+    #         user_id is not None or project_id is not None
+    #     ), "Либо user_id либо project_id должен быть не пустым"
+    #
+    #     stmt = select(UserRole)
+    #
+    #     if user_id is not None:
+    #         # Checking if user with this id exists
+    #         await User.by_id(session, user_id)
+    #         stmt = stmt.where(UserRole.user_id == user_id)
+    #     if project_id is not None:
+    #         # Checking if project with this id exists
+    #         await Project.by_id(session, project_id)
+    #         stmt = stmt.where(UserRole.project_id == project_id)
+    #     if role_type is not None:
+    #         stmt = stmt.where(UserRole.role_type == role_type)
+    #
+    #     stmt = stmt.options(selectinload(UserRole.user), selectinload(UserRole.project))
+    #
+    #     return (await session.execute(stmt)).scalars().all()
 
-        stmt = select(UserRole)
-
-        if user_id is not None:
-            # Checking if user with this id exists
-            await User.by_id(session, user_id)
-            stmt = stmt.where(UserRole.user_id == user_id)
-        if project_id is not None:
-            # Checking if project with this id exists
-            await Project.by_id(session, project_id)
-            stmt = stmt.where(UserRole.project_id == project_id)
-        if role_type is not None:
-            stmt = stmt.where(UserRole.role_type == role_type)
-
-        stmt = stmt.options(selectinload(UserRole.user), selectinload(UserRole.project))
-
-        return (await session.execute(stmt)).scalars().all()
-
-    async def get_project(
-        self, session: AsyncSession, project_id: uuid.UUID
-    ) -> Project:
-        return await Project.by_id(session, project_id)
+    # async def get_project(
+    #     self, session: AsyncSession, project_id: uuid.UUID
+    # ) -> Project:
+    #     return await Project.by_id(session, project_id)
 
     async def authenticate_user(
         self, session: AsyncSession, username: str, password: str
