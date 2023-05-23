@@ -1,5 +1,5 @@
 import React from "react";
-import {takeEvery, call, put} from "redux-saga/effects";
+import {takeEvery, takeLatest, call, put} from "redux-saga/effects";
 import Actions from "@actions";
 import {PayloadAction} from "@reduxjs/toolkit";
 import Api from "@api";
@@ -12,20 +12,22 @@ const cookies = new Cookies();
 const UserLogin = function* (action: PayloadAction<iActions.userLogin>) {
     const {payload} = action;
     const notification = useNotification();
+    console.log("login");
 
     try {
         const {data} = yield call(Api.Auth.login, payload);
         if (!data) throw new Error("Ошибка авторизации");
         yield put(Actions.User.setFetching(true));
+        const currentDate = new Date();
         yield call(
             {
                 context: cookies,
                 fn: cookies.set,
             },
-            "access",
+            "access_token",
             data.access_token,
             {
-                expires: new Date(data.access_expires_at * 1000),
+                expires: new Date(currentDate.getTime() + (data.access_expires_at * 1000)),
                 path: "/",
             }
         );
@@ -34,16 +36,18 @@ const UserLogin = function* (action: PayloadAction<iActions.userLogin>) {
                 context: cookies,
                 fn: cookies.set,
             },
-            "refresh",
+            "refresh_token",
             data.refresh_token,
             {
-                expires: new Date(data.refresh_expires_at * 1000),
+                expires: new Date(currentDate.getTime() + (data.refresh_expires_at * 1000)),
                 path: "/",
             }
         );
+        console.log(cookies.getAll());
         yield put(Actions.User.getUserInfo());
         yield put(Actions.Auth._userLoginSuccess());
         action.payload.redirect();
+        
     } catch (error: any) {
         action.payload.setFieldsErrors(error.response.data);
         yield put(Actions.Auth._userLoginError());
@@ -55,5 +59,5 @@ const UserLogin = function* (action: PayloadAction<iActions.userLogin>) {
 };
 
 export default function* () {
-    yield takeEvery(Actions.Auth.userLogin, UserLogin);
+    yield takeLatest(Actions.Auth.userLogin, UserLogin);
 }

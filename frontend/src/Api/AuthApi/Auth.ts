@@ -16,7 +16,7 @@ export default {
         return Request.post<Auth.oRefresh>(`${Endpoints.refresh}`, {refresh})
             .then(({data}) => {
                 cookies.set(
-                    "access",
+                    "access_token",
                     data.access_token,
                     {
                         // TODO Пока нет SSL сертификата, убираю это
@@ -25,7 +25,7 @@ export default {
                         path: "/",
                     });
                 cookies.set(
-                    "refresh",
+                    "refresh_token",
                     data.refresh_token,
                     {
                         expires: new Date(data.refresh_expires_at * 1000),
@@ -33,7 +33,7 @@ export default {
                     });
             })
             .catch(() => {
-                cookies.remove("refresh", {path: "/"});
+                cookies.remove("refresh_token", {path: "/"});
             });
     }
 };

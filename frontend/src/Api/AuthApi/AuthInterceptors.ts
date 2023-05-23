@@ -5,9 +5,9 @@ import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
 export const setAuthHeaderInterceptor = (config: AxiosRequestConfig) => {
-    const accessToken = cookies.get("access");
+    const accessToken = cookies.get("access_token");
     if (accessToken) {
-        config.headers.Authorization = `Token ${accessToken}`;
+        config.headers.Authorization = `Bearer ${accessToken}`;
     } else {
         delete config.headers.Authorization;
     }
@@ -18,12 +18,12 @@ export const refreshToken = (error: any, axiosInstance: AxiosInstance) => {
     const originalRequest = error.config;
     if (error.response && error.response.status === 401 && !originalRequest.retry) {
         originalRequest.retry = true;
-        const refreshToken = cookies.get("refresh");
+        const refreshToken = cookies.get("refresh_token");
         if (refreshToken) {
             return Auth
                 .refresh(refreshToken)
                 .then(() => {
-                    originalRequest.headers.Authorization = `Token ${cookies.get("access_token")}`;
+                    originalRequest.headers.Authorization = `Bearer ${refreshToken}`;
                     return axiosInstance(originalRequest);
                 });
         }
