@@ -75,12 +75,12 @@ class UsersRouter:
             methods=[METHOD.POST],
         )
 
-        # self.router.add_api_route(
-        #     path="/swagger-token",
-        #     endpoint=self._users_endpoints.swagger_login_for_access_token,
-        #     response_model=Token,
-        #     methods=[METHOD.POST],
-        # )
+        self.router.add_api_route(
+            path="/swagger-token",
+            endpoint=self._users_endpoints.swagger_login_for_access_token,
+            response_model=TokenWithExpiryData,
+            methods=[METHOD.POST],
+        )
 
         self.router.add_api_route(
             path="/token-refresh",

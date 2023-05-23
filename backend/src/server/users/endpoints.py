@@ -22,6 +22,7 @@ from src.server.common import exc_to_str
 from src.server.users.models import (
     TokenWithExpiryData,
     UserCreate,
+    UserLogin,
 )
 
 
@@ -113,9 +114,7 @@ class UsersEndpoints:
     #             # raise HTTPException(status_code=404, detail=e.args)
     #             return UnifiedResponse(error=exc_to_str(e), status_code=404)
 
-    async def login_for_access_token(
-        self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-    ) -> TokenWithExpiryData:
+    async def login_for_access_token(self, form_data: UserLogin) -> TokenWithExpiryData:
         # user = authenticate_user(fake_users_db, form_data.username, form_data.password)
         async with self._main_db_manager.users.make_autobegin_session() as session:
             try:
@@ -158,31 +157,11 @@ class UsersEndpoints:
         # return UnifiedResponse(data=token)
         return token
 
-    # async def swagger_login_for_access_token(
-    #     self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-    # ) -> Token:
-    #     resp = await self.login_for_access_token(form_data)
-    #     if resp.status_code == 401:
-    #         raise HTTPException(
-    #             status_code=401,
-    #             detail=resp.error,
-    #             headers={"WWW-Authenticate": "Bearer"},
-    #         )
-    #     elif resp.status_code == 500:
-    #         # SHOULD NEVER COME HERE
-    #         raise HTTPException(
-    #             status_code=500,
-    #             detail="User can not be found, though credentials are correct. It's an internal error.",
-    #         )
-    #     elif resp.status_code == 404:
-    #         raise HTTPException(status_code=404, detail=resp.error)
-    #     elif resp.status_code == 200:
-    #         assert resp.data is not None
-    #         return Token.parse_obj(resp.data)
-    #     else:
-    #         raise HTTPException(
-    #             status_code=500, detail="Unknown status_code. It's an internal error."
-    #         )
+    async def swagger_login_for_access_token(
+        self, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    ) -> TokenWithExpiryData:
+        user_login = UserLogin(username=form_data.username, password=form_data.password)
+        return await self.login_for_access_token(user_login)
 
     async def get_current_user(
         self, token: Annotated[str, Depends(oauth2_scheme)]
