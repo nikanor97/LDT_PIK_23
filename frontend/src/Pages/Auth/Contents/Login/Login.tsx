@@ -54,7 +54,7 @@ const Login = () => {
                 layout="vertical"
                 onFinish={onLogin}>
                 <FormItem
-                    name="email"
+                    name="username"
                     label="E-mail"
                     required
                     rules={[

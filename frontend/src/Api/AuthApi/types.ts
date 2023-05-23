@@ -9,7 +9,7 @@ export declare namespace Auth {
         email: string
     }
     type iLogin = {
-        email: string,
+        username: string,
         password: string,
     }
     type oLogin = {
