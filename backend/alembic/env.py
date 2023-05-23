@@ -48,7 +48,7 @@ def construct_engine_url(db_name: str) -> str:
 
 def create_db_if_not_exists(engine: Engine) -> None:
     if not database_exists(engine.url):
-        db_full_name = engine.url.split('/')[-1]
+        db_full_name = str(engine.url).split('/')[-1]
         logger.info(f"Database with name {db_full_name} does not exist. It will be created now")
         create_database(engine.url)
 
