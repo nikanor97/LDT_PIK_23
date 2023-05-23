@@ -1,18 +1,23 @@
-import uuid
-
 from pydantic import BaseModel
 
-from src.db.users.models import Project, ProjectBase, User, UserRoleBase
+from src.db.users.models import UserBase
 
 
-class UserRoleWithProjectRead(UserRoleBase):
-    id: uuid.UUID
-    user: User
-    project: Project
+# from src.db.users.models import Project, ProjectBase, User, UserRoleBase
 
 
-class ProjectCreate(ProjectBase):
-    user_id: uuid.UUID
+# class UserRoleWithProjectRead(UserRoleBase):
+#     id: uuid.UUID
+#     user: User
+#     project: Project
+#
+#
+# class ProjectCreate(ProjectBase):
+#     user_id: uuid.UUID
+
+
+class UserCreate(UserBase):
+    password: str
 
 
 class Token(BaseModel):

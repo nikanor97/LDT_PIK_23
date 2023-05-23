@@ -7,6 +7,8 @@ from sqlalchemy import pool
 
 from alembic import context
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+from sqlalchemy_utils import database_exists, create_database
 
 from src.db.users.models import UsersSQLModel
 import settings
@@ -42,6 +44,13 @@ db_names = list(target_metadata.keys())
 def construct_engine_url(db_name: str) -> str:
     return f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@" \
            f"{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.DB_NAME_PREFIX}{db_name}"
+
+
+def create_db_if_not_exists(engine: Engine) -> None:
+    if not database_exists(engine.url):
+        db_full_name = str(engine.url).split('/')[-1]
+        logger.info(f"Database with name {db_full_name} does not exist. It will be created now")
+        create_database(engine.url)
 
 
 def run_migrations_offline() -> None:
@@ -113,7 +122,9 @@ def run_migrations_online() -> None:
     engines = {}
     for name in db_names:
         engines[name] = rec = {}
-        rec["engine"] = create_engine(construct_engine_url(name))
+        engine = create_engine(construct_engine_url(name))
+        create_db_if_not_exists(engine)
+        rec["engine"] = engine
 
     for name, rec in engines.items():
         engine = rec["engine"]

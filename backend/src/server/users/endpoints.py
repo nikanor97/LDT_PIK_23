@@ -21,6 +21,7 @@ from src.server.auth_utils import (
 from src.server.common import exc_to_str
 from src.server.users.models import (
     TokenWithExpiryData,
+    UserCreate,
 )
 
 
@@ -31,14 +32,14 @@ class UsersEndpoints:
     ) -> None:
         self._main_db_manager = main_db_manager
 
-    async def create_user(self, name: str, email: str, password: str) -> User:
+    async def create_user(self, user_create: UserCreate) -> User:
         async with self._main_db_manager.users.make_autobegin_session() as session:
             try:
-                user = UserBase(name=name, email=email)
+                user = UserBase(name=user_create.name, email=user_create.email)
                 new_user = await self._main_db_manager.users.create_user(session, user)
 
                 await self._main_db_manager.users.create_user_password(
-                    session, new_user.id, password
+                    session, new_user.id, user_create.password
                 )
 
                 return new_user
