@@ -1,6 +1,6 @@
 export declare namespace Auth {
     type iRegistration = {
-        username: string,
+        name: string,
         password: string,
         email: string,
     }

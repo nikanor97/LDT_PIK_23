@@ -9,6 +9,7 @@ import {Auth} from "@root/Api/AuthApi/types";
 import Navigation from "../../Modules/Navigation/Navigation";
 import routes from "@routes";
 import {useHistory} from "react-router-dom";
+import Logo from "../../Icons/Logo";
 
 const Login = () => {
     const [form] = Form.useForm();
@@ -39,6 +40,9 @@ const Login = () => {
     
     return (
         <div className={styles.wrapper}>
+            <div className={styles.logo}>
+                <Logo />
+            </div>
             <Title
                 variant="h1" 
                 className={styles.title}>
@@ -78,7 +82,8 @@ const Login = () => {
                     />
                 </FormItem>
                 <div className={styles.controls}>
-                    <FormItem>
+                    <FormItem
+                        className={styles.formItem}>
                         <Button
                             size="large"
                             type="primary"
@@ -88,8 +93,10 @@ const Login = () => {
                             Войти
                         </Button>
                     </FormItem>
-                    <FormItem>
+                    <FormItem
+                        className={styles.formItem}>
                         <Button
+                            className={styles.linkButton}
                             type="link">
                             <Navigation route={routes.auth.registration}>
                                 Еще не зарегистрированы?

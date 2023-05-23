@@ -5,5 +5,5 @@ module.exports = {
     "@lg": "992px",
     "@xl": "1320px",
     "@xxl": "1600px",
-    "@primary-color": "#40A9FF",
+    "@primary-color": "#FC4C02",
 };

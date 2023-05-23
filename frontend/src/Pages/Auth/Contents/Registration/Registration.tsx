@@ -9,6 +9,7 @@ import Navigation from "../../Modules/Navigation/Navigation";
 import routes from "@routes";
 import Title from "@root/Components/Title/Title";
 import {useHistory} from "react-router-dom";
+import Logo from "../../Icons/Logo";
 
 const Registration = () => {
     const [form] = Form.useForm();
@@ -30,6 +31,7 @@ const Registration = () => {
     };
 
     const onRegistration = (values: Auth.iRegistration) => {
+        console.log(values);
         dispatch(Actions.Auth.userRegistration({
             ...values,
             setFieldsErrors,
@@ -39,6 +41,9 @@ const Registration = () => {
 
     return (
         <>
+            <div className={styles.logo}>
+                <Logo />
+            </div>
             <Title
                 variant="h1" 
                 className={styles.title}>
@@ -52,7 +57,7 @@ const Registration = () => {
                 scrollToFirstError
                 className={styles.form}>
                 <FormItem
-                    name="username"
+                    name="name"
                     className={styles.item}
                     label="Имя пользователя"
                     required>
@@ -115,7 +120,8 @@ const Registration = () => {
                     />
                 </FormItem>
                 <div className={styles.controls}>
-                    <FormItem>
+                    <FormItem
+                        className={styles.formItem}>
                         <Button
                             loading={state.fetching}
                             size="large"
@@ -125,14 +131,16 @@ const Registration = () => {
                             Зарегистрироваться
                         </Button>
                     </FormItem>
-                    <div className={styles.link}>
+                    <FormItem
+                        className={styles.formItem}>
                         <Button
+                            className={styles.linkButton}
                             type="link">
                             <Navigation route={routes.auth.login}>
                                 Уже зарегистрированы?
                             </Navigation>
                         </Button>
-                    </div>
+                    </FormItem>
                 </div>
             </Form>
         </>

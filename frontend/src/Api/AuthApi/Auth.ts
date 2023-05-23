@@ -6,7 +6,11 @@ import Endpoints from "./endpoints";
 const cookies = new Cookies();
 
 export default {
-    registration: (params: Auth.iRegistration) => Request.post<Auth.oRegistration>(`${Endpoints.registration}`, params),
+    registration: (params: Auth.iRegistration) => Request.post<Auth.oRegistration>(`${Endpoints.registration}`, {
+        name: params.name,
+        email: params.email,
+        password: params.password
+    }),
     login: (params: Auth.iLogin) => Request.post<Auth.oLogin>(`${Endpoints.auth}`, params),
     refresh: (refresh: Auth.iRefresh) => {
         return Request.post<Auth.oRefresh>(`${Endpoints.refresh}`, {refresh})
