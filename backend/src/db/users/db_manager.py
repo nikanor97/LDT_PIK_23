@@ -147,7 +147,9 @@ class UsersDbManager(BaseDbManager):
         user: Optional[User] = (await session.execute(stmt)).scalar_one_or_none()
         if user is None:
             raise NoResultFound(
-                f"Пользователь с электронной почтой {username} не зарегистрирован"
+                {
+                    "username": f"Пользователь с электронной почтой {username} не зарегистрирован"
+                }
             )
 
         stmt = select(UserPassword.hashed_password).where(
