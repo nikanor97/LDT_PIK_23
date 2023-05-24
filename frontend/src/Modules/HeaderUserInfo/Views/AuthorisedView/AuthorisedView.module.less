@@ -1,0 +1,20 @@
+.col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .avatar {
+        background: var(--avatar-bg);
+        color: @primary-color;
+        border: var(--avatar-border);
+        &:hover {
+            cursor: pointer;
+        }
+    }
+    
+    .name {
+        font-style: normal;
+        font-weight: 600;
+        font-size: 16px;
+        margin-right: 20px;
+    }
+}

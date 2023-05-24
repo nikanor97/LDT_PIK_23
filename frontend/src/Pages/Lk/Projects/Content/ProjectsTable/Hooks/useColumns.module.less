@@ -1,0 +1,22 @@
+.statusColumn {
+    width: 30px;
+    padding: 4px 10px;
+    justify-content: center;
+    align-items: center;
+    :global{
+        .ant-table-filter-column {
+            margin-left: -5px;
+        } 
+        .ant-table-filter-trigger {
+            margin: 0;
+        }
+    }
+}
+
+.titleColumn {
+    display: block;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

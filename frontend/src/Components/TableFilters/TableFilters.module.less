@@ -1,0 +1,73 @@
+.wrapper {
+    max-width: 320px;
+    padding: 15px 20px;
+    background: var(--component-bg);
+    color: var(--text-secondary);
+    border-radius: 16px 16px 16px 16px;
+    .content {
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-height: 200px;
+        color: var(--text-secondary);
+    }
+    :global {
+        .ant-checkbox {
+            &-inner {
+                background-color: inherit;
+            }
+        }
+        .ant-checkbox + span { 
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 265px;
+        }
+        .ant-checkbox-checked .ant-checkbox-inner {
+            background-color: var(--brand-main);
+        }
+    }
+    .empty {
+        color: #797979;
+        :global {
+            .ant-empty-image {
+                height: unset;
+                span svg {
+                    height: 100px;
+                    width: 100px;
+                }
+            }
+        }
+    }
+    .space {
+        width: 100%;
+    }
+    .checkbox {
+        color: var(--text-secondary);
+    }
+    .resetButton {
+        margin-right: 16px;
+    }
+    .buttons {
+        display: flex;
+        flex-direction: row;
+    }
+    .input {
+        :global {
+            .ant-input-wrapper {
+                margin-bottom: 16px;
+            }
+            .ant-input-affix-wrapper {
+                padding: 4px 10px;
+            }
+            .ant-input {
+                font-size: 18px;
+                line-height: 26px;
+            }
+        }
+    }
+}
+.buttonsRow {
+    margin-top: 16px;
+    justify-content: flex-end;
+}

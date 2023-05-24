@@ -1,4 +1,5 @@
 import CommonLayout from "./CommonLayout/CommonLayout";
+import LkLayout from "./LkLayout/LkLayout";
 import {children} from "@types";
 
 export type iLayoutProps = {
@@ -10,5 +11,6 @@ export type iLayoutProps = {
 
 export default {
     CommonLayout,
+    LkLayout
 };
 

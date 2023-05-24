@@ -11,16 +11,23 @@ const RoutesController = () => {
             <Route exact path="/">
                 <CheckAuthorized
                     unauthView={<Redirect to={routes.auth.login} />}>
-                    <Redirect to={"/"} />
+                    <Redirect to={routes.lk.projects} />
                 </CheckAuthorized>
             </Route>
             <Route path={routes.auth.root}>
                 <CheckAuthorized
                     unauthView={<AuthRouter />}>
-                    <Redirect to={"/"} />
+                    <Redirect to={routes.lk.projects} />
                 </CheckAuthorized>
             </Route>
-            
+            <Route
+                exact
+                path={routes.lk.projects}>
+                <CheckAuthorized
+                    unauthView={<Redirect to={routes.auth.login} />}>
+                    <Pages.Lk.Projects />
+                </CheckAuthorized>
+            </Route>
             <Route path="*">
                 <Pages.Undefined />
             </Route>
