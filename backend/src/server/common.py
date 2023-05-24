@@ -1,3 +1,4 @@
+import enum
 from typing import Any, Generic, Optional, Protocol, TypeVar
 
 from fastapi import APIRouter
@@ -34,6 +35,24 @@ class UnifiedResponse(GenericModel, Generic[Model_T]):
         Somehow if data is an empty list, it is considered by pydantic as BaseModel()
         """
         return [] if v == BaseModel() else v
+
+
+class HTTPExceptionDetailErrorMetaOptions(str, enum.Enum):
+    field = "field"
+
+
+class HTTPExceptionDetail(BaseModel):
+    """
+    List of these HTTPExceptionDetail objects can be used in HTTPException details section
+    """
+
+    error: str
+    error_meta: dict[HTTPExceptionDetailErrorMetaOptions, str]
+
+    # class Config:
+    #     json_encoders = {
+    #         'HTTPExceptionDetail': lambda x: jsonable_encoder(x)
+    #     }
 
 
 def exc_to_str(exception: Exception) -> str:
