@@ -1,0 +1,24 @@
+.wrapper {
+    border-radius: 12px;
+    width: 272px;
+    display: flex;
+    flex-direction: column;
+    :global {
+        .ant-btn:active { 
+            background: var(--button-secondary-hover);
+            color: var(--text-primary);
+        }
+        .ant-btn:hover, .ant-btn:focus {
+            background: var(--button-secondary-hover);
+            color: var(--text-primary);
+            
+        }
+    }
+}
+
+.btn {
+    width: 100%;
+    svg {
+        margin-right: 16px;
+    }
+}

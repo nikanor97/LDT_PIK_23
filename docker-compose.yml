@@ -1,0 +1,64 @@
+version: "3.3"
+services:
+
+  frontend:
+    stdin_open: true
+    build:
+      context: frontend/
+      target: PROD
+    ports:
+      - ${FRONTEND_HOST_PORT}:${FRONTEND_PORT}
+    restart: on-failure
+
+  db:
+    image: postgres:13-alpine
+    hostname: db
+    volumes:
+      - ${HOST_WORKING_DIRECTORY}/db_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT_ON_HOST}:${POSTGRES_PORT}"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    restart: on-failure
+
+  backend:
+    build:
+      context: backend/
+    hostname: backend
+    command: bash -c "poetry run python main/run_server.py"
+#    command: bash -c "sleep infinity"
+    environment:
+      - HOST_WORKING_DIRECTORY=${HOST_WORKING_DIRECTORY}
+      - PYTHONPATH=/code
+    volumes:
+      - ./backend:/code
+      - .env:/code/.env
+#      - backend-logs:/code/logs
+    ports:
+      - "${BACKEND_PORT_ON_HOST}:${BACKEND_PORT}"
+    restart: on-failure
+    depends_on:
+      - db
+
+#  graylog-sidecar:
+#    image: nikanor97/graylog-sidecar:1.0
+#    volumes:
+#      - backend-logs:/root/backend_logs
+#    env_file:
+#      - graylog.env
+##    depends_on:
+##      - backend
+#    restart: on-failure
+##    extra_hosts:
+##      - "host.docker.internal:host-gateway"
+#    network_mode: host
+#
+#volumes:
+#  backend-logs:
+#    driver: local
+#    driver_opts:
+#      type: 'none'
+#      o: 'bind'
+#      device: './backend/logs'

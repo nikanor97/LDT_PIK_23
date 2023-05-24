@@ -1,1 +1,6 @@
 *.env
+*/poetry.lock
+/backend/data
+/backend/.mypy_cache
+/db_data
+/backend/logs

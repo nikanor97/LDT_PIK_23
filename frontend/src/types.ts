@@ -17,14 +17,26 @@ export const Guard = {
 export declare namespace iApi {
     namespace User {
         type iAuthUserInfo = {
-            username: string;
+            name: string;
             email: string;
             auth: boolean;
-            user_id: number;
+            id: string;
+            created_at: string;
+            updated_at: string;
         };
         type iUnauthUserInfo = {
             auth: boolean;
         };
         type iUserInfo = iUnauthUserInfo | iAuthUserInfo;
     }  
+    namespace Error {
+        type Item = {
+            detail: {
+                error: string,
+                error_meta?: {
+                      field: string
+                }
+            }[]
+        }
+    }
 }
