@@ -47,7 +47,7 @@ const UserLogin = function* (action: PayloadAction<iActions.userLogin>) {
         action.payload.redirect();
         
     } catch (error: any) {
-        // action.payload.setFieldsErrors(error.response.data);
+        action.payload.setFieldsErrors(error.response.data);
         yield put(Actions.Auth._userLoginError());
         notification({
             type: "error",
