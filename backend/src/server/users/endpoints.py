@@ -128,7 +128,7 @@ class UsersEndpoints:
         if not user:
             raise HTTPException(
                 status_code=401,
-                detail="Неверный юзернейм или пароль",
+                detail="Неверный пароль",
                 headers={"WWW-Authenticate": "Bearer"},
             )
             # return UnifiedResponse(
