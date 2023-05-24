@@ -4,8 +4,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-load_dotenv(Path(__file__).parent.parent / ".env")
-load_dotenv(Path(__file__).parent / ".env")
+# Env possible paths in order that they should be called
+env_paths = [Path(__file__).parent.parent / ".env", Path(__file__).parent / ".env"]
+for env_path in env_paths:
+    if env_path.exists():
+        load_dotenv(env_path)
 
 DB_NAME_PREFIX = getenv("DB_NAME_PREFIX", "ldt_pik_local_dev_")
 
