@@ -1,5 +1,6 @@
 import {Auth} from "@root/Api/AuthApi/types";
 import {RequestShortState} from "@root/Utils/Redux/types";
+import {iApi} from "@root/types";
 
 export type fieldsError = {
     username?: string[],
@@ -14,11 +15,11 @@ export declare namespace iState {
 }
 export declare namespace iActions {
     type userLogin = Auth.iLogin & {
-        setFieldsErrors: (errors: Error) => any,
+        setFieldsErrors: (errors: iApi.Error.Item) => any,
         redirect: () => any
     };
     type userRegistration = Auth.iRegistration & {
-        setFieldsErrors: (errors: Error) => any,
+        setFieldsErrors: (errors: iApi.Error.Item) => any,
         redirect: () => any
     };
 }

@@ -12,7 +12,6 @@ const cookies = new Cookies();
 const UserLogin = function* (action: PayloadAction<iActions.userLogin>) {
     const {payload} = action;
     const notification = useNotification();
-    console.log("login");
 
     try {
         const {data} = yield call(Api.Auth.login, payload);
@@ -43,13 +42,12 @@ const UserLogin = function* (action: PayloadAction<iActions.userLogin>) {
                 path: "/",
             }
         );
-        console.log(cookies.getAll());
         yield put(Actions.User.getUserInfo());
         yield put(Actions.Auth._userLoginSuccess());
         action.payload.redirect();
         
     } catch (error: any) {
-        action.payload.setFieldsErrors(error.response.data);
+        // action.payload.setFieldsErrors(error.response.data);
         yield put(Actions.Auth._userLoginError());
         notification({
             type: "error",

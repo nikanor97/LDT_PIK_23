@@ -10,6 +10,7 @@ import routes from "@routes";
 import Title from "@root/Components/Title/Title";
 import {useHistory} from "react-router-dom";
 import Logo from "../../Icons/Logo";
+import {iApi} from "@types";
 
 const Registration = () => {
     const [form] = Form.useForm();
@@ -17,11 +18,11 @@ const Registration = () => {
     const history = useHistory();
     const state = useAppSelector((state) => state.Auth.registration);
 
-    const setFieldsErrors = (errors: Error) => {
-        form.setFields(Object.entries(errors).map(([key, value]) => (
+    const setFieldsErrors = (errors: iApi.Error.Item) => {
+        form.setFields(errors.detail.map((item) => (
             {
-                name: key,
-                errors: value
+                name: item.error_meta!.field,
+                errors: [item.error]
             }))
         );
     };
@@ -31,12 +32,27 @@ const Registration = () => {
     };
 
     const onRegistration = (values: Auth.iRegistration) => {
-        console.log(values);
         dispatch(Actions.Auth.userRegistration({
             ...values,
             setFieldsErrors,
             redirect
         }));
+    };
+
+    const onValuesChange = (values: Auth.iRegistration) => {
+        Object.keys(values).forEach((field) => {
+            const error = form.getFieldError(field);
+            if (!error.length) {
+                return;
+            }
+            // Clear error message of field
+            form.setFields([
+                {
+                    name: field,
+                    errors: []
+                }
+            ]);
+        });
     };
 
     return (
@@ -55,6 +71,7 @@ const Registration = () => {
                 onFinish={onRegistration}
                 layout="vertical"
                 scrollToFirstError
+                onValuesChange={onValuesChange}
                 className={styles.form}>
                 <FormItem
                     name="name"

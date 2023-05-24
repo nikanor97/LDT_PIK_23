@@ -10,6 +10,7 @@ import Navigation from "../../Modules/Navigation/Navigation";
 import routes from "@routes";
 import {useHistory} from "react-router-dom";
 import Logo from "../../Icons/Logo";
+import {iApi} from "@types";
 
 const Login = () => {
     const [form] = Form.useForm();
@@ -17,11 +18,11 @@ const Login = () => {
     const history = useHistory();
     const state = useAppSelector((state) => state.Auth.login);
 
-    const setFieldsErrors = (errors: Error) => {
-        form.setFields(Object.entries(errors).map(([key, value]) => (
+    const setFieldsErrors = (errors: iApi.Error.Item) => {
+        form.setFields(errors.detail.map((item) => (
             {
-                name: key,
-                errors: value
+                name: item.error_meta!.field,
+                errors: [item.error]
             }))
         );
     };
@@ -36,6 +37,22 @@ const Login = () => {
             setFieldsErrors,
             redirect
         }));
+    };
+
+    const onValuesChange = (values: Auth.iLogin) => {
+        Object.keys(values).forEach((field) => {
+            const error = form.getFieldError(field);
+            if (!error.length) {
+                return;
+            }
+            // Clear error message of field
+            form.setFields([
+                {
+                    name: field,
+                    errors: []
+                }
+            ]);
+        });
     };
     
     return (
@@ -52,6 +69,7 @@ const Login = () => {
                 form={form}
                 name="Login"
                 layout="vertical"
+                onValuesChange={onValuesChange}
                 onFinish={onLogin}>
                 <FormItem
                     name="username"
