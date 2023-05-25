@@ -118,15 +118,15 @@ const useColumns = () => {
             render: (status: ProjectListItem["status"]) => {
                 if (status === null || status === 100) {
                     return (
-                        <Tag color="#B3B3B3" className={styles.tag}>В процессе</Tag>
+                        <Tag className={styles.tagProcess}>В процессе</Tag>
                     );
                 } else if (status === 400) {
                     return (
-                        <Tag color="#F86262" className={styles.tag}>Ошибка</Tag>
+                        <Tag className={styles.tagError}>Ошибка</Tag>
                     );
                 } else {
                     return (
-                        <Tag color="#00D98B" className={styles.tag}>Готово</Tag>
+                        <Tag  className={styles.tagSuccess}>Готово</Tag>
                     );
                 }
             },
