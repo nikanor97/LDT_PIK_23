@@ -9,4 +9,7 @@ export default {
     getProjects: () => {
         return Request.get<Projects.oGetProjects[]>(`${Endpoints.base}`);
     },
+    getFittingsGroup: () => {
+        return Request.get<Projects.oGetFittingsGroups>(`${Endpoints.getFittings}`);
+    }
 };

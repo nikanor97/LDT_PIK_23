@@ -11,4 +11,5 @@ export declare namespace iActions {
     type getSelectedProject =  Pick<iApi.Projects.Item, "id">;
     type _getSelectedProjectSuccess = iApi.Projects.Item;
     type setSelectedProjects = iApi.Projects.Item[];
+    type _getFittingSuccess = iApi.Projects.FittingGroup[];
 }

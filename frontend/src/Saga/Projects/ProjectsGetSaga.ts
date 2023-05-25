@@ -14,7 +14,8 @@ const GetProjects = function* () {
             bathroomType: "Type 1",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 2,
@@ -22,7 +23,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 100,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 3,
@@ -30,7 +32,8 @@ const GetProjects = function* () {
             bathroomType: "Type 3",
             author: "Пупкин В.С.",
             status: 400,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 4,
@@ -38,7 +41,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 5,
@@ -46,7 +50,8 @@ const GetProjects = function* () {
             bathroomType: "Type 1",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 6,
@@ -54,7 +59,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 100,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 7,
@@ -62,7 +68,8 @@ const GetProjects = function* () {
             bathroomType: "Type 3",
             author: "Пупкин В.С.",
             status: 400,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 8,
@@ -70,7 +77,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 9,
@@ -78,7 +86,8 @@ const GetProjects = function* () {
             bathroomType: "Type 1",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 10,
@@ -86,7 +95,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 100,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 11,
@@ -94,7 +104,8 @@ const GetProjects = function* () {
             bathroomType: "Type 3",
             author: "Пупкин В.С.",
             status: 400,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 12,
@@ -102,7 +113,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 13,
@@ -110,7 +122,8 @@ const GetProjects = function* () {
             bathroomType: "Type 1",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 14,
@@ -118,7 +131,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 100,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 15,
@@ -126,7 +140,8 @@ const GetProjects = function* () {
             bathroomType: "Type 3",
             author: "Пупкин В.С.",
             status: 400,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
         {
             id: 16,
@@ -134,7 +149,8 @@ const GetProjects = function* () {
             bathroomType: "Type 2",
             author: "Пупкин В.С.",
             status: 200,
-            performer: "Лупкин Г.В."
+            performer: "Лупкин Г.В.",
+            type: "DXF"
         },
     ];
 

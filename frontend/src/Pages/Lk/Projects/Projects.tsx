@@ -11,6 +11,8 @@ const Projects = () => {
 
     useEffect(() => {
         dispatch(Actions.Projects.getProjects());
+        dispatch(Actions.User.getUsersAll());
+        dispatch(Actions.Projects.getFittings());
     }, []);
 
     return (

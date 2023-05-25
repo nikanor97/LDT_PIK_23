@@ -8,73 +8,20 @@ import {Input, Button, FormItem, Select} from "@components/Controls";
 import styles from "./CreateProjectModal.module.less";
 import GridContainer from "@root/Components/GridContainer/GridContainer";
 import Title from "@root/Components/Title/Title";
-import base64 from "./base64";
-import Scrollbars from "react-custom-scrollbars";
 const {Option} = Select;
 
 const CreateProjectModal = () => {
     const showModal = useAppSelector((state) => state.Projects.createModal);
+    const fittings = useAppSelector((state) => state.Projects.fittingsGroups);
+    const users = useAppSelector((state) => state.User.users);
     const dispatch = useAppDispatch();
     const [form] = Form.useForm();
 
-    //Mock
-
-    const users = [
-        {
-            user_id: 1,
-            username: "Пупкин В.С."
-        },
-        {
-            user_id: 2,
-            username: "Лупкин Г.В."
-        }
-    ];
-
-    const fitings = [
-        {
-            groupName: "Тройники",
-            values: [
-                {
-                    image: base64,
-                    name: "Тройник 50х50х45",
-                    id: 1
-                },
-                {
-                    image: base64,
-                    name: "Тройник 50х50х87",
-                    id: 2
-                },
-                {
-                    image: base64,
-                    name: "Тройник 110х50х87",
-                    id: 3
-                },
-            ]
-        },
-        {
-            groupName: "Крестовины",
-            values: [
-                {
-                    image: base64,
-                    name: "Крестовина 50х50х45",
-                    id: 4
-                },
-                {
-                    image: base64,
-                    name: "Крестовина 50х50х87",
-                    id: 5
-                },
-                {
-                    image: base64,
-                    name: "Крестовина 110х50х87",
-                    id: 6
-                },
-            ]
-        }
-    ];
+    if (!users) return null;
+    if (!fittings) return null;
 
     const onCreate = () => {
-        const fitingsNames = fitings.map((item) => item.groupName);
+        const fitingsNames = fittings.map((item) => item.groupName);
 
         const data = {
             performer: form.getFieldValue("performer"),
@@ -175,7 +122,7 @@ const CreateProjectModal = () => {
                                 <Option
                                     key={user.user_id}
                                     value={user.user_id}>
-                                    {user.username}
+                                    {user.name}
                                 </Option>
                             ))}
                         </Select>
@@ -186,7 +133,7 @@ const CreateProjectModal = () => {
                     <Title variant="h3" className={styles.fitingsSubTitle}>
                         Выберите необходимые фитинги
                     </Title>
-                    {fitings.map((item) => (
+                    {fittings.map((item) => (
                         <FormItem
                             name={item.groupName}
                             key={item.groupName}

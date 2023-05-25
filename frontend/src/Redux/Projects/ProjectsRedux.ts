@@ -10,6 +10,8 @@ type iState = {
     getSelectedProject: boolean;
     getFetching: boolean;
     selectedProjects: null | iApi.Projects.Item[];
+    fittingsGroups: iApi.Projects.FittingGroup[] | null;
+    getFittings: boolean,
 }
 
 const initialState:iState  = {
@@ -19,7 +21,9 @@ const initialState:iState  = {
     createFetching: false,
     getSelectedProject: false,
     getFetching: false,
-    selectedProjects: null
+    selectedProjects: null,
+    fittingsGroups: null,
+    getFittings: false
 };
 
 const Slice = createSlice({
@@ -70,6 +74,16 @@ const Slice = createSlice({
         eraseSelectedProjects: (state) => {
             state.selectedProjects = null;
         },
+        getFittings: (state) => {
+            state.getFittings = true;
+        },
+        _getFittingsSuccess: (state, action: PayloadAction<iActions._getFittingSuccess>) => {
+            state.fittingsGroups = action.payload;
+            state.getFittings = false;
+        },
+        _getFittingsError: (state) => {
+            state.getFittings = false;
+        }
     }
 });
 

@@ -30,6 +30,13 @@ export declare namespace iApi {
         type iUserInfo = iUnauthUserInfo | iAuthUserInfo;
     }
 
+    namespace Users {
+        type Item = {
+            user_id: string,
+            name: string
+        }
+    }
+
     namespace Projects {
         type Item = {
             id: number,
@@ -37,7 +44,16 @@ export declare namespace iApi {
             bathroomType: string,
             author: string,
             status: 100 | 200 | 400 | 300,
-            performer: string
+            performer: string,
+            type: string
+        }
+        type FittingGroup = {
+            groupName: string,
+            values: {
+                image: string,
+                name: string,
+                id: string
+            }[]
         }
     }
     namespace Error {
