@@ -126,7 +126,7 @@ const useColumns = () => {
                     );
                 } else {
                     return (
-                        <Tag  className={styles.tagSuccess}>Готово</Tag>
+                        <Tag className={styles.tagSuccess}>Готово</Tag>
                     );
                 }
             },
