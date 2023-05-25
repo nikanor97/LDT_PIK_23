@@ -18,9 +18,7 @@ export declare namespace Auth {
         access_expires_at: number,
         refresh_expires_at: number
     }
-    type iRefresh = {
-        refresh: string
-    }
+    type iRefresh = string;
     type oRefresh = {
         access_token: string,
         refresh_token: string,

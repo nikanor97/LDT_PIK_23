@@ -1,6 +1,6 @@
 import AuthSaga from "./AuthSaga/AuthSaga";
 import UserSaga from "./UserSaga/UserSaga";
-import ProjectSaga from "./Projects/ProjectsSaga"
+import ProjectSaga from "./Projects/ProjectsSaga";
 import rootSagaCreator from "./rootSagaCreator";
 
 export default function* rootSaga() {

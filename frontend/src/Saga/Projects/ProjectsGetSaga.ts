@@ -40,9 +40,108 @@ const GetProjects = function* () {
             status: 200,
             performer: "Лупкин Г.В."
         },
+        {
+            id: 5,
+            name: "Project 5",
+            bathroomType: "Type 1",
+            author: "Пупкин В.С.",
+            status: 200,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 6,
+            name: "Project 6",
+            bathroomType: "Type 2",
+            author: "Пупкин В.С.",
+            status: 100,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 7,
+            name: "Project 7",
+            bathroomType: "Type 3",
+            author: "Пупкин В.С.",
+            status: 400,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 8,
+            name: "Project 8",
+            bathroomType: "Type 2",
+            author: "Пупкин В.С.",
+            status: 200,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 9,
+            name: "Project 9",
+            bathroomType: "Type 1",
+            author: "Пупкин В.С.",
+            status: 200,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 10,
+            name: "Project 10",
+            bathroomType: "Type 2",
+            author: "Пупкин В.С.",
+            status: 100,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 11,
+            name: "Project 11",
+            bathroomType: "Type 3",
+            author: "Пупкин В.С.",
+            status: 400,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 12,
+            name: "Project 12",
+            bathroomType: "Type 2",
+            author: "Пупкин В.С.",
+            status: 200,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 13,
+            name: "Project 13",
+            bathroomType: "Type 1",
+            author: "Пупкин В.С.",
+            status: 200,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 14,
+            name: "Project 14",
+            bathroomType: "Type 2",
+            author: "Пупкин В.С.",
+            status: 100,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 15,
+            name: "Project 15",
+            bathroomType: "Type 3",
+            author: "Пупкин В.С.",
+            status: 400,
+            performer: "Лупкин Г.В."
+        },
+        {
+            id: 16,
+            name: "Project 16",
+            bathroomType: "Type 2",
+            author: "Пупкин В.С.",
+            status: 200,
+            performer: "Лупкин Г.В."
+        },
     ];
 
     try {
+
+        //TODO Убрать Моки
+
         // const {data} = yield call(Api.Projects.getProjects);
         yield put(Actions.Projects._getProjectsSuccess(mockData));
     } catch (error) {

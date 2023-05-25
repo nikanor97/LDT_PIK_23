@@ -7,7 +7,7 @@ import {useAppSelector} from "@root/Hooks";
 import styles from "./useColumns.module.less";
 import useGetMinColumnWidthForTable from "@root/Hooks/GetMinColumnWidthForTable/useGetMinColumnWidthForTable";
 import Tooltip from "@root/Components/Tooltip/Tooltip";
-import {Badge} from "antd";
+import {Tag} from "antd";
 
 type ProjectListItem = iApi.Projects.Item;
 
@@ -118,15 +118,15 @@ const useColumns = () => {
             render: (status: ProjectListItem["status"]) => {
                 if (status === null || status === 100) {
                     return (
-                        <Badge color="#B3B3B3" text="В процессе" />
+                        <Tag color="#B3B3B3" className={styles.tag}>В процессе</Tag>
                     );
                 } else if (status === 400) {
                     return (
-                        <Badge color="#F86262" text="Ошибка" />
+                        <Tag color="#F86262" className={styles.tag}>Ошибка</Tag>
                     );
                 } else {
                     return (
-                        <Badge color="#00D98B" text="Готово" />
+                        <Tag color="#00D98B" className={styles.tag}>Готово</Tag>
                     );
                 }
             },

@@ -3,6 +3,7 @@ import {Col, Dropdown, Avatar} from "antd";
 import {iApi, Guard} from "@types";
 import Menu from "./Modules/Menu/Menu";
 import styles from "./AuthorisedView.module.less";
+import AvatarImage from "@assets/Images/Avatar.svg";
 
 const {isAuthUserInfo} = Guard.User;
 
@@ -23,9 +24,7 @@ const AuthorisedView = (props: AuthorisedViewProps) => {
                 <Dropdown 
                     trigger={["click"]}
                     overlay={<Menu />}>
-                    <Avatar className={styles.avatar}>
-                        {userInfo.name[0].toUpperCase()}
-                    </Avatar>
+                    <Avatar className={styles.avatar} src={AvatarImage}/>
                 </Dropdown>
             </Col>
         </>
