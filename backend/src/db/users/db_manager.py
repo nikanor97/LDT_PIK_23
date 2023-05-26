@@ -32,9 +32,8 @@ class UsersDbManager(BaseDbManager):
             created_user = await User.create(session, user)
             return created_user
         else:
-            raise ResourceAlreadyExists(
-                f"Пользователь с электронной почтой {user.email} уже существует"
-            )
+            # raise ResourceAlreadyExists(f"Пользователь с электронной почтой {user.email} уже существует")
+            raise ResourceAlreadyExists(f"User with email {user.email} already exists")
 
     # async def create_project(
     #     self, session: AsyncSession, project: ProjectBase, user_id: uuid.UUID
@@ -147,9 +146,7 @@ class UsersDbManager(BaseDbManager):
         user: Optional[User] = (await session.execute(stmt)).scalar_one_or_none()
         if user is None:
             raise NoResultFound(
-                {
-                    "username": f"Пользователь с электронной почтой {username} не зарегистрирован"
-                }
+                f"Пользователь с электронной почтой {username} не зарегистрирован"
             )
 
         stmt = select(UserPassword.hashed_password).where(

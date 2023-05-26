@@ -18,7 +18,7 @@ from src.server.auth_utils import (
     get_user_id_from_token,
     create_user_token,
 )
-from src.server.common import exc_to_str
+from src.server.common import exc_to_str, HTTPExceptionDetail
 from src.server.users.models import (
     TokenWithExpiryData,
     UserCreate,
@@ -38,15 +38,26 @@ class UsersEndpoints:
             try:
                 user = UserBase(name=user_create.name, email=user_create.email)
                 new_user = await self._main_db_manager.users.create_user(session, user)
+            except ResourceAlreadyExists as e:
+                # raise HTTPException(detail=exc_to_str(e), status_code=409)
+                error = f"Пользователь с электронной почтой {user.email} уже существует"
+                raise HTTPException(
+                    detail=[
+                        HTTPExceptionDetail(
+                            error=error, error_meta={"field": "username"}
+                        ).dict()
+                    ],
+                    status_code=409,
+                )
+                # return UnifiedResponse(error=exc_to_str(e), status_code=409)
 
+            try:
                 await self._main_db_manager.users.create_user_password(
                     session, new_user.id, user_create.password
                 )
 
                 return new_user
-            except ResourceAlreadyExists as e:
-                raise HTTPException(detail=exc_to_str(e), status_code=409)
-                # return UnifiedResponse(error=exc_to_str(e), status_code=409)
+
             except NoResultFound as e:
                 raise HTTPException(detail=exc_to_str(e), status_code=404)
                 # return UnifiedResponse(error=exc_to_str(e), status_code=404)
@@ -122,15 +133,34 @@ class UsersEndpoints:
                     session, form_data.username, form_data.password
                 )
             except NoResultFound as e:
-                raise HTTPException(status_code=404, detail=exc_to_str(e))
+                error = f"Пользователь с электронной почтой {form_data.username} не зарегистрирован"
+                raise HTTPException(
+                    detail=[
+                        HTTPExceptionDetail(
+                            error=error, error_meta={"field": "username"}
+                        ).dict()
+                    ],
+                    status_code=404,
+                )
+                # raise HTTPException(status_code=404, detail=exc_to_str(e))
                 # return UnifiedResponse(error=exc_to_str(e), status_code=404)
 
         if not user:
+            error = f"Неверный пароль"
             raise HTTPException(
+                detail=[
+                    HTTPExceptionDetail(
+                        error=error, error_meta={"field": "password"}
+                    ).dict()
+                ],
                 status_code=401,
-                detail={"password": "Неверный пароль"},
                 headers={"WWW-Authenticate": "Bearer"},
             )
+            # raise HTTPException(
+            #     status_code=401,
+            #     detail={"password": "Неверный пароль"},
+            #     headers={"WWW-Authenticate": "Bearer"},
+            # )
             # return UnifiedResponse(
             #     error="Incorrect username or password", status_code=401
             # )
@@ -173,7 +203,11 @@ class UsersEndpoints:
                     session, user_id=user_id
                 )
             except JWTError as e:
-                raise HTTPException(detail=exc_to_str(e), status_code=401)
+                error = f"Ошибка валидации данных"
+                raise HTTPException(
+                    detail=[HTTPExceptionDetail(error=error).dict()], status_code=404
+                )
+                # raise HTTPException(detail=exc_to_str(e), status_code=401)
                 # return UnifiedResponse(error=exc_to_str(e), status_code=401)
         return user
 
