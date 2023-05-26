@@ -4,6 +4,8 @@ import Api from "@api";
 import base64 from "@root/Pages/Lk/Projects/Content/TopBar/Modules/CreateProject/Modules/CreateProjectModal/base64";
 
 const GetFittingsGroup = function* () {
+
+    //TODO Убрать моки
     const data = [
         {
             groupName: "Тройники",

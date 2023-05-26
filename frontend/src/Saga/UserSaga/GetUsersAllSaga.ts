@@ -3,6 +3,8 @@ import Actions from "@actions";
 import Api from "@api";
 
 const GetUsersAll = function* () {
+    //TODO Убрать моки
+
     const data = [
         {
             user_id: "asdfasdf45235",

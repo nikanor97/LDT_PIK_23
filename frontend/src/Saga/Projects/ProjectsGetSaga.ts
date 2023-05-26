@@ -7,6 +7,8 @@ import {iApi} from "@root/types";
 const GetProjects = function* () {
     const notification = useNotification();
 
+    //TODO Убрать моки
+
     const mockData: iApi.Projects.Item[] = [
         {
             id: 1,
