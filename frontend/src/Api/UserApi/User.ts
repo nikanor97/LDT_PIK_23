@@ -6,4 +6,7 @@ export default {
     getUserInfo: () => {
         return Request.get<User.oGetUserInfo>(`${Endpoints.user.base}`);
     },
+    getUsersAll: () => {
+        return Request.get<User.oGetUsersAll>(`${Endpoints.user.getUsers}`);
+    }
 };

@@ -11,4 +11,3 @@ export {default as Menu} from "./Menu/Menu";
 export {default as Drawer} from "./Drawer/Drawer";
 export {default as ButtonIcon} from "./ButtonIcon/ButtonIcon";
 export {default as DropdownMenu} from "./DropdownMenu/DropdownMenu";
-export {default as ButtonSwitch} from "./ButtonSwitch/ButtonSwitch";

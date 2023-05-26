@@ -9,7 +9,7 @@ import Navigation from "../../Modules/Navigation/Navigation";
 import routes from "@routes";
 import Title from "@root/Components/Title/Title";
 import {useHistory} from "react-router-dom";
-import Logo from "../../Icons/Logo";
+import Logo from "../../../../Assets/Logo/Logo";
 import {iApi} from "@types";
 
 const Registration = () => {

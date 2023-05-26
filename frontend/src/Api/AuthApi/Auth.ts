@@ -13,22 +13,22 @@ export default {
     }),
     login: (params: Auth.iLogin) => Request.post<Auth.oLogin>(`${Endpoints.auth}`, params),
     refresh: (refresh: Auth.iRefresh) => {
-        return Request.post<Auth.oRefresh>(`${Endpoints.refresh}`, {refresh})
+        const url = Endpoints.refresh.replace("{refreshToken}", refresh);
+        return Request.post<Auth.oRefresh>(url)
             .then(({data}) => {
+                const currentDate = new Date();
                 cookies.set(
                     "access_token",
                     data.access_token,
                     {
-                        // TODO Пока нет SSL сертификата, убираю это
-                        // secure: true,
-                        expires: new Date(data.access_expires_at * 1000),
+                        expires: new Date(currentDate.getTime() + (data.access_expires_at * 1000)),
                         path: "/",
                     });
                 cookies.set(
                     "refresh_token",
                     data.refresh_token,
                     {
-                        expires: new Date(data.refresh_expires_at * 1000),
+                        expires: new Date(currentDate.getTime() + (data.refresh_expires_at * 1000)),
                         path: "/"
                     });
             })

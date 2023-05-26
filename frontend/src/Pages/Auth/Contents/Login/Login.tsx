@@ -9,7 +9,7 @@ import {Auth} from "@root/Api/AuthApi/types";
 import Navigation from "../../Modules/Navigation/Navigation";
 import routes from "@routes";
 import {useHistory} from "react-router-dom";
-import Logo from "../../Icons/Logo";
+import Logo from "../../../../Assets/Logo/Logo";
 import {iApi} from "@types";
 
 const Login = () => {
