@@ -15,8 +15,6 @@ const CheckAuthorized = (props: CheckAuthorizedProps) => {
     const userInfo = useAppSelector((state) => state.User.info);
     const isAuth = useMemo(() => isAuthUserInfo(userInfo), [userInfo]);
 
-    console.log(isAuth);
-
     return (
         <>
             {isAuth

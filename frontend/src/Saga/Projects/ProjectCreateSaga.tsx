@@ -13,6 +13,7 @@ const CreateProject = function* (action: PayloadAction<iActions.createProject>) 
     try {
         yield call(Api.Projects.createProject, payload);
         yield put(Actions.Projects.getProjects());
+        payload.onSuccess && payload.onSuccess();
         yield put(Actions.Projects.setCreateModal(false));
         notification({
             type: "info",

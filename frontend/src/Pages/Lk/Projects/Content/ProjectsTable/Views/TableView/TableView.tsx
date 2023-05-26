@@ -29,16 +29,11 @@ const TableView = () => {
 
     const rowSelection = {
         onChange: (selectedRowKeys: React.Key[], selectedRows: iApi.Projects.Item[]) => {
-            console.log(selectedRows);
             dispatch(Actions.Projects.setSelectedProjects(selectedRows));
         },
         getCheckboxProps: (record: iApi.Projects.Item) => ({
             name: record.name,
         }),
-    };
-    const filterSelectedColumns = (options: Array<any>, deletedColumns: string[] | null) => {
-        if (deletedColumns && deletedColumns.length !== 0) return options.filter((item) => !deletedColumns.includes(item.title));
-        else return options;
     };
 
     useEffect(() => {
@@ -51,7 +46,7 @@ const TableView = () => {
 
     return (
         <Table
-            rowSelection={rowSelection}
+            // rowSelection={rowSelection}
             className={styles.table}
             dataSource={projects}
             columns={columns}

@@ -45,7 +45,7 @@ export declare namespace iApi {
             author: string,
             status: 100 | 200 | 400 | 300,
             performer: string,
-            type: string
+            type: "DXF" | "manual"
         }
         type FittingGroup = {
             groupName: string,

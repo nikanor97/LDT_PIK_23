@@ -20,16 +20,24 @@ const CreateProjectModal = () => {
     if (!users) return null;
     if (!fittings) return null;
 
+    const onSuccess = () => {
+        form.resetFields();
+    };
+
     const onCreate = () => {
-        const fitingsNames = fittings.map((item) => item.groupName);
+        const fittingsNames = fittings.map((item) => item.groupName);
 
         const data = {
             performer: form.getFieldValue("performer"),
-            fitings: fitingsNames.map((item) => form.getFieldValue(item)).flat(),
+            fittings: fittingsNames
+                .map((item) => form.getFieldValue(item))
+                .flat()
+                .filter((item) => item !== undefined && item !== null),
             type: form.getFieldValue("type"),
-            title: form.getFieldValue("title")
+            title: form.getFieldValue("title"),
+            onSuccess
         };
-        console.log(data);
+        dispatch(Actions.Projects.createProject(data));
     };
 
     const setCreateModal = (mode: boolean) => {
@@ -127,10 +135,10 @@ const CreateProjectModal = () => {
                             ))}
                         </Select>
                     </FormItem>
-                    <Title variant="h2" className={styles.fitingsTitle}>
+                    <Title variant="h2" className={styles.fittingsTitle}>
                         Фитинги
                     </Title>
-                    <Title variant="h3" className={styles.fitingsSubTitle}>
+                    <Title variant="h3" className={styles.fittingsSubTitle}>
                         Выберите необходимые фитинги
                     </Title>
                     {fittings.map((item) => (
@@ -138,7 +146,6 @@ const CreateProjectModal = () => {
                             name={item.groupName}
                             key={item.groupName}
                             className={styles.formItem}>
-
                             <Checkbox.Group  className={styles.checkboxGroup}>
                                 <Title variant="h2" className={styles.checkboxGroupTitle}>
                                     {item.groupName}
