@@ -3,6 +3,7 @@ import {Switch, Route, Redirect} from "react-router-dom";
 import routes from "@routes";
 import Pages from "@pages/index";
 import AuthRouter from "./Auth/AuthRouter";
+import ProjectRouter from "./Project/ProjectRouter";
 import CheckAuthorized from "@containers/CheckAuthorized/CheckAuthorized";
 
 const RoutesController = () => {
@@ -26,6 +27,12 @@ const RoutesController = () => {
                 <CheckAuthorized
                     unauthView={<Redirect to={routes.auth.login} />}>
                     <Pages.Lk.Projects />
+                </CheckAuthorized>
+            </Route>
+            <Route path={routes.lk.project.root()}>
+                <CheckAuthorized
+                    unauthView={<Redirect to={routes.auth.login} />}>
+                    <ProjectRouter />
                 </CheckAuthorized>
             </Route>
             <Route path="*">

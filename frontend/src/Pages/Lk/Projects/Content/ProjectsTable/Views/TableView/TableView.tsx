@@ -47,6 +47,14 @@ const TableView = () => {
     return (
         <Table
             // rowSelection={rowSelection}
+            onRow={(record) => {
+                return {
+                    onClick: () => {
+                        console.log(record.id.toString());
+                        history.push(routes.lk.project.root(record.id.toString()));
+                    },
+                };
+            }}
             className={styles.table}
             dataSource={projects}
             columns={columns}

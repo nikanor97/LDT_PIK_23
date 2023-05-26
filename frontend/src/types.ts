@@ -48,6 +48,49 @@ export declare namespace iApi {
             performer: string,
             type: "DXF" | "manual"
         }
+        type ItemDetail = Item & {
+            resultOptions?: Result[]
+        }
+
+        type Result = {
+            materials: {
+                tabName: "Материалы",
+                tables: {
+                    name: string,
+                    values: {
+                        id: number,
+                        name: string,
+                        diameter1: number,
+                        diameter2: number,
+                        diameter3: number,
+                        angle: number,
+                        direction: string
+                    }[]
+                }[]
+            },
+            connectionPoints: {
+                tabName: "Точки подключения",
+                table: {
+                    order: string,
+                    type: string,
+                    diameter: number,
+                    X: number,
+                    Y: number,
+                    Z: number,
+                }[],
+                image: string
+            },
+            graph: {
+                tabName: "Граф подключения фитингов",
+                table: {
+                    graph: string,
+                    material: string,
+                    probability: number,
+                }[],
+                image: string
+            },
+        }
+
         type FittingGroup = {
             groupName: string,
             values: {

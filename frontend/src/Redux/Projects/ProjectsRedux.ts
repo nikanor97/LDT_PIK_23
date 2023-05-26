@@ -4,7 +4,7 @@ import {iActions} from "./types";
 
 type iState = {
     projects: null | iApi.Projects.Item[];
-    selectedProject: null | iApi.Projects.Item;
+    selectedProject: null | iApi.Projects.ItemDetail;
     createModal: boolean;
     createFetching: boolean;
     getSelectedProject: boolean;
@@ -12,6 +12,7 @@ type iState = {
     selectedProjects: null | iApi.Projects.Item[];
     fittingsGroups: iApi.Projects.FittingGroup[] | null;
     getFittings: boolean,
+    selectedOption: number | null,
 }
 
 const initialState:iState  = {
@@ -23,7 +24,8 @@ const initialState:iState  = {
     getFetching: false,
     selectedProjects: null,
     fittingsGroups: null,
-    getFittings: false
+    getFittings: false,
+    selectedOption: null
 };
 
 const Slice = createSlice({
@@ -83,6 +85,9 @@ const Slice = createSlice({
         },
         _getFittingsError: (state) => {
             state.getFittings = false;
+        },
+        setSelectedOption: (state, action: PayloadAction<iActions.setSelectedOption>) => {
+            state.selectedOption = action.payload;
         }
     }
 });

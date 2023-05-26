@@ -11,5 +11,9 @@ export default {
     },
     getFittingsGroup: () => {
         return Request.get<Projects.oGetFittingsGroups>(`${Endpoints.getFittings}`);
+    },
+    getProjectInfo: (params: Projects.iGetProjectInfo) => {
+        const url = Endpoints.getProjectInfo.replace("{projectID}", params.id.toString());
+        return Request.get<Projects.oGetProjectInfo>(url);
     }
 };

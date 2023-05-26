@@ -11,4 +11,6 @@ export declare namespace Projects {
     type oCreateProject = iApi.Projects.Item;
     type oGetProjects = iApi.Projects.Item[];
     type oGetFittingsGroups = iApi.Projects.FittingGroup[];
+    type iGetProjectInfo = Pick<iApi.Projects.Item, "id">
+    type oGetProjectInfo = iApi.Projects.ItemDetail;
 }
