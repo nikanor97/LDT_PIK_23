@@ -1,4 +1,5 @@
 import {iApi} from "@types";
+import {RcFile} from "antd/lib/upload";
 
 export declare namespace iActions {
     type setCreateModal = boolean;
@@ -18,4 +19,11 @@ export declare namespace iActions {
     type setSelectedProjects = iApi.Projects.Item[];
     type _getFittingSuccess = iApi.Projects.FittingGroup[];
     type setSelectedOption = number | null;
+    type parseDXF = {
+        dxf: RcFile,
+        project: number
+    };
+    type _parseDXFSuccess = iApi.Projects.DXFParsedData;
+    type startCalc = any;
+    type _startCalcSuccess = iApi.Projects.ItemDetail;
 }

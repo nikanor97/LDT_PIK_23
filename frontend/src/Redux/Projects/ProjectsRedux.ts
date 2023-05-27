@@ -13,6 +13,9 @@ type iState = {
     fittingsGroups: iApi.Projects.FittingGroup[] | null;
     getFittings: boolean,
     selectedOption: number | null,
+    parseDXFStatus: "loading" | "success" | "error" | null;
+    DXFdata: iApi.Projects.DXFParsedData | null,
+    startCalcStatus: "loading" | "success" | "error" | null;
 }
 
 const initialState:iState  = {
@@ -25,7 +28,10 @@ const initialState:iState  = {
     selectedProjects: null,
     fittingsGroups: null,
     getFittings: false,
-    selectedOption: null
+    selectedOption: null,
+    parseDXFStatus: null,
+    DXFdata: null,
+    startCalcStatus: null
 };
 
 const Slice = createSlice({
@@ -88,6 +94,30 @@ const Slice = createSlice({
         },
         setSelectedOption: (state, action: PayloadAction<iActions.setSelectedOption>) => {
             state.selectedOption = action.payload;
+        },
+        parseDXF: (state, action: PayloadAction<iActions.parseDXF>) => {
+            state.parseDXFStatus = "loading";
+        },
+        _parseDXFSuccess: (state, action: PayloadAction<iActions._parseDXFSuccess>) => {
+            state.parseDXFStatus = "success";
+            state.DXFdata = action.payload;
+        },
+        _parseDXFError: (state) => {
+            state.parseDXFStatus = "error";
+        },
+        eraseDXFData: (state) => {
+            state.DXFdata = null;
+            state.parseDXFStatus = null;
+        },
+        startCalc: (state, action: PayloadAction<iActions.startCalc>) => {
+            state.startCalcStatus = "loading";
+        },
+        _startCalcSuccess: (state, action: PayloadAction<iActions._startCalcSuccess>) => {
+            state.startCalcStatus = "success";
+            state.selectedProject = action.payload;
+        },
+        _startCalcError: (state) => {
+            state.startCalcStatus = "error";
         }
     }
 });

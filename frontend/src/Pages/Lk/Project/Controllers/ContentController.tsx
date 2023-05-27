@@ -5,6 +5,7 @@ import {Empty} from "antd";
 import EmptyImage from "@root/Assets/Icons/EmptyImage/EmptyImage";
 import ResultList from "../Content/ResultsList/ResultsList";
 import ResultView from "../Content/ResultView/ResultView";
+import CalcWindow from "../Content/CalcWindow/CalcWindow";
 
 const ContentController = () => {
     const selectedProject = useAppSelector((state) => state.Projects.selectedProject);
@@ -30,13 +31,8 @@ const ContentController = () => {
 
         } else {
             return (
-                <Empty
-                    imageStyle={{height: "200px",
-                        width: "200px",
-                        margin: "auto"}}
-                    image={<EmptyImage />}
-                    style={{margin: "auto"}}
-                    description="Информация о проекте не загрузилась"/>);
+                <CalcWindow />
+            );
         }
     }
     if (!selectedProject) return (

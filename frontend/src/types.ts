@@ -91,6 +91,16 @@ export declare namespace iApi {
             },
         }
 
+        type DXFParsedData = {
+            type: string,
+            config: {
+                title: string,
+                value: string,
+                x: number,
+                y: number,
+            }[]
+        }
+
         type FittingGroup = {
             groupName: string,
             values: {
