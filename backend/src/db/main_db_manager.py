@@ -3,6 +3,7 @@ import json
 import settings
 from fastapi.encoders import jsonable_encoder
 from src.db import init_db_manager_closure
+from src.db.projects.db_manager import ProjectsDbManager
 from src.db.users.db_manager import UsersDbManager
 
 
@@ -24,5 +25,12 @@ class MainDbManager:
             settings.POSTGRES_MAX_CONNECTIONS,
         )
 
+        self.projects = init_db_manager(
+            "projects",
+            ProjectsDbManager,
+            settings.POSTGRES_MAX_CONNECTIONS,
+        )
+
     async def close(self) -> None:
         await self.users.close()
+        await self.projects.close()

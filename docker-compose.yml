@@ -27,14 +27,17 @@ services:
       context: backend/
     hostname: backend
     command: bash -c "poetry run python main/run_server.py"
-#    command: bash -c "sleep infinity"
     environment:
       - HOST_WORKING_DIRECTORY=${HOST_WORKING_DIRECTORY}
-      - PYTHONPATH=/code
     volumes:
-      - ./backend:/code
+      - ./backend/src:/code/src
+      - ./backend/main:/code/main
+      - ./backend/alembic:/code/alembic
+      - ./backend/data:/code/data
+      - ./backend/scripts:/code/scripts
       - .env:/code/.env
-#      - backend-logs:/code/logs
+      - ./media:/code/media
+      - backend-logs:/code/logs
     ports:
       - "${BACKEND_PORT_ON_HOST}:${BACKEND_PORT}"
     restart: on-failure

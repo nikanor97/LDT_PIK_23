@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy_utils import database_exists, create_database
 
+from src.db.projects.models import ProjectsSQLModel
 from src.db.users.models import UsersSQLModel
 import settings
 
@@ -31,6 +32,7 @@ if config.config_file_name is not None:
 # target_metadata = None
 target_metadata = {
     "users": UsersSQLModel.metadata,
+    "projects": ProjectsSQLModel.metadata
 }
 
 db_names = list(target_metadata.keys())

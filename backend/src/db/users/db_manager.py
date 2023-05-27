@@ -5,6 +5,7 @@ from typing import Optional
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlmodel import col
 
 from src.db.base_manager import BaseDbManager
 from src.db.exceptions import ResourceAlreadyExists
@@ -268,3 +269,20 @@ class UsersDbManager(BaseDbManager):
             return False
         else:
             return True
+
+    async def get_users(
+        self, session: AsyncSession, user_ids: set[uuid.UUID]
+    ) -> list[User]:
+        stmt = select(User).where(col(User.id).in_(user_ids))
+        users: list[User] = (await session.execute(stmt)).scalars().all()
+        wrong_user_ids = set(user_ids) - set([u.id for u in users])
+        if len(wrong_user_ids) > 0:
+            raise NoResultFound(
+                f"Users with ids {wrong_user_ids} were not found in the DB"
+            )
+        return users
+
+    async def get_all_users(self, session: AsyncSession) -> list[User]:
+        stmt = select(User)
+        users: list[User] = (await session.execute(stmt)).scalars().all()
+        return users

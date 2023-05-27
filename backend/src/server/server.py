@@ -6,13 +6,14 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, ORJSONResponse
 from pydantic import ValidationError
-from settings import APP_PREFIX  # , AUTH_CLIENT_ID, AUTH_REGION, AUTH_USER_POOL_ID
+from settings import API_PREFIX  # , AUTH_CLIENT_ID, AUTH_REGION, AUTH_USER_POOL_ID
 from src.db.main_db_manager import MainDbManager
 
 # from internal_common.server.cognito_auth_params import CognitoAuthParams
 # from internal_common.server.middelwares import AuthorizedRoutesMiddleware
 # from internal_common.server.ping_router import PingRouter
 from src.server.common import RouterProtocol
+from src.server.projects.router import ProjectsRouter
 from src.server.users.router import UsersRouter
 
 
@@ -56,8 +57,8 @@ def make_server_app(
     app = FastAPI(
         title="API",
         version="0.1",
-        openapi_url=f"{APP_PREFIX}/openapi.json",
-        docs_url=f"{APP_PREFIX}/docs",
+        openapi_url=f"{API_PREFIX}/openapi.json",
+        docs_url=f"{API_PREFIX}/docs",
         default_response_class=ORJSONResponse,
     )
 
@@ -82,6 +83,7 @@ def make_server_app(
 
     routers_list: list[RouterProtocol] = [
         UsersRouter(main_db_manager=main_db_manager),
+        ProjectsRouter(main_db_manager=main_db_manager),
     ]
     for router in routers_list:
         # app.include_router(router.router, prefix=APP_PREFIX)
