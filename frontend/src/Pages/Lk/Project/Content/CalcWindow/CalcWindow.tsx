@@ -5,10 +5,14 @@ import {useAppDispatch, useAppSelector} from "@root/Hooks";
 import {Tag} from "antd";
 import DXF from "./Modules/DXF/DXF";
 import Manual from "./Modules/Manual/Manual";
+import routes from "@root/Routes/Routes";
+import {useHistory} from "react-router-dom";
+import BackArrow from "@root/Assets/Icons/BackArrow/BackArrow";
 
 const CalcWindow = () => {
     const selectedProject = useAppSelector((state) => state.Projects.selectedProject);
     const dispatch = useAppDispatch();
+    const history = useHistory();
 
     if (!selectedProject) return null;
 
@@ -16,6 +20,10 @@ const CalcWindow = () => {
 
     return (
         <div className={styles.wrapper}>
+            <div className={styles.backCol}
+                onClick={() => history.push(routes.lk.projects)}>
+                <BackArrow /> Проекты
+            </div>
             <div className={styles.header}>
                 <Title variant="h1" className={styles.title}>
                     {selectedProject.name}

@@ -5,6 +5,7 @@ import GetFittingsGroupSaga from "./GetFittingsGroupSaga";
 import GetSelectedProject from "./GetSelectedProject";
 import ParseDXF from "./ParseDXF";
 import StartCalcSaga from "./StartCalcSaga";
+import DownloadResultSaga from "./DownloadResultSaga";
 
 export default function* rootSaga() {
     yield rootSagaCreator([
@@ -13,6 +14,7 @@ export default function* rootSaga() {
         GetFittingsGroupSaga,
         GetSelectedProject,
         ParseDXF,
-        StartCalcSaga
+        StartCalcSaga,
+        DownloadResultSaga
     ], "PROJECTS");
 }

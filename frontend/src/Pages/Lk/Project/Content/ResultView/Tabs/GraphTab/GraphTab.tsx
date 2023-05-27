@@ -3,6 +3,7 @@ import {Table, Image, Row, Col} from "antd";
 import styles from "./Graph.module.less";
 
 type TableData = {
+    id: number,
     graph: string;
     material: string;
     probability: number;
@@ -22,17 +23,17 @@ const GraphTab = (props: GraphTabProps) => {
     
     const columns = [
         {
-            title: "Graph",
+            title: "Граф",
             dataIndex: "graph",
             key: "graph",
         },
         {
-            title: "Material",
+            title: "Материал",
             dataIndex: "material",
             key: "material",
         },
         {
-            title: "Probability",
+            title: "Вероятность",
             dataIndex: "probability",
             key: "probability",
         },
@@ -51,7 +52,7 @@ const GraphTab = (props: GraphTabProps) => {
                         x: true,
                     }}
                     size="small"
-            
+                    rowKey="id"
                 />
             </Col>
             <Col span={12}>

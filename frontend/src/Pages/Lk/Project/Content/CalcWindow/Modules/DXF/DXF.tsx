@@ -10,6 +10,7 @@ import Actions from "@actions";
 import {useParams} from "react-router-dom";
 import Loading from "@root/Components/Loading/Loading";
 import ErrorView from "@root/Components/Error/Error";
+import transformData from "./Utils/TransformData";
 
 const {Dragger} = Upload;
 
@@ -24,6 +25,7 @@ const DXF = () => {
     const {projectID} = useParams<iParams>();
     const parseDXFStatus = useAppSelector((state) => state.Projects.parseDXFStatus);
     const DXFData = useAppSelector((state) => state.Projects.DXFdata);
+    const startCalcStatus = useAppSelector((state) => state.Projects.startCalcStatus);
     const [form] = Form.useForm();
 
     const beforeUpload = (file: RcFile, fileList: RcFile[]) => {
@@ -45,16 +47,12 @@ const DXF = () => {
     };
 
     const onFinish = () => {
-        // console.log(form.getFieldsValue());
-        const data = form.getFieldsValue();
-        dispatch(Actions.Projects.startCalc({
+        const formData = form.getFieldsValue();
+        const data = transformData({
             project: Number(projectID),
-            ...data
-        }));
-        console.log({
-            project: Number(projectID),
-            ...data
+            ...formData
         });
+        dispatch(Actions.Projects.startCalc(data));
     };
     return (
         <div className={styles.wrapper}>
@@ -119,7 +117,11 @@ const DXF = () => {
 
                                 ))}
                                 <div className={styles.button}>
-                                    <Button type="primary" htmlType="submit">
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        loading={startCalcStatus === "loading"}
+                                        disabled={startCalcStatus === "loading"}>
                                         Рассчитать
                                     </Button>
                                 </div>

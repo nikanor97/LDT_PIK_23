@@ -23,35 +23,40 @@ interface TableValue {
     tables: TableData[];
   }
   
-const Tables: React.FC<TablesProps> = ({tables}) => {
+const MaterialTab: React.FC<TablesProps> = ({tables}) => {
     const columns = [
         {
-            title: "Name",
+            title: "ИД",
+            dataIndex: "id",
+            key: "id",
+        },
+        {
+            title: "Наименование",
             dataIndex: "name",
             key: "name",
         },
         {
-            title: "Diameter 1",
+            title: "Диаметр 1",
             dataIndex: "diameter1",
             key: "diameter1",
         },
         {
-            title: "Diameter 2",
+            title: "Диаметр 2",
             dataIndex: "diameter2",
             key: "diameter2",
         },
         {
-            title: "Diameter 3",
+            title: "Диаметр 3",
             dataIndex: "diameter3",
             key: "diameter3",
         },
         {
-            title: "Angle",
+            title: "Угол",
             dataIndex: "angle",
             key: "angle",
         },
         {
-            title: "Direction",
+            title: "Направление",
             dataIndex: "direction",
             key: "direction",
         },
@@ -59,21 +64,20 @@ const Tables: React.FC<TablesProps> = ({tables}) => {
   
     return (
         <div className={styles.wrapper}>
-            {tables.map((table, index) => (
-                <>
+            {tables.map((table, key) => (
+                <div key={key}>
                     <Title variant="h2" className={styles.title}>
                         {table.name}
                     </Title>
                     <Table
                         className={styles.table}
-                        key={index} 
                         dataSource={table.values} 
                         columns={columns}
                         pagination={false}
                         size="small"
-            
+                        rowKey="name"
                     />
-                </>
+                </div>
 
             ))}
 
@@ -81,5 +85,5 @@ const Tables: React.FC<TablesProps> = ({tables}) => {
     );
 };
   
-export default Tables;
+export default MaterialTab;
   

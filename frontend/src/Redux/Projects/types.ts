@@ -24,6 +24,19 @@ export declare namespace iActions {
         project: number
     };
     type _parseDXFSuccess = iApi.Projects.DXFParsedData;
-    type startCalc = any;
+    type startCalc = {
+        project: number,
+        values: {
+                deviceType: string,
+                X: number,
+                Y: number,
+                Z: number
+            }[]
+            
+    };
     type _startCalcSuccess = iApi.Projects.ItemDetail;
+    type downloadResult = {
+        project: number,
+        variant: number
+    }
 }

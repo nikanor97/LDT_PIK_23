@@ -50,7 +50,6 @@ const TableView = () => {
             onRow={(record) => {
                 return {
                     onClick: () => {
-                        console.log(record.id.toString());
                         history.push(routes.lk.project.root(record.id.toString()));
                     },
                 };

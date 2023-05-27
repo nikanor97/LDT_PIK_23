@@ -71,6 +71,7 @@ export declare namespace iApi {
             connectionPoints: {
                 tabName: "Точки подключения",
                 table: {
+                    id: number,
                     order: string,
                     type: string,
                     diameter: number,
@@ -83,6 +84,7 @@ export declare namespace iApi {
             graph: {
                 tabName: "Граф подключения фитингов",
                 table: {
+                    id: number,
                     graph: string,
                     material: string,
                     probability: number,

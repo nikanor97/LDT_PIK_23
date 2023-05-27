@@ -4,17 +4,25 @@ import React from "react";
 import styles from "./ResultsList.module.less";
 import {Tag} from "antd";
 import Actions from "@actions";
+import routes from "@root/Routes/Routes";
+import {useHistory} from "react-router-dom";
+import BackArrow from "@root/Assets/Icons/BackArrow/BackArrow";
 
 const ResultList = () => {
     const selectedProject = useAppSelector((state) => state.Projects.selectedProject);
     const resultOptions = useAppSelector((state) => state.Projects.selectedProject?.resultOptions);
     const dispatch = useAppDispatch();
+    const history = useHistory();
 
     if (!selectedProject) return null;
     if (!resultOptions) return null;
 
     return (
         <div className={styles.wrapper}>
+            <div className={styles.backCol}
+                onClick={() => history.push(routes.lk.projects)}>
+                <BackArrow /> Проекты
+            </div>
             <div className={styles.header}>
                 <Title variant="h1" className={styles.title}>
                     {selectedProject.name}

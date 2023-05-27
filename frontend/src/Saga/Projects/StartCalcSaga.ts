@@ -12,12 +12,14 @@ const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
     const {payload} = action;
     const notification = useNotification();
 
+    console.log(payload);
+
     const data: iApi.Projects.ItemDetail = {
         id: 1,
         name: "ЖК У Тракториста",
         bathroomType: "Master",
         author: "Author 1",
-        status: 100,
+        status: 200,
         performer: "Performer 1",
         type: "DXF",
         resultOptions: [
@@ -192,6 +194,7 @@ const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
                     tabName: "Точки подключения",
                     table: [
                         {
+                            id: 1,
                             order: "Order 1",
                             type: "Type 1",
                             diameter: 10,
@@ -200,6 +203,7 @@ const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
                             Z: 0,
                         },
                         {
+                            id: 2,
                             order: "Order 2",
                             type: "Type 2",
                             diameter: 15,
@@ -214,66 +218,79 @@ const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
                     tabName: "Граф подключения фитингов",
                     table: [
                         {
+                            id: 1,
                             graph: "Graph 1",
                             material: "Material 1",
                             probability: 0.9,
                         },
                         {
+                            id: 2,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 3,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 4,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 5,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 6,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 7,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 8,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 9,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 10,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 11,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 12,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,
                         },
                         {
+                            id: 13,
                             graph: "Graph 2",
                             material: "Material 2",
                             probability: 0.8,

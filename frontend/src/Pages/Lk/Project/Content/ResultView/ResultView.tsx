@@ -9,22 +9,43 @@ import {Tabs} from "antd";
 import Icon from "@ant-design/icons/lib/components/Icon";
 import Back from "./Icons/Back";
 import Actions from "@actions";
+import {Button} from "@root/Components/Controls";
+import {useParams} from "react-router-dom";
 
 const {TabPane} = Tabs;
+
+type iParams = {
+    projectID: string
+}
 
 const ResultView = () => {
     const selectedOption = useAppSelector((state) => state.Projects.selectedOption);
     if (selectedOption === null) return null;
     const option = useAppSelector((state) => state.Projects.selectedProject!.resultOptions![selectedOption]);
     const dispatch = useAppDispatch();
+    const {projectID} = useParams<iParams>();
+
+    const onDownload = () => {
+        dispatch(Actions.Projects.downloadResult({
+            project: Number(projectID),
+            variant: selectedOption
+        }));
+    };
 
     return (
         <div className={styles.wrapper}>
             <div className={styles.header}>
-                <Icon component={Back} onClick={() => dispatch(Actions.Projects.setSelectedOption(null))}/>
-                <div  className={styles.title}>
+                <div className={styles.back}>
+                    <Icon component={Back} onClick={() => dispatch(Actions.Projects.setSelectedOption(null))}/>
+                    <div  className={styles.title}>
                     Вариант {selectedOption + 1}
+                    </div>
                 </div>
+                <Button 
+                    type="primary"
+                    onClick={onDownload}>
+                    Экспорт
+                </Button>
             </div>
             <Tabs defaultActiveKey="1">
                 <TabPane tab={option.materials.tabName} key="1">

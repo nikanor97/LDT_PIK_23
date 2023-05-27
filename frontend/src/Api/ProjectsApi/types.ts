@@ -20,6 +20,19 @@ export declare namespace Projects {
     }
     //TODO TYpe
     type oParseDXF = iApi.Projects.DXFParsedData;
-    type iStartCalc = any;
+    type iStartCalc = {
+        project: number,
+        values: {
+                deviceType: string,
+                X: number,
+                Y: number,
+                Z: number
+            }[]
+            
+    };
     type oStartCalc = iApi.Projects.ItemDetail;
+    type iDownloadResult = {
+        project: number,
+        variant: number
+    }
 }

@@ -24,5 +24,15 @@ export default {
     },
     startCalc: (params: Projects.iStartCalc) => {
         return Request.get<Projects.oStartCalc>(`${Endpoints.startCalc}`, params);
-    }
+    },
+    downloadResult: (params: Projects.iDownloadResult) => {
+        const url = Endpoints.downloadResult;
+        return Request.get(
+            url,
+            params,
+            {
+                responseType: "blob"
+            }
+        );
+    },
 };

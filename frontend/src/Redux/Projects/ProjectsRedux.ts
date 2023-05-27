@@ -118,6 +118,9 @@ const Slice = createSlice({
         },
         _startCalcError: (state) => {
             state.startCalcStatus = "error";
+        },
+        downloadResult: (state, action: PayloadAction<iActions.downloadResult>) => {
+            return state;
         }
     }
 });

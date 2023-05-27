@@ -4,6 +4,7 @@ import {ColumnsType} from "antd/es/table";
 import styles from "./ConnectPointsTab.module.less";
 
 type TableData = {
+    id: number,
     order: string;
     type: string;
     diameter: number;
@@ -25,17 +26,17 @@ const ConnectPointsTab = (props: ConnectPointsTabProps) => {
     const {data} = props;
     const columns: ColumnsType<TableData> = [
         {
-            title: "Order",
+            title: "Порядок",
             dataIndex: "order",
             key: "order",
         },
         {
-            title: "Type",
+            title: "Тип",
             dataIndex: "type",
             key: "type",
         },
         {
-            title: "Diameter",
+            title: "Диаметр",
             dataIndex: "diameter",
             key: "diameter",
         },
@@ -69,7 +70,7 @@ const ConnectPointsTab = (props: ConnectPointsTabProps) => {
                         x: true,
                     }}
                     size="small"
-            
+                    rowKey="id"
                 />
             </Col>
             <Col span={12}>

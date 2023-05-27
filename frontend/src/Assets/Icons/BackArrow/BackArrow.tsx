@@ -2,18 +2,8 @@ import * as React from "react";
 
 const BackArrow = () => {
     return (
-        <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-            <path
-                d="M15.5 19L8.5 12L15.5 5"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
+        <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 13L1 7L7 1" stroke="#667085" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
     );
 };
