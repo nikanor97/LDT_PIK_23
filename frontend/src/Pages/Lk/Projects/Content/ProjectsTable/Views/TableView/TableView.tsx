@@ -70,7 +70,7 @@ const TableView = () => {
                 selectPrefixCls: styles.test,
             }}
             scroll={{
-                y: "calc(100vh - 477px)",
+                y: "calc(100vh - 350px)",
                 x: true,
             }}
             rowKey="id"

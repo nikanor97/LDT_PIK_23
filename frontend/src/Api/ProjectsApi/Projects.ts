@@ -4,13 +4,13 @@ import Endpoints from "./endpoints";
 
 export default {
     createProject: (params: Projects.iCreateProject) => {
-        return Request.post<Projects.oCreateProject>(`${Endpoints.base}`, params);
+        return Request.post<Projects.oCreateProject>(`${Endpoints.createProject}`, params);
     },
     getProjects: () => {
-        return Request.get<Projects.oGetProjects[]>(`${Endpoints.base}`);
+        return Request.get<Projects.oGetProjects[]>(`${Endpoints.getProjects}`);
     },
     getFittingsGroup: () => {
-        return Request.get<Projects.oGetFittingsGroups>(`${Endpoints.getFittings}`);
+        return Request.post<Projects.oGetFittingsGroups>(`${Endpoints.getFittings}`);
     },
     getProjectInfo: (params: Projects.iGetProjectInfo) => {
         const url = Endpoints.getProjectInfo.replace("{projectID}", params.id.toString());

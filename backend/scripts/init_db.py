@@ -54,7 +54,7 @@ async def init_db():
 
     lorem_words = lorem_ipsum.split(' ')
 
-
+    await pe.create_fittings(fittings_config)
 
     # for i in range(10):
     #     uf = await pe.create_and_upload_project_document(UploadFile(

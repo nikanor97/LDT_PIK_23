@@ -18,7 +18,7 @@ const Projects = () => {
     return (
         <div className={styles.wrapper}>
             <TopBar />
-            <StatBar />
+            {/* <StatBar /> */}
             <ProjectsTable />
         </div>
     );
