@@ -112,6 +112,7 @@ def upgrade_projects() -> None:
     op.create_index(op.f('ix_projects_name'), 'projects', ['name'], unique=False)
     op.create_table('devices',
     sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('project_id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
@@ -169,11 +170,11 @@ def downgrade_projects() -> None:
     op.drop_table('dxf_files')
     op.drop_table('devices')
     op.drop_index(op.f('ix_projects_name'), table_name='projects')
-    op.drop_table('projects')
-    op.drop_table('fittings')
     op.drop_index(op.f('ix_project_fittings_project_id'), table_name='project_fittings')
     op.drop_index(op.f('ix_project_fittings_fitting_id'), table_name='project_fittings')
     op.drop_table('project_fittings')
+    op.drop_table('projects')
+    op.drop_table('fittings')
     # ### end Alembic commands ###
     op.execute("""DROP TYPE projectstatusoption""")
     op.execute("""DROP TYPE roletypeoption""")

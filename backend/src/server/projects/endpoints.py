@@ -1,11 +1,15 @@
+import os
 import uuid
 from collections import defaultdict
 from typing import Annotated
 
-
-from fastapi import HTTPException, Depends
+import aiofiles
+import ezdxf
+from fastapi import HTTPException, Depends, UploadFile
 from sqlalchemy.exc import NoResultFound
 
+import settings
+from src.architecture_utils.dxf import entities_with_coordinates
 from src.server.constants import FittingCreate
 from src.db.main_db_manager import MainDbManager
 from src.db.projects.models import (
@@ -14,6 +18,10 @@ from src.db.projects.models import (
     Project,
     RoleTypeOption,
     UserRoleBase,
+    DxfFile,
+    Device,
+    device_type_to_name,
+    DeviceTypeOption,
 )
 from src.db.users.models import User
 from src.server.auth_utils import oauth2_scheme, get_user_id_from_token
@@ -24,6 +32,7 @@ from src.server.projects.models import (
     ProjectExtendedWithNames,
     FittingGroupRead,
     FittingRead,
+    DxfFileWithDevices,
 )
 
 
@@ -156,7 +165,7 @@ class ProjectsEndpoints:
                 proj = ProjectExtendedWithNames(
                     author_name=user_by_id[project.author_id].name,
                     worker_name=user_by_id[project.worker_id].name,
-                    **project.dict()
+                    **project.dict(),
                 )
                 return proj
             except NoResultFound as e:
@@ -177,11 +186,75 @@ class ProjectsEndpoints:
                 proj = ProjectExtendedWithNames(
                     author_name=user_by_id[project.author_id].name,
                     worker_name=user_by_id[project.worker_id].name,
-                    **project.dict()
+                    **project.dict(),
                 )
                 result.append(proj)
 
             return result
+
+    async def upload_dxf(
+        self, project_id: uuid.UUID, file: UploadFile
+    ) -> DxfFileWithDevices:
+        try:
+            async with self._main_db_manager.projects.make_autobegin_session() as session:
+                project = await self._main_db_manager.projects.get_project(
+                    session, project_id
+                )
+        except NoResultFound as e:
+            raise HTTPException(status_code=404, detail=exc_to_str(e))
+
+        file_id = uuid.uuid4()
+        if file.filename is not None:
+            file_name = f'{".".join(file.filename.split(".")[:-1])}_{file_id}.dxf'
+        else:
+            file_name = f"{file_id}.dxf"
+        file_path = settings.MEDIA_DIR / "dxf_files" / file_name
+        os.makedirs(settings.MEDIA_DIR / "dxf_files", exist_ok=True)
+
+        async with aiofiles.open(file_path, "wb") as f:
+            await f.write(await file.read())
+
+        doc = ezdxf.readfile(file_path)
+        modelspace = doc.modelspace()
+        stuffs = entities_with_coordinates(modelspace)
+
+        dxf_file = DxfFile(project_id=project_id, source_url=file_path)
+
+        devices = []
+        for stuff_name, coords in stuffs.items():
+            if "унитаз" in stuff_name.lower():
+                device_type = DeviceTypeOption.toilet
+            elif "раковина" in stuff_name.lower():
+                device_type = DeviceTypeOption.sink
+            elif "машина" in stuff_name.lower():
+                device_type = DeviceTypeOption.washing_machine
+            else:
+                raise ValueError(stuff_name)
+            device = Device(
+                project_id=project_id,
+                name=device_type_to_name[device_type],
+                type=device_type,
+                coord_x=coords[0],
+                coord_y=coords[1],
+            )
+            devices.append(device)
+
+        try:
+            async with self._main_db_manager.projects.make_autobegin_session() as session:
+                devices_created = await self._main_db_manager.projects.create_devices(
+                    session, devices
+                )
+                dxf_file_created = await self._main_db_manager.projects.create_dxf_file(
+                    session, dxf_file
+                )
+
+        except NoResultFound as e:
+            raise HTTPException(status_code=404, detail=exc_to_str(e))
+
+        res = DxfFileWithDevices(
+            id=dxf_file_created.id, project_id=project_id, devices=devices_created
+        )
+        return res
 
     async def _get_user_or_error(self, user_id: uuid.UUID) -> User | NoResultFound:
         """
