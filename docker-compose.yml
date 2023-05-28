@@ -37,7 +37,7 @@ services:
       - ./backend/scripts:/code/scripts
       - .env:/code/.env
       - ./media:/code/media
-      - backend-logs:/code/logs
+#      - backend-logs:/code/logs
     ports:
       - "${BACKEND_PORT_ON_HOST}:${BACKEND_PORT}"
     restart: on-failure
