@@ -12,26 +12,26 @@ const ParseDXF = function* (action: PayloadAction<iActions.parseDXF>) {
     const {payload} = action;
     const notification = useNotification();
 
-    const data: iApi.Projects.DXFParsedData = {
-        type: "Гостевой",
-        config: [
-            {
-                title: "Ванная",
-                value: "bathroom",
-                x: 14,
-                y: 19,
-            },
-            {
-                title: "Туалет",
-                value: "toilet",
-                x: 37,
-                y: 48,
-            },
-        ]
-    };
+    // const data: iApi.Projects.DXFParsedData = {
+    //     type: "Гостевой",
+    //     config: [
+    //         {
+    //             title: "Ванная",
+    //             value: "bathroom",
+    //             x: 14,
+    //             y: 19,
+    //         },
+    //         {
+    //             title: "Туалет",
+    //             value: "toilet",
+    //             x: 37,
+    //             y: 48,
+    //         },
+    //     ]
+    // };
 
     try {
-        // const {data} = yield call(Api.Projects.parseDXF, payload);
+        const {data} = yield call(Api.Projects.parseDXF, payload);
         yield put(Actions.Projects._parseDXFSuccess(data));
         notification({
             type: "info",

@@ -19,10 +19,11 @@ export default {
         });
     },
     parseDXF: (params: Projects.iParseDXF) => {
+        const url = Endpoints.parseDXF.replace("{projectID}", params.project_id);
         const fileData = new FormData();
-        fileData.append("dxf", (params.dxf));
-        fileData.append("project", params.project.toString());
-        return Request.post<Projects.oParseDXF>(`${Endpoints.parseDXF}`, fileData);
+        fileData.append("file", (params.dxf));
+        // fileData.append("project_id", params.project_id);
+        return Request.post<Projects.oParseDXF>(url, fileData);
     },
     startCalc: (params: Projects.iStartCalc) => {
         return Request.get<Projects.oStartCalc>(`${Endpoints.startCalc}`, params);

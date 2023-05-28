@@ -34,7 +34,7 @@ const DXF = () => {
             if (fileList[0]) {
                 dispatch(Actions.Projects.parseDXF({
                     dxf: fileList[0],
-                    project: Number(projectID)
+                    project_id: projectID
                 }));
             }
         } else {
@@ -84,25 +84,25 @@ const DXF = () => {
                     <div>
                         {DXFData && (
                             <Form form={form} onFinish={onFinish}>
-                                <Title variant="h3" className={styles.formTitle}>
+                                {/* <Title variant="h3" className={styles.formTitle}>
                                     Конфигурация
                                 </Title>
                                 <FormItem>
                                     <Input value={DXFData.type} disabled/>
-                                </FormItem>
+                                </FormItem> */}
                                 {DXFData.config.map((item, index) => (
                                     <div key={index}>
                                         <Title variant="h3" className={styles.configTitle}>
                                             {item.title} 
                                         </Title>
                                         <div className={styles.inputs}>
-                                            <FormItem name={`${item.value}X`} initialValue={item.x} label={"X"}>
+                                            <FormItem name={`${item.value}X`} initialValue={item.coord_x} label={"X"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}
                                                     disabled/>
                                             </FormItem>
-                                            <FormItem name={`${item.value}Y`} initialValue={item.y} label={"Y"}>
+                                            <FormItem name={`${item.value}Y`} initialValue={item.coord_y} label={"Y"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}

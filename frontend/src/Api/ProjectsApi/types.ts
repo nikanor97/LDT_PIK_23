@@ -16,7 +16,7 @@ export declare namespace Projects {
     type oGetProjectInfo = iApi.Projects.ItemDetail;
     type iParseDXF = {
         dxf: RcFile,
-        project: number
+        project_id: string
     }
     //TODO TYpe
     type oParseDXF = iApi.Projects.DXFParsedData;

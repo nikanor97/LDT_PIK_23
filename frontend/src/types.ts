@@ -98,8 +98,8 @@ export declare namespace iApi {
             config: {
                 title: string,
                 value: string,
-                x: number,
-                y: number,
+                coord_x: number,
+                coord_y: number,
             }[]
         }
 

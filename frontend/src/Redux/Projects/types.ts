@@ -21,7 +21,7 @@ export declare namespace iActions {
     type setSelectedOption = number | null;
     type parseDXF = {
         dxf: RcFile,
-        project: number
+        project_id: string
     };
     type _parseDXFSuccess = iApi.Projects.DXFParsedData;
     type startCalc = {
