@@ -78,6 +78,11 @@ class ProjectsEndpoints:
                 status_code=400, detail="Author and Worker can not be the same person"
             )
 
+        if len(project.fittings_ids) == 0:
+            raise HTTPException(
+                status_code=400, detail="Fittings array can not be empty"
+            )
+
         # Checking whether user with user_id exists
         user = await self._get_user_or_error(user_id)
         if isinstance(user, NoResultFound):
