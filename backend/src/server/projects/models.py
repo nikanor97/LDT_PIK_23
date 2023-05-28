@@ -12,6 +12,7 @@ from src.db.projects.models import ProjectBase
 
 
 class ProjectCreate(ProjectBase):
+    fittings_ids: list[uuid.UUID]  # ids of Fittings
     worker_id: uuid.UUID
     # workers_ids: list[
     #     uuid.UUID

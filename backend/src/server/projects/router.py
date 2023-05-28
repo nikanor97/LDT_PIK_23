@@ -33,7 +33,7 @@ class ProjectsRouter:
             path="/fittings-all",
             endpoint=self._projects_endpoints.get_all_fittings,
             response_model=list[FittingGroupRead],
-            methods=[METHOD.POST],
+            methods=[METHOD.GET],  # TODO: make GET
             dependencies=[Depends(Auth(main_db_manager))],
         )
 

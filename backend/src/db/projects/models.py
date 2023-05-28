@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Optional, TypeVar
 
 import sqlalchemy
-from sqlalchemy import Index, Column
+from sqlalchemy import Index, Column, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlmodel import Field, Relationship
 from src.db.common_sql_model import CommonSqlModel
@@ -29,10 +29,16 @@ class RoleTypeOption(str, enum.Enum):
     worker = "worker"
 
 
-class ProjectStatusOption(str, enum.Enum):
-    created = "created"  # When project is created or sent to the building stage
-    in_progress = "ready"
-    error = "error"  # When the project is totally finished
+# class ProjectStatusOption(str, enum.Enum):
+#     created = "created"  # When project is created or sent to the building stage
+#     in_progress = "ready"
+#     error = "error"  # When the project is totally finished
+
+
+class ProjectStatusOption(int, enum.Enum):
+    created = 100  # When project is created or sent to the building stage
+    ready = 200
+    error = 400  # When the project is totally finished
 
 
 class ProjectTypeOption(str, enum.Enum):
@@ -51,7 +57,7 @@ class ProjectBase(ProjectsSQLModel):
     type: ProjectTypeOption = Field(
         sa_column=Column(sqlalchemy.Enum(ProjectTypeOption))
     )
-    bathroom_type: str = Field(nullable=False)
+    bathroom_type: Optional[str] = Field(nullable=True)
     is_deleted: Optional[bool] = Field(default=False)
 
 
@@ -114,4 +120,15 @@ class DxfFileBase(ProjectsSQLModel):
 
 class DxfFile(DxfFileBase, TimeStampWithIdMixin, table=True):
     __tablename__ = "dxf_files"
+    project: Project = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+
+class ProjectFitting(ProjectsSQLModel, TimeStampWithIdMixin, table=True):
+    __tablename__ = "project_fittings"
+    __table_args__ = (
+        UniqueConstraint("project_id", "fitting_id", name="project_fitting_constr"),
+    )
+    project_id: uuid.UUID = Field(foreign_key="projects.id", index=True)
+    fitting_id: uuid.UUID = Field(foreign_key="fittings.id", index=True)
+    fitting: Fitting = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
     project: Project = Relationship(sa_relationship_kwargs={"lazy": "selectin"})

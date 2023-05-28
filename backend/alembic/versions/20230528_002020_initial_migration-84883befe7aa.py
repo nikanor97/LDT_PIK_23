@@ -105,7 +105,7 @@ def upgrade_projects() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('bathroom_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('bathroom_type', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -144,6 +144,19 @@ def upgrade_projects() -> None:
     op.create_index('idx_user_project_role', 'user_roles', ['user_id', 'project_id', 'role_type'], unique=True)
     op.create_index(op.f('ix_user_roles_project_id'), 'user_roles', ['project_id'], unique=False)
     op.create_index(op.f('ix_user_roles_user_id'), 'user_roles', ['user_id'], unique=False)
+    op.create_table('project_fittings',
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('project_id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
+    sa.Column('fitting_id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
+    sa.ForeignKeyConstraint(['fitting_id'], ['fittings.id'], ),
+    sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('project_id', 'fitting_id', name='project_fitting_constr')
+    )
+    op.create_index(op.f('ix_project_fittings_fitting_id'), 'project_fittings', ['fitting_id'], unique=False)
+    op.create_index(op.f('ix_project_fittings_project_id'), 'project_fittings', ['project_id'], unique=False)
     # ### end Alembic commands ###
 
 
@@ -158,6 +171,9 @@ def downgrade_projects() -> None:
     op.drop_index(op.f('ix_projects_name'), table_name='projects')
     op.drop_table('projects')
     op.drop_table('fittings')
+    op.drop_index(op.f('ix_project_fittings_project_id'), table_name='project_fittings')
+    op.drop_index(op.f('ix_project_fittings_fitting_id'), table_name='project_fittings')
+    op.drop_table('project_fittings')
     # ### end Alembic commands ###
     op.execute("""DROP TYPE projectstatusoption""")
     op.execute("""DROP TYPE roletypeoption""")

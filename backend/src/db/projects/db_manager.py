@@ -2,9 +2,11 @@ import base64
 import uuid
 from typing import Optional
 
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from sqlmodel import col
 
 import settings
 from src.db.exceptions import ResourceAlreadyExists
@@ -17,6 +19,7 @@ from src.db.projects.models import (
     UserRole,
     RoleTypeOption,
     UserRoleBase,
+    ProjectFitting,
 )
 from src.server.projects.models import ProjectExtendedWithIds
 
@@ -41,6 +44,18 @@ class ProjectsDbManager(BaseDbManager):
         stmt = select(Fitting)
         fittings = (await session.execute(stmt)).scalars().all()
         return fittings
+
+    async def get_fittings(
+        self, session: AsyncSession, fittings_ids: set[uuid.UUID]
+    ) -> list[Fitting]:
+        stmt = select(Fitting).where(col(Fitting.id).in_(fittings_ids))
+        tags = (await session.execute(stmt)).scalars().all()
+        not_existing_tags_ids = set(fittings_ids) - set([t.id for t in tags])
+        if len(not_existing_tags_ids) != 0:
+            raise NoResultFound(
+                f"Fittings with ids {not_existing_tags_ids} were not found in the DB"
+            )
+        return tags
 
     async def create_project(
         self, session: AsyncSession, project: ProjectBase, user_id: uuid.UUID
@@ -159,3 +174,47 @@ class ProjectsDbManager(BaseDbManager):
                 f"user_id {user_role.user_id} and "
                 f"project_id {user_role.project_id} already exists"
             )
+
+    async def create_project_fittings(
+        self, session: AsyncSession, project_id: uuid.UUID, fittings_ids: set[uuid.UUID]
+    ) -> list[ProjectFitting]:
+        """
+        Will add new project fittings. If some already exist it'll be OK
+        :returns newly created project fittings
+        """
+        await Project.by_id(session, project_id)
+        await self.get_fittings(session, fittings_ids)
+
+        # TODO: implement it with upsert with on conflict update updated_at field only
+        stmt = select(ProjectFitting.fitting_id).where(
+            ProjectFitting.project_id == project_id
+        )
+        current_project_fittings_ids: set[uuid.UUID] = set(
+            (await session.execute(stmt)).scalars().all()
+        )
+        new_fittings_ids = set(fittings_ids) - current_project_fittings_ids
+
+        new_project_fittings = [
+            ProjectFitting(project_id=project_id, fitting_id=fitting_id)
+            for fitting_id in new_fittings_ids
+        ]
+        session.add_all(new_project_fittings)
+        return new_project_fittings
+
+    async def get_fittings_by_project(
+        self,
+        session: AsyncSession,
+        project_id: uuid.UUID,
+    ) -> list[Fitting]:
+        await Project.by_id(session, project_id)
+        stmt = (
+            select(ProjectFitting)
+            .where(ProjectFitting.project_id == project_id)
+            .options(selectinload(ProjectFitting.fitting))
+        )
+        project_fittings: list[ProjectFitting] = (
+            (await session.execute(stmt)).scalars().all()
+        )
+        fittings = [pf.fitting for pf in project_fittings]
+
+        return fittings
