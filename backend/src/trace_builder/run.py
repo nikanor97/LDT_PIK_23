@@ -113,7 +113,7 @@ def run_algo(dxf_path: str, heighs: dict()):
     mesh = build_path(walls, riser_projections, scrennshot_name)
     mesh.save(f"{scrennshot_name}.stl")
     pd.DataFrame({"Граф": ["A-1", "1-2"], "Материал": [101, 102]}).to_csv(
-        f"{dir_name}/graph.csv"
+        f"{dir_name}/{timestam}.csv"
     )
     output_dir = os.getcwd() + "/" + dir_name
     return output_dir
@@ -129,3 +129,5 @@ if __name__ == "__main__":
         "Унитаз_3D_С бачком_Рен - 2D_Унитаз_Бачок-V58-Битца 8_ТИПИЗАЦИЯ": 100,
     }
     run_algo("data/СТМ8-1П-Б-2.dxf", hieghts)
+
+# %%
