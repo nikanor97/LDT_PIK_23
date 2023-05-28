@@ -32,7 +32,8 @@ export declare namespace Projects {
     };
     type oStartCalc = iApi.Projects.ItemDetail;
     type iDownloadResult = {
-        project: number,
-        variant: number
+        project: string,
+        variant: number,
+        file_type: "xls" | "stl"
     }
 }

@@ -13,8 +13,10 @@ export default {
         return Request.get<Projects.oGetFittingsGroups>(`${Endpoints.getFittings}`);
     },
     getProjectInfo: (params: Projects.iGetProjectInfo) => {
-        const url = Endpoints.getProjectInfo.replace("{projectID}", params.id.toString());
-        return Request.get<Projects.oGetProjectInfo>(url);
+        const url = Endpoints.getProjectInfo;
+        return Request.get<Projects.oGetProjectInfo>(url, {
+            project_id: params.id
+        });
     },
     parseDXF: (params: Projects.iParseDXF) => {
         const fileData = new FormData();

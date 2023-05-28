@@ -40,7 +40,7 @@ export declare namespace iApi {
     namespace Projects {
         // TODO Изменить в соответствии с беком
         type Item = {
-            id: number,
+            id: string,
             name: string,
             bathroom_type: string,
             author_name: string,

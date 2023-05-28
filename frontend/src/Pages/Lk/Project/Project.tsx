@@ -15,7 +15,7 @@ const Project = () => {
     const {projectID} = useParams<iParams>();
 
     useEffect(() => {
-        dispatch(Actions.Projects.getSelectedProject({id: Number(projectID)}));
+        dispatch(Actions.Projects.getSelectedProject({id: projectID}));
     }, []);
 
     return (

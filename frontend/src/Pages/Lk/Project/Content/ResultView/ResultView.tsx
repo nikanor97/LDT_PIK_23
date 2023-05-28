@@ -1,16 +1,17 @@
 import {useAppDispatch, useAppSelector} from "@root/Hooks";
-import React from "react";
+import React, {useEffect} from "react";
 import MaterialTab from "./Tabs/MaterialTab/MaterialTab";
 import ConnectPointsTab from "./Tabs/ConnectPointsTab/ConnectPointsTab";
 import GraphTab from "./Tabs/GraphTab/GraphTab";
 import styles from "./ResultView.module.less";
 
-import {Tabs} from "antd";
+import {Dropdown, Tabs} from "antd";
 import Icon from "@ant-design/icons/lib/components/Icon";
 import Back from "./Icons/Back";
 import Actions from "@actions";
 import {Button} from "@root/Components/Controls";
 import {useParams} from "react-router-dom";
+import DownloadMenu from "./Modules/DownloadMenu/DownloadMenu";
 
 const {TabPane} = Tabs;
 
@@ -25,12 +26,11 @@ const ResultView = () => {
     const dispatch = useAppDispatch();
     const {projectID} = useParams<iParams>();
 
-    const onDownload = () => {
-        dispatch(Actions.Projects.downloadResult({
-            project: Number(projectID),
-            variant: selectedOption
-        }));
-    };
+    useEffect(() => {
+        return () => {
+            dispatch(Actions.Projects.setSelectedOption(null));
+        };
+    });
 
     return (
         <div className={styles.wrapper}>
@@ -41,11 +41,14 @@ const ResultView = () => {
                     Вариант {selectedOption + 1}
                     </div>
                 </div>
-                <Button 
-                    type="primary"
-                    onClick={onDownload}>
-                    Экспорт
-                </Button>
+                <Dropdown 
+                    trigger={["click"]}
+                    overlay={<DownloadMenu project={projectID} variant={selectedOption}/>}>
+                    <Button 
+                        type="primary">
+                        Экспорт
+                    </Button>
+                </Dropdown>
             </div>
             <Tabs defaultActiveKey="1">
                 <TabPane tab={option.materials.tabName} key="1">

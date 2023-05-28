@@ -15,7 +15,7 @@ const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
     console.log(payload);
 
     const data: iApi.Projects.ItemDetail = {
-        id: 1,
+        id: "asldfjal2131",
         name: "ЖК У Тракториста",
         bathroom_type: "Master",
         author_name: "Author 1",
