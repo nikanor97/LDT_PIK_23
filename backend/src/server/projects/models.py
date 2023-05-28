@@ -1,8 +1,10 @@
 import uuid
+from _decimal import Decimal
+from typing import Optional
 
 from pydantic import BaseModel
 
-from src.db.projects.models import ProjectBase, DxfFileBase, Device
+from src.db.projects.models import ProjectBase, DeviceTypeOption
 
 
 # class FittingCreate(BaseModel):
@@ -42,6 +44,16 @@ class FittingGroupRead(BaseModel):
     values: list[FittingRead]
 
 
-class DxfFileWithDevices(DxfFileBase):
+class DeviceRead(BaseModel):
+    name: str
+    type: DeviceTypeOption
+    coord_x: Optional[Decimal]
+    coord_y: Optional[Decimal]
+    coord_z: Optional[Decimal]
+
+
+class DxfFileWithDevices(BaseModel):
     id: uuid.UUID
-    devices: list[Device]
+    project_id: uuid.UUID
+    type: str
+    devices: list[DeviceRead]

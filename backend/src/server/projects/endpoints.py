@@ -228,8 +228,15 @@ class ProjectsEndpoints:
                 device_type = DeviceTypeOption.sink
             elif "машина" in stuff_name.lower():
                 device_type = DeviceTypeOption.washing_machine
+            elif "ванна" in stuff_name.lower():
+                device_type = DeviceTypeOption.bath
+            elif "кран" in stuff_name.lower():
+                device_type = DeviceTypeOption.faucet
+            elif "мойка" in stuff_name.lower():
+                device_type = DeviceTypeOption.kitchen_sink
             else:
-                raise ValueError(stuff_name)
+                print(f"Unknown device {stuff_name}")
+                continue
             device = Device(
                 project_id=project_id,
                 name=device_type_to_name[device_type],
@@ -252,7 +259,10 @@ class ProjectsEndpoints:
             raise HTTPException(status_code=404, detail=exc_to_str(e))
 
         res = DxfFileWithDevices(
-            id=dxf_file_created.id, project_id=project_id, devices=devices_created
+            id=dxf_file_created.id,
+            project_id=project_id,
+            devices=devices_created,
+            type="Кабина",
         )
         return res
 

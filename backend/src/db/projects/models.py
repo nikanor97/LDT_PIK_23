@@ -51,13 +51,17 @@ class DeviceTypeOption(str, enum.Enum):
     bath = "bath"
     washing_machine = "washing_machine"
     sink = "sink"
+    faucet = "faucet"
+    kitchen_sink = "kitchen_sink"
 
 
 device_type_to_name = {
-    DeviceTypeOption.toilet: "туалет",
-    DeviceTypeOption.bath: "ванная",
-    DeviceTypeOption.washing_machine: "стиральная машина",
-    DeviceTypeOption.sink: "раковина",
+    DeviceTypeOption.toilet: "Туалет",
+    DeviceTypeOption.bath: "Ванна",
+    DeviceTypeOption.washing_machine: "Стиральная машина",
+    DeviceTypeOption.sink: "Раковина",
+    DeviceTypeOption.faucet: "Кран",
+    DeviceTypeOption.kitchen_sink: "Мойка кухня",
 }
 
 
@@ -124,7 +128,9 @@ class Fitting(FittingBase, TimeStampWithIdMixin, table=True):
 class DeviceBase(ProjectsSQLModel):
     project_id: uuid.UUID = Field(foreign_key="projects.id")
     name: str = Field(nullable=False)  # same sense as type
-    type: DeviceTypeOption = Field(nullable=False)
+    type: DeviceTypeOption = Field(
+        sa_column=Column(sqlalchemy.Enum(DeviceTypeOption), nullable=False)
+    )
     coord_x: Optional[Decimal] = Field(nullable=True)
     coord_y: Optional[Decimal] = Field(nullable=True)
     coord_z: Optional[Decimal] = Field(nullable=True)
