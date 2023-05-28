@@ -103,6 +103,14 @@ class ProjectsEndpoints:
                     session, proj, user_id
                 )
 
+                await self._main_db_manager.projects.create_project_fittings(
+                    session, new_project.id, project.fittings_ids
+                )
+
+                fittings = await self._main_db_manager.projects.get_fittings_by_project(
+                    session, new_project.id
+                )
+
                 # Checking if any workers with workers_ids are already assigned to the project
                 existing_user_roles = (
                     await self._main_db_manager.projects.get_user_roles(
