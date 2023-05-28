@@ -49,7 +49,7 @@ const DXF = () => {
     const onFinish = () => {
         const formData = form.getFieldsValue();
         const data = transformData({
-            project: Number(projectID),
+            project: projectID,
             ...formData
         });
         dispatch(Actions.Projects.startCalc(data));
@@ -83,32 +83,32 @@ const DXF = () => {
                 {parseDXFStatus === "success" && (
                     <div>
                         {DXFData && (
-                            <Form form={form} onFinish={onFinish}>
+                            <Form form={form} onFinish={onFinish} className={styles.form}>
                                 {/* <Title variant="h3" className={styles.formTitle}>
                                     Конфигурация
                                 </Title>
                                 <FormItem>
                                     <Input value={DXFData.type} disabled/>
                                 </FormItem> */}
-                                {DXFData.config.map((item, index) => (
+                                {DXFData.devices.map((item, index) => (
                                     <div key={index}>
                                         <Title variant="h3" className={styles.configTitle}>
-                                            {item.title} 
+                                            {item.name} 
                                         </Title>
                                         <div className={styles.inputs}>
-                                            <FormItem name={`${item.value}X`} initialValue={item.coord_x} label={"X"}>
+                                            <FormItem name={`${item.type}X`} initialValue={item.coord_x} label={"X"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}
                                                     disabled/>
                                             </FormItem>
-                                            <FormItem name={`${item.value}Y`} initialValue={item.coord_y} label={"Y"}>
+                                            <FormItem name={`${item.type}Y`} initialValue={item.coord_y} label={"Y"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}
                                                     disabled/>
                                             </FormItem>
-                                            <FormItem name={`${item.value}Z`} label={"Z"}>
+                                            <FormItem name={`${item.type}Z`} label={"Z"} required>
                                                 <InputNumber required controls={false}/>
                                             </FormItem>
                                         </div>

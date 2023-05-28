@@ -95,9 +95,9 @@ export declare namespace iApi {
 
         type DXFParsedData = {
             type: string,
-            config: {
-                title: string,
-                value: string,
+            devices: {
+                name: string,
+                type: string,
                 coord_x: number,
                 coord_y: number,
             }[]
