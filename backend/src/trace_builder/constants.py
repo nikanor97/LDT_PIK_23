@@ -1,4 +1,3 @@
-
 _path_pattern = "/data/fittings_3d"
 FITTINGS = {
     "d50": {
@@ -8,7 +7,7 @@ FITTINGS = {
         "out": 1,
         "angel": 0,
         "path": f"{_path_pattern}/d50.stl",
-        },
+    },
     "d110": {
         "id": 1,
         "name": "труба 110",
@@ -16,7 +15,7 @@ FITTINGS = {
         "out": 1,
         "angel": 0,
         "path": f"{_path_pattern}/d110.stl",
-        },
+    },
     "otvod_50x45": {
         "id": 2,
         "name": "отвод 50/45",
@@ -24,7 +23,7 @@ FITTINGS = {
         "out": 1,
         "andel": 45,
         "path": f"{_path_pattern}/otvod-50x45.stl",
-        },
+    },
     "otvod_50x87": {
         "id": 3,
         "name": "отвод 50/87",
@@ -32,7 +31,7 @@ FITTINGS = {
         "out": 1,
         "angle": 87,
         "path": f"{_path_pattern}/otvod-50x87.stl",
-        },
+    },
     "otvod_110x45": {
         "id": 4,
         "name": "отвод 110/45",
@@ -40,7 +39,7 @@ FITTINGS = {
         "out": 1,
         "andel": 45,
         "path": f"{_path_pattern}/otvod-110x45.stl",
-        },
+    },
     "otvod_110x87": {
         "id": 5,
         "name": "отвод 110/87",
@@ -48,7 +47,7 @@ FITTINGS = {
         "out": 1,
         "angle": 87,
         "path": f"{_path_pattern}/otvod-110x87.stl",
-        },
+    },
     "reduction": {
         "id": 6,
         "name": "редукция 110/50",
@@ -57,7 +56,7 @@ FITTINGS = {
         "out": 1,
         "angle": 00,
         "path": f"{_path_pattern}/reduction-110x50.stl",
-        },
+    },
     "troinik_50_50x45": {
         "id": 7,
         "name": "редуктройник 50/50/45",
@@ -66,7 +65,7 @@ FITTINGS = {
         "out": 2,
         "angle": 45,
         "path": f"{_path_pattern}/troinik-50x50x45.stl",
-        },
+    },
     "troinik_50_50x87": {
         "id": 8,
         "name": "редуктройник 50/50/87",
@@ -75,7 +74,7 @@ FITTINGS = {
         "out": 2,
         "angle": 87,
         "path": f"{_path_pattern}/troinik-50x50x87.stl",
-        },
+    },
     "troinik_110_110x45": {
         "id": 9,
         "name": "тройник 110/110/45",
@@ -84,7 +83,7 @@ FITTINGS = {
         "out": 2,
         "angle": 45,
         "path": f"{_path_pattern}/troinik-110x110x45.stl",
-        },
+    },
     "troinik_110_50x45": {
         "id": 10,
         "name": "тройник 110/50/45",
@@ -93,7 +92,7 @@ FITTINGS = {
         "out": 2,
         "angle": 45,
         "path": f"{_path_pattern}/troinik-110x50x45.stl",
-        },
+    },
     "troinik_110_110x87": {
         "id": 11,
         "name": "тройник 110/110/87",
@@ -102,7 +101,7 @@ FITTINGS = {
         "out": 2,
         "angle": 87,
         "path": f"{_path_pattern}/troinik-110x110x87.stl",
-        },
+    },
     "otvod_110_50_87": {
         "id": 12,
         "name": "отвод 110/50x87 выход вверх",
@@ -111,7 +110,7 @@ FITTINGS = {
         "out": 2,
         "angle": 87,
         "path": f"{_path_pattern}/otvod-110х87_out_50_up.stl.stl",
-        },
+    },
 }
 
 GLOBAL_INIT_MIN = 80

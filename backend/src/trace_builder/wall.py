@@ -3,18 +3,18 @@ from model import Segment, Point
 from geometry import l1_distance
 import re
 
-class Wall:
 
+class Wall:
     def __init__(
-            self,
-            wall: Segment,
-            has_toilet: bool = False,
-            has_stuff: bool = False,
-            entery_wall: bool = False,
-            with_riser: bool = False,
-            max_length_stuff: Optional[float] = None,
-            path2wall_with_riser: Optional[List] = None,
-            stuff_point: Optional[List[Point]] = None
+        self,
+        wall: Segment,
+        has_toilet: bool = False,
+        has_stuff: bool = False,
+        entery_wall: bool = False,
+        with_riser: bool = False,
+        max_length_stuff: Optional[float] = None,
+        path2wall_with_riser: Optional[List] = None,
+        stuff_point: Optional[List[Point]] = None,
     ):
         self.wall = wall
         self.start = self.wall.start
@@ -36,17 +36,17 @@ class Wall:
             return
         pass
 
-class Stuff:
 
+class Stuff:
     def __init__(
-            self,
-            name: str,
-            coordinates: Point,
-            projection: Point,
-            nearest_segment: Segment,
-            l1_projection: float,
-            riser_l1_distance: float,
-            height: float
+        self,
+        name: str,
+        coordinates: Point,
+        projection: Point,
+        nearest_segment: Segment,
+        l1_projection: float,
+        riser_l1_distance: float,
+        height: float,
     ):
         self.name = name
         self.coordinates = coordinates
@@ -57,18 +57,20 @@ class Stuff:
         self.height = height
         self.is_toilet = _is_toilet(self.name)
 
+
 def _is_toilet(stuff) -> bool:
     return True if bool(re.search(".*[Уу]нитаз.*", stuff)) else False
 
+
 class Pipe:
     def __init__(
-            self,
-            coordinates: Point,
-            is_toilet: bool = False,
-            is_start: bool = False,
-            is_end: bool = False,
-            with_riser: bool = False,
-            stuff: Optional[Stuff] = None
+        self,
+        coordinates: Point,
+        is_toilet: bool = False,
+        is_start: bool = False,
+        is_end: bool = False,
+        with_riser: bool = False,
+        stuff: Optional[Stuff] = None,
     ):
         self.coordinates = coordinates
         self.is_toilet = is_toilet

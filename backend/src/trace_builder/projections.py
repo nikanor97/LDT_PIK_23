@@ -6,6 +6,7 @@ from typing import List, Tuple
 
 import ezdxf
 import matplotlib.pyplot as plt
+
 # import networkx as nx
 import numpy as np
 import pandas as pd
@@ -25,7 +26,12 @@ import re
 from merge_segments import merge_segments
 from model import Point, Segment
 from utils import load_data, save_data
-from geometry import is_dot_inside_segment, l1_distance, l2_distance, detect_wall_with_door
+from geometry import (
+    is_dot_inside_segment,
+    l1_distance,
+    l2_distance,
+    detect_wall_with_door,
+)
 
 # %%
 
@@ -303,6 +309,7 @@ def calculate_max_riser_height(stuffs):
         min_dist = max(info["height"] - info["riser_l1_distance"] * 0.02, 50)
         best_min_dist = min(best_min_dist, min_dist)
     return best_min_dist
+
 
 def clear_sutff_duplicate(stuffs):
     keys_to_delete = []

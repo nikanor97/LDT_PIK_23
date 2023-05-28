@@ -13,7 +13,14 @@ from model import Point, Segment
 from wall import Stuff
 
 
-def save_data(stuffs, walls, max_riser_height, optimal_segment, riser_coordinates, riser_projection):
+def save_data(
+    stuffs,
+    walls,
+    max_riser_height,
+    optimal_segment,
+    riser_coordinates,
+    riser_projection,
+):
     for stuff in stuffs.keys():
         stuffs[stuff]["coordinates"] = point2coordinate(stuffs[stuff]["coordinates"])
         stuffs[stuff]["projection"] = point2coordinate(stuffs[stuff]["projection"])
@@ -26,7 +33,7 @@ def save_data(stuffs, walls, max_riser_height, optimal_segment, riser_coordinate
         "walls": walls,
         "optimal_wall": optimal_segment,
         "riser_coordinates": point2coordinate(riser_coordinates),
-        "riser_projection": point2coordinate(riser_projection)
+        "riser_projection": point2coordinate(riser_projection),
     }
     with open("geometry.json", "w") as f:
         json.dump(result, f)
@@ -42,15 +49,30 @@ def load_data(path):
     riser_coordinates = coordinate2point(data["riser_coordinates"])
     for stuff in data["stuff"].keys():
         data["stuff"][stuff]["l1_projection"] = data["stuff"][stuff]["l1_projection"]
-        data["stuff"][stuff]["riser_l1_distance"] = data["stuff"][stuff]["riser_l1_distance"]
+        data["stuff"][stuff]["riser_l1_distance"] = data["stuff"][stuff][
+            "riser_l1_distance"
+        ]
         data["stuff"][stuff]["height"] = data["stuff"][stuff]["height"]
-        data["stuff"][stuff]["projection"] = coordinate2point(data["stuff"][stuff]["projection"])
-        data["stuff"][stuff]["segment"] = coordinates2segment(data["stuff"][stuff]["segment"])
-        data["stuff"][stuff]["coordinates"] = coordinate2point(data["stuff"][stuff]["coordinates"])
-
+        data["stuff"][stuff]["projection"] = coordinate2point(
+            data["stuff"][stuff]["projection"]
+        )
+        data["stuff"][stuff]["segment"] = coordinates2segment(
+            data["stuff"][stuff]["segment"]
+        )
+        data["stuff"][stuff]["coordinates"] = coordinate2point(
+            data["stuff"][stuff]["coordinates"]
+        )
 
     stuff = data["stuff"]
-    return stuff, walls, optimal_segment, max_riser_height, riser_coordinates, riser_projection
+    return (
+        stuff,
+        walls,
+        optimal_segment,
+        max_riser_height,
+        riser_coordinates,
+        riser_projection,
+    )
+
 
 def dict2stuff(stuffs):
     stuffs_classes = []

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Point:
     x: float
@@ -10,4 +11,3 @@ class Point:
 class Segment:
     start: Point
     end: Point
-

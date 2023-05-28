@@ -70,6 +70,3 @@ def merge_segments(segments: List[Segment], eps: float):
                     min_y, max_y = min(y1, y2), max(y1, y2)
         merged_segments.append(((min_x, min_y), (max_x, max_y)))
     return coordinates2segments(merged_segments)
-
-
-

@@ -10,6 +10,7 @@ from coordinate_converter import (
 import numpy as np
 from typing import List
 
+
 def is_dot_inside_segment(dot, segment):
     if isinstance(dot, Point):
         dot = point2coordinate(dot)
@@ -22,6 +23,7 @@ def is_dot_inside_segment(dot, segment):
     ):
         return True
     return False
+
 
 def l2_distance(start, end):
     if isinstance(start, Point):
@@ -39,7 +41,6 @@ def l1_distance(start, end):
         end = point2coordinate(end)
     start, end = np.array(start), np.array(end)
     return np.abs(start - end).sum()
-
 
 
 def detect_wall_with_door(segments: List[Segment]):
