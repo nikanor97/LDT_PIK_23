@@ -1,0 +1,62 @@
+.search {
+    :global {
+        .ant-input-wrapper {
+            border: var(--input-border);
+            box-sizing: border-box;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            background: transparent;
+            &:focus-within {
+                border: 1px solid var(--brand-main);
+                background: rgba(0, 0, 0, 0.1);
+            }
+        }
+        .ant-input-affix-wrapper {
+            padding: 8px 16px;
+            border: none;
+            color: var(--text-primary);
+            background: transparent;
+            input {
+                background: transparent;
+                color: var(--text-primary);
+            }
+            .ant-input-clear-icon {
+                color: inherit;
+            }
+            &:not(.ant-input-affix-wrapper-disabled):hover {
+                border: none;
+            }
+            &-focused {
+                box-shadow: none;
+            }
+
+        }
+        .ant-input-group-addon {
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+            width: unset;
+            button {
+                height: 100%;
+                border: unset;
+                background: transparent;
+                &::after {
+                    display: none;
+                }
+            }
+        }
+        .anticon.ant-input-clear-icon {
+            background: url('../../../Assets/Icons/Search/Clear/Clear.svg') 50% 50% no-repeat;
+            height: 8px;
+            width: 8px;
+            color: var(--text-primary);
+        }
+        .anticon.ant-input-clear-icon > svg {
+            color: transparent;
+        }
+        .anticon-search {
+            color: var(--text-primary);
+        }
+    }
+}

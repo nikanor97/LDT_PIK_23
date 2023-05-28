@@ -1,0 +1,35 @@
+.menu {
+    padding: 4px;
+    background: linear-gradient(115.09deg, #3B3F44 3.38%, #2E3036 92.1%);
+    mix-blend-mode: normal;
+    box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    .item {
+        font-size: 14px;
+        line-height: 16px;
+        color: var(--text-primary);
+        padding: 10px 12px;
+        position: relative;
+        padding-left: 48px;
+        &:global(.ant-dropdown-menu-item-selected) {
+            background: unset;
+            .activeIcon {
+                display: initial;
+                position: absolute;
+                left: 24px;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        &:hover {
+            background: unset;
+            color: @primary-color;
+        }
+    }
+}
+
+.activeIcon {
+    font-size: 12px;
+    display: none;
+}

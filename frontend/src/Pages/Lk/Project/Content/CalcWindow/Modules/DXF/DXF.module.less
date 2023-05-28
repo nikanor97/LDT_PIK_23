@@ -1,0 +1,118 @@
+
+.wrapper {
+    .form {
+        margin-top: 24px;
+    }
+    .title {
+        margin-bottom: 8px;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 16px;
+        color: #32324D;
+    }
+    .formTitle {
+        margin-bottom: 8px;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 16px;
+        color: #32324D;
+        margin-top: 24px;
+        margin-bottom: 8px;
+    }
+    .description {
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+        color: #32324D;
+        margin-bottom: 16px;
+    }
+    .dragger {
+        width: 50%;
+        height: 50px;
+        border-radius: 8px;
+        &Desc {
+            font-style: normal;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 16px;
+            color: #475467;
+        }
+    }
+    :global {
+        .ant-upload-list {
+            width: 50%;
+        }
+        .ant-form-item {
+            display: flex;
+            flex-direction: column;
+
+            // &:not(:last-child) {
+            //     margin-right: 16px;
+            // }
+            
+        }
+        .ant-input-number {
+            width: 100%;
+            border-radius: 8px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            input {
+                border-radius: 8px;
+                height: 44px;
+                &:hover {
+                    border: transparent;
+                }
+            }
+        }
+        .ant-form-item-label {
+            text-align: left;
+            font-style: normal;
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 16px;
+            color: #32324D;
+        }
+        .ant-form-item-label > label::after {
+            display: none;
+        }
+        .ant-input {
+            border-radius: 8px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            input {
+                border-radius: 8px;
+                height: 44px;
+                &:hover {
+                    border: transparent;
+                }
+            }
+        }
+    }
+}
+
+.inputs {
+    display: flex;
+    gap: 16px;
+}
+
+.configTitle {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    color: #667085;
+}
+
+.button {
+    display: flex;
+    justify-content: flex-end;
+}

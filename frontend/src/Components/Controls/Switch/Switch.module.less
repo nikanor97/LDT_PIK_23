@@ -1,0 +1,11 @@
+button.switch {
+    background: #858585;
+    &:global {
+        &.ant-switch-checked {
+            background: @primary-color;
+            &:focus {
+                box-shadow: none;
+            }
+        }
+    }
+}
