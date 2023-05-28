@@ -29,7 +29,7 @@ const CreateProjectModal = () => {
 
         const data = {
             worker_id: form.getFieldValue("worker_id"),
-            fittings: fittingsNames
+            fittings_ids: fittingsNames
                 .map((item) => form.getFieldValue(item))
                 .flat()
                 .filter((item) => item !== undefined && item !== null),

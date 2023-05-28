@@ -42,10 +42,10 @@ export declare namespace iApi {
         type Item = {
             id: number,
             name: string,
-            bathroomType: string,
-            author: string,
+            bathroom_type: string,
+            author_name: string,
             status: 100 | 200 | 400 | 300,
-            performer: string,
+            worker_name: string,
             type: "dxf" | "manual"
         }
         type ItemDetail = Item & {

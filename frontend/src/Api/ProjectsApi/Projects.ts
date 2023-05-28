@@ -10,7 +10,7 @@ export default {
         return Request.get<Projects.oGetProjects[]>(`${Endpoints.getProjects}`);
     },
     getFittingsGroup: () => {
-        return Request.post<Projects.oGetFittingsGroups>(`${Endpoints.getFittings}`);
+        return Request.get<Projects.oGetFittingsGroups>(`${Endpoints.getFittings}`);
     },
     getProjectInfo: (params: Projects.iGetProjectInfo) => {
         const url = Endpoints.getProjectInfo.replace("{projectID}", params.id.toString());

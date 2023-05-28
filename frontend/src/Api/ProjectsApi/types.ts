@@ -5,7 +5,7 @@ export declare namespace Projects {
     // TODO Типизировать
     type iCreateProject = {
         worker_id: string,
-        fittings: string[],
+        fittings_ids: string[],
         type: string,
         name: string,
     };

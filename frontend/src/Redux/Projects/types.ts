@@ -5,7 +5,7 @@ export declare namespace iActions {
     type setCreateModal = boolean;
     type createProject = {
         worker_id: string,
-        fittings: string[],
+        fittings_ids: string[],
         type: string,
         name: string,
         onSuccess: () => void

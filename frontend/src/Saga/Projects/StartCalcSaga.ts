@@ -17,10 +17,10 @@ const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
     const data: iApi.Projects.ItemDetail = {
         id: 1,
         name: "ЖК У Тракториста",
-        bathroomType: "Master",
-        author: "Author 1",
+        bathroom_type: "Master",
+        author_name: "Author 1",
         status: 200,
-        performer: "Performer 1",
+        worker_name: "Performer 1",
         type: "dxf",
         resultOptions: [
             {

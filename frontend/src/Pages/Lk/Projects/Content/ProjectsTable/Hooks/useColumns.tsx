@@ -48,9 +48,9 @@ const useColumns = () => {
         }
     };
     const nameFD = useMemo(() => getDataForFilters((item) => item.name), [projects]);
-    const bathroomTypeFD = useMemo(() => getDataForFilters((item) => item.bathroomType), [projects]);
-    const authorFD = useMemo(() => getDataForFilters((item) => item.author), [projects]);
-    const performerFD = useMemo(() => getDataForFilters((item) => item.performer), [projects]);
+    const bathroomTypeFD = useMemo(() => getDataForFilters((item) => item.bathroom_type), [projects]);
+    const authorFD = useMemo(() => getDataForFilters((item) => item.author_name), [projects]);
+    const performerFD = useMemo(() => getDataForFilters((item) => item.worker_name), [projects]);
     const statusFD = ["Готово", "В процессе", "Ошибка"];
 
     return [
@@ -88,16 +88,16 @@ const useColumns = () => {
         },
         {
             title: "Автор задания",
-            dataIndex: "author",
-            key: "author",
+            dataIndex: "author_name",
+            key: "author_name",
             sorter: (first: ProjectListItem, second: ProjectListItem) =>
-                first.author.localeCompare(
-                    second.author
+                first.author_name.localeCompare(
+                    second.author_name
                 ),
             showSorterTooltip: false,
-            render: (author: ProjectListItem["author"]) => (
+            render: (author_name: ProjectListItem["author_name"]) => (
                 <div style={{width: useGetMinColumnWidthForTable("Автор проекта")}}>
-                    {author}
+                    {author_name}
                 </div>
             ),
             filters: authorFD.map(dataFilterMapper),
@@ -107,7 +107,7 @@ const useColumns = () => {
             onFilter: (
                 value: string | number | boolean,
                 record: iApi.Projects.Item
-            ) => record.author === value,
+            ) => record.author_name === value,
             ellipsis: true,
         },
         {
@@ -144,18 +144,18 @@ const useColumns = () => {
         },
         {
             title: "Тип Санузла",
-            dataIndex: "bathroomType",
-            key: "bathroomType",
+            dataIndex: "bathroom_type",
+            key: "bathroom_type",
             filters: bathroomTypeFD.map(dataFilterMapper),
             sorter: (first: ProjectListItem, second: ProjectListItem) =>
-                first.bathroomType.localeCompare(
-                    second.bathroomType
+                first.bathroom_type.localeCompare(
+                    second.bathroom_type
                 ),
             showSorterTooltip: false,
-            render: (doc_classified_doctype: ProjectListItem["bathroomType"]) => {
+            render: (bathroom_type: ProjectListItem["bathroom_type"]) => {
                 return (
                     <div style={{minWidth: useGetMinColumnWidthForTable("Тип Санузла")}}>
-                        {doc_classified_doctype}
+                        {bathroom_type ? bathroom_type : "-"}
                     </div>
                 );
             },
@@ -165,21 +165,21 @@ const useColumns = () => {
             onFilter: (
                 value: string | number | boolean,
                 record: iApi.Projects.Item
-            ) => record.bathroomType === value,
+            ) => record.bathroom_type === value,
             ellipsis: true,
         },
         {
             title: "Исполнитель",
-            dataIndex: "performer",
-            key: "performer",
+            dataIndex: "worker_name",
+            key: "worker_name",
             sorter: (first: ProjectListItem, second: ProjectListItem) =>
-                first.performer.localeCompare(
-                    second.performer
+                first.worker_name.localeCompare(
+                    second.worker_name
                 ),
             showSorterTooltip: false,
-            render: (performer: ProjectListItem["performer"]) => (
+            render: (worker_name: ProjectListItem["worker_name"]) => (
                 <div style={{width: useGetMinColumnWidthForTable("Исполнитель")}}>
-                    {performer}
+                    {worker_name}
                 </div>
             ),
             filters: performerFD.map(dataFilterMapper),
@@ -189,7 +189,7 @@ const useColumns = () => {
             onFilter: (
                 value: string | number | boolean,
                 record: iApi.Projects.Item
-            ) => record.performer === value,
+            ) => record.worker_name === value,
             ellipsis: true,
         },
     ];

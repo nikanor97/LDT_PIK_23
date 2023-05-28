@@ -19,11 +19,13 @@ const CreateProject = function* (action: PayloadAction<iActions.createProject>) 
             type: "info",
             message: "Проект создан"
         });
-    } catch (error) {
+    } catch (error: any) {
         yield put(Actions.Projects._createProjectError());
+        let message = "При создании проект произошла ошибка";
+        if (error.response.data.detail) message = error.response.data.detail;
         notification({
             type: "error",
-            message: "При создании проект произошла ошибка"
+            message
         });
     }
 };
