@@ -6,7 +6,11 @@ from src.db.projects.models import Fitting, Project
 from src.server.auth import Auth
 from src.server.common import METHOD
 from src.server.projects.endpoints import ProjectsEndpoints
-from src.server.projects.models import ProjectExtendedWithNames, FittingGroupRead
+from src.server.projects.models import (
+    ProjectExtendedWithNames,
+    FittingGroupRead,
+    DxfFileWithDevices,
+)
 
 
 class ProjectsRouter:
@@ -61,13 +65,13 @@ class ProjectsRouter:
             dependencies=[Depends(Auth(main_db_manager))],
         )
 
-        # self.router.add_api_route(
-        #     path="/dxf-upload",
-        #     endpoint=self._projects_endpoints.upload_dxf,
-        #     response_model=,
-        #     methods=[METHOD.GET],
-        #     dependencies=[Depends(Auth(main_db_manager))],
-        # )
+        self.router.add_api_route(
+            path="/dxf-upload",
+            endpoint=self._projects_endpoints.upload_dxf,
+            response_model=DxfFileWithDevices,
+            methods=[METHOD.POST],
+            dependencies=[Depends(Auth(main_db_manager))],
+        )
         #
         # self.router.add_api_route(
         #     path="/excel-download",

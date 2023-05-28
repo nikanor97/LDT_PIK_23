@@ -46,6 +46,21 @@ class ProjectTypeOption(str, enum.Enum):
     manual = "manual"
 
 
+class DeviceTypeOption(str, enum.Enum):
+    toilet = "toilet"
+    bath = "bath"
+    washing_machine = "washing_machine"
+    sink = "sink"
+
+
+device_type_to_name = {
+    DeviceTypeOption.toilet: "туалет",
+    DeviceTypeOption.bath: "ванная",
+    DeviceTypeOption.washing_machine: "стиральная машина",
+    DeviceTypeOption.sink: "раковина",
+}
+
+
 class ProjectBase(ProjectsSQLModel):
     name: str = Field(nullable=False, index=True)
     description: Optional[str] = Field(nullable=True, default=None)
@@ -64,6 +79,12 @@ class ProjectBase(ProjectsSQLModel):
 class Project(ProjectBase, TimeStampWithIdMixin, table=True):
     __tablename__ = "projects"
     roles: list["UserRole"] = Relationship(
+        back_populates="project", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+    devices: list["Device"] = Relationship(
+        back_populates="project", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+    dxf_file: "DxfFile" = Relationship(
         back_populates="project", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
@@ -102,7 +123,8 @@ class Fitting(FittingBase, TimeStampWithIdMixin, table=True):
 
 class DeviceBase(ProjectsSQLModel):
     project_id: uuid.UUID = Field(foreign_key="projects.id")
-    type: str = Field(nullable=False)  # TODO: make device type enum
+    name: str = Field(nullable=False)  # same sense as type
+    type: DeviceTypeOption = Field(nullable=False)
     coord_x: Optional[Decimal] = Field(nullable=True)
     coord_y: Optional[Decimal] = Field(nullable=True)
     coord_z: Optional[Decimal] = Field(nullable=True)
@@ -110,7 +132,9 @@ class DeviceBase(ProjectsSQLModel):
 
 class Device(DeviceBase, TimeStampWithIdMixin, table=True):
     __tablename__ = "devices"
-    project: Project = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+    project: Project = Relationship(
+        back_populates="devices", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class DxfFileBase(ProjectsSQLModel):
@@ -120,7 +144,9 @@ class DxfFileBase(ProjectsSQLModel):
 
 class DxfFile(DxfFileBase, TimeStampWithIdMixin, table=True):
     __tablename__ = "dxf_files"
-    project: Project = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+    project: Project = Relationship(
+        back_populates="dxf_file", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class ProjectFitting(ProjectsSQLModel, TimeStampWithIdMixin, table=True):

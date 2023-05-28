@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import BaseModel
 
-from src.db.projects.models import ProjectBase
+from src.db.projects.models import ProjectBase, DxfFileBase, Device
 
 
 # class FittingCreate(BaseModel):
@@ -40,3 +40,8 @@ class FittingRead(BaseModel):
 class FittingGroupRead(BaseModel):
     groupname: str
     values: list[FittingRead]
+
+
+class DxfFileWithDevices(DxfFileBase):
+    id: uuid.UUID
+    devices: list[Device]

@@ -20,6 +20,10 @@ from src.db.projects.models import (
     RoleTypeOption,
     UserRoleBase,
     ProjectFitting,
+    DeviceBase,
+    Device,
+    DxfFileBase,
+    DxfFile,
 )
 from src.server.projects.models import ProjectExtendedWithIds
 
@@ -218,3 +222,23 @@ class ProjectsDbManager(BaseDbManager):
         fittings = [pf.fitting for pf in project_fittings]
 
         return fittings
+
+    async def create_devices(self, session: AsyncSession, devices: list[DeviceBase]):
+        projects_ids = {d.project_id for d in devices}
+        for project_id in projects_ids:
+            await Project.by_id(session, project_id)
+
+        new_devices = [Device.parse_obj(d) for d in devices]
+
+        session.add_all(new_devices)
+
+        return new_devices
+
+    async def create_dxf_file(
+        self, session: AsyncSession, dxf_file: DxfFileBase
+    ) -> DxfFile:
+        await Project.by_id(session, dxf_file.project_id)
+        file = DxfFile.parse_obj(dxf_file)
+        session.add(file)
+
+        return file
