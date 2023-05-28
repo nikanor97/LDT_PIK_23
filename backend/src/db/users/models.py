@@ -32,34 +32,6 @@ class UserBase(UsersSQLModel):
 
 class User(UserBase, TimeStampWithIdMixin, table=True):
     __tablename__ = "users"
-    # roles: list["UserRole"] = Relationship(
-    #     back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
-    # )
-
-
-# class UserRoleBase(UsersSQLModel):
-#     user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
-#     project_id: uuid.UUID = Field(foreign_key="projects.id", index=True)
-#
-#     role_type: RoleTypeOption = Field(
-#         sa_column=Column(sqlalchemy.Enum(RoleTypeOption), nullable=False)
-#     )
-
-
-# class UserRole(UserRoleBase, TimeStampWithIdMixin, table=True):
-#     __tablename__ = "user_roles"
-#     __table_args__ = (
-#         Index(
-#             "idx_user_project_role", "user_id", "project_id", "role_type", unique=True
-#         ),
-#     )
-#
-#     user: User = Relationship(
-#         back_populates="roles", sa_relationship_kwargs={"lazy": "selectin"}
-#     )
-#     project: Project = Relationship(
-#         back_populates="roles", sa_relationship_kwargs={"lazy": "selectin"}
-#     )
 
 
 class UserTokenBase(UsersSQLModel):

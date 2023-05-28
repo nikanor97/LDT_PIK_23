@@ -248,3 +248,8 @@ class UsersEndpoints:
             ).seconds,
         )
         return token
+
+    async def get_all_users(self) -> list[User]:
+        async with self._main_db_manager.users.make_autobegin_session() as session:
+            users = await self._main_db_manager.users.get_all_users(session)
+        return users

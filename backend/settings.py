@@ -25,10 +25,11 @@ POSTGRES_USER = getenv("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = getenv("POSTGRES_PASSWORD", "postgres")
 POSTGRES_MAX_CONNECTIONS = int(getenv("POSTGRES_MAX_CONNECTIONS", 5))
 
-APP_PREFIX = getenv("API_PREFIX", "/api/v1")
+API_PREFIX = getenv("API_PREFIX", "/api/v1")
 APP_PORT = int(getenv("APP_PORT", 8095))
 
 BASE_DIR = Path(__file__).parent
+MEDIA_DIR = BASE_DIR / "media"
 
 SECRET_KEY = getenv(
     "SECRET_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"

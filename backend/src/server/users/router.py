@@ -1,7 +1,8 @@
 import settings
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from src.db.main_db_manager import MainDbManager
 from src.db.users.models import User
+from src.server.auth import Auth
 from src.server.common import METHOD
 from src.server.users.endpoints import UsersEndpoints
 from src.server.users.models import TokenWithExpiryData
@@ -15,7 +16,7 @@ class UsersRouter:
         self._users_endpoints = UsersEndpoints(main_db_manager)
 
         self.router = APIRouter(
-            prefix=f"{settings.APP_PREFIX}/users",
+            prefix=f"{settings.API_PREFIX}/users",
             tags=["users"],
         )
 
@@ -94,4 +95,12 @@ class UsersRouter:
             endpoint=self._users_endpoints.get_current_user,
             response_model=User,
             methods=[METHOD.GET],
+        )
+
+        self.router.add_api_route(
+            path="/users-all",
+            endpoint=self._users_endpoints.get_all_users,
+            response_model=list[User],
+            methods=[METHOD.GET],
+            dependencies=[Depends(Auth(main_db_manager))],
         )
