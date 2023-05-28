@@ -235,7 +235,8 @@ class ProjectsEndpoints:
             elif "мойка" in stuff_name.lower():
                 device_type = DeviceTypeOption.kitchen_sink
             else:
-                raise ValueError(stuff_name)
+                print(f"Unknown device {stuff_name}")
+                continue
             device = Device(
                 project_id=project_id,
                 name=device_type_to_name[device_type],
