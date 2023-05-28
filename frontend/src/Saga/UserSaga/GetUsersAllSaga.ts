@@ -7,11 +7,11 @@ const GetUsersAll = function* () {
 
     const data = [
         {
-            user_id: "asdfasdf45235",
+            id: "asdfasdf45235",
             name: "Пупкин В.С."
         },
         {
-            user_id: "asdfasdfgher23414",
+            id: "asdfasdfgher23414",
             name: "Лупкин Г.В."
         }
     ];

@@ -32,7 +32,7 @@ export declare namespace iApi {
 
     namespace Users {
         type Item = {
-            user_id: string,
+            id: string,
             name: string
         }
     }
@@ -46,7 +46,7 @@ export declare namespace iApi {
             author: string,
             status: 100 | 200 | 400 | 300,
             performer: string,
-            type: "DXF" | "manual"
+            type: "dxf" | "manual"
         }
         type ItemDetail = Item & {
             resultOptions?: Result[]
@@ -104,7 +104,7 @@ export declare namespace iApi {
         }
 
         type FittingGroup = {
-            groupName: string,
+            groupname: string,
             values: {
                 image: string,
                 name: string,

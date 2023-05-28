@@ -4,10 +4,10 @@ import {RcFile} from "antd/lib/upload";
 export declare namespace iActions {
     type setCreateModal = boolean;
     type createProject = {
-        performer: string[],
+        worker_id: string,
         fittings: string[],
         type: string,
-        title: string,
+        name: string,
         onSuccess: () => void
     };
     type _createProjectSuccess = iApi.Projects.Item;

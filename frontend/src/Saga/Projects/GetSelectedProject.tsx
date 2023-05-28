@@ -19,7 +19,7 @@ const getSelectedProject = function* (action: PayloadAction<iActions.getSelected
         author: "Author 1",
         status: 200,
         performer: "Performer 1",
-        type: "DXF",
+        type: "dxf",
         // resultOptions: [
         //     {
         //         materials: {

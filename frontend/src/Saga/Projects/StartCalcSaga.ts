@@ -21,7 +21,7 @@ const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
         author: "Author 1",
         status: 200,
         performer: "Performer 1",
-        type: "DXF",
+        type: "dxf",
         resultOptions: [
             {
                 materials: {

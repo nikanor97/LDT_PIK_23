@@ -25,16 +25,16 @@ const CreateProjectModal = () => {
     };
 
     const onCreate = () => {
-        const fittingsNames = fittings.map((item) => item.groupName);
+        const fittingsNames = fittings.map((item) => item.groupname);
 
         const data = {
-            performer: form.getFieldValue("performer"),
+            worker_id: form.getFieldValue("worker_id"),
             fittings: fittingsNames
                 .map((item) => form.getFieldValue(item))
                 .flat()
                 .filter((item) => item !== undefined && item !== null),
-            type: form.getFieldValue("type"),
-            title: form.getFieldValue("title"),
+            type: "dxf",
+            name: form.getFieldValue("name"),
             onSuccess
         };
         dispatch(Actions.Projects.createProject(data));
@@ -79,7 +79,7 @@ const CreateProjectModal = () => {
                     id="createForm"
                     className={styles.form}
                     requiredMark={false}>
-                    <FormItem
+                    {/* <FormItem
                         name="type"
                         className={styles.formItem}
                         initialValue={"DXF"}
@@ -94,9 +94,9 @@ const CreateProjectModal = () => {
                             Ручной ввод
                             </Radio.Button>
                         </Radio.Group>
-                    </FormItem>
+                    </FormItem> */}
                     <FormItem
-                        name="title"
+                        name="name"
                         className={styles.formItem}
                         rules={[
                             {
@@ -111,7 +111,7 @@ const CreateProjectModal = () => {
                         />
                     </FormItem>
                     <FormItem
-                        name="performer"
+                        name="worker_id"
                         className={styles.formItem}
                         rules={[
                             {
@@ -128,8 +128,8 @@ const CreateProjectModal = () => {
                             className={styles.select}>
                             {users.map((user) => (
                                 <Option
-                                    key={user.user_id}
-                                    value={user.user_id}>
+                                    key={user.id}
+                                    value={user.id}>
                                     {user.name}
                                 </Option>
                             ))}
@@ -143,12 +143,12 @@ const CreateProjectModal = () => {
                     </Title>
                     {fittings.map((item) => (
                         <FormItem
-                            name={item.groupName}
-                            key={item.groupName}
+                            name={item.groupname}
+                            key={item.groupname}
                             className={styles.formItem}>
                             <Checkbox.Group  className={styles.checkboxGroup}>
                                 <Title variant="h2" className={styles.checkboxGroupTitle}>
-                                    {item.groupName}
+                                    {item.groupname}
                                 </Title>
                                 {item.values.map((item) => (
                                     <div key={item.id} className={styles.checkboxWrapper}>

@@ -17,7 +17,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 2,
@@ -26,7 +26,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 100,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 3,
@@ -35,7 +35,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 400,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 4,
@@ -44,7 +44,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 5,
@@ -53,7 +53,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 6,
@@ -62,7 +62,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 100,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 7,
@@ -71,7 +71,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 400,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 8,
@@ -80,7 +80,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 9,
@@ -89,7 +89,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 10,
@@ -98,7 +98,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 100,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 11,
@@ -107,7 +107,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 400,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 12,
@@ -116,7 +116,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 13,
@@ -125,7 +125,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 14,
@@ -134,7 +134,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 100,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 15,
@@ -143,7 +143,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 400,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
         {
             id: 16,
@@ -152,7 +152,7 @@ const GetProjects = function* () {
             author: "Пупкин В.С.",
             status: 200,
             performer: "Лупкин Г.В.",
-            type: "DXF"
+            type: "dxf"
         },
     ];
 

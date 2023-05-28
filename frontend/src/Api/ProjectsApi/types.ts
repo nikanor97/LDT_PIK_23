@@ -4,10 +4,10 @@ import {RcFile} from "antd/lib/upload";
 export declare namespace Projects {
     // TODO Типизировать
     type iCreateProject = {
-        performer: string[],
+        worker_id: string,
         fittings: string[],
         type: string,
-        title: string,
+        name: string,
     };
     type oCreateProject = iApi.Projects.Item;
     type oGetProjects = iApi.Projects.Item[];

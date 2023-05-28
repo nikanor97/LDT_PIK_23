@@ -8,7 +8,7 @@ const GetFittingsGroup = function* () {
     //TODO Убрать моки
     const data = [
         {
-            groupName: "Тройники",
+            groupname: "Тройники",
             values: [
                 {
                     image: base64,
@@ -28,7 +28,7 @@ const GetFittingsGroup = function* () {
             ]
         },
         {
-            groupName: "Крестовины",
+            groupname: "Крестовины",
             values: [
                 {
                     image: base64,

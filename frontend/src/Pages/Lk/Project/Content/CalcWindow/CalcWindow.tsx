@@ -36,7 +36,7 @@ const CalcWindow = () => {
                     Введите данные для расчёта
                 </div>
                 <div className={styles.blockContent}>
-                    {calcType === "DXF" ? (
+                    {calcType === "dxf" ? (
                         <DXF />
                     ) : (
                         <Manual />
