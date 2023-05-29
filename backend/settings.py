@@ -26,7 +26,7 @@ POSTGRES_PASSWORD = getenv("POSTGRES_PASSWORD", "postgres")
 POSTGRES_MAX_CONNECTIONS = int(getenv("POSTGRES_MAX_CONNECTIONS", 5))
 
 API_PREFIX = getenv("API_PREFIX", "/api/v1")
-APP_PORT = int(getenv("APP_PORT", 8095))
+APP_PORT = int(getenv("BACKEND_PORT", 8095))
 
 BASE_DIR = Path(__file__).parent
 MEDIA_DIR = BASE_DIR / "media"
