@@ -8,9 +8,9 @@ type TableData = {
     order: string;
     type: string;
     diameter: number;
-    X: number;
-    Y: number;
-    Z: number;
+    coord_x: number;
+    coord_y: number;
+    coord_z: number;
 }
 
 type DataObject = {
@@ -42,18 +42,18 @@ const ConnectPointsTab = (props: ConnectPointsTabProps) => {
         },
         {
             title: "X",
-            dataIndex: "X",
-            key: "X",
+            dataIndex: "coord_x",
+            key: "coord_x",
         },
         {
             title: "Y",
-            dataIndex: "Y",
-            key: "Y",
+            dataIndex: "coord_y",
+            key: "coord_y",
         },
         {
             title: "Z",
-            dataIndex: "Z",
-            key: "Z",
+            dataIndex: "coord_z",
+            key: "coord_z",
         },
     ];
 

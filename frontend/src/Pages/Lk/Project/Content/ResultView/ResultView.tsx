@@ -10,8 +10,9 @@ import Icon from "@ant-design/icons/lib/components/Icon";
 import Back from "./Icons/Back";
 import Actions from "@actions";
 import {Button} from "@root/Components/Controls";
-import {useParams} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import DownloadMenu from "./Modules/DownloadMenu/DownloadMenu";
+import routes from "@root/Routes/Routes";
 
 const {TabPane} = Tabs;
 
@@ -20,11 +21,15 @@ type iParams = {
 }
 
 const ResultView = () => {
-    const selectedOption = useAppSelector((state) => state.Projects.selectedOption);
-    if (selectedOption === null) return null;
-    const option = useAppSelector((state) => state.Projects.selectedProject!.resultOptions![selectedOption]);
+    // const selectedOption = useAppSelector((state) => state.Projects.selectedOption);
+    // if (selectedOption === null) return null;
+    const option = useAppSelector((state) => state.Projects.selectedProject?.result);
     const dispatch = useAppDispatch();
     const {projectID} = useParams<iParams>();
+    const history = useHistory();
+
+    console.log(option);
+    if (!option) return null;
 
     useEffect(() => {
         return () => {
@@ -36,28 +41,28 @@ const ResultView = () => {
         <div className={styles.wrapper}>
             <div className={styles.header}>
                 <div className={styles.back}>
-                    <Icon component={Back} onClick={() => dispatch(Actions.Projects.setSelectedOption(null))}/>
-                    <div  className={styles.title}>
+                    <Icon component={Back} onClick={() => history.push(routes.lk.projects)}/>
+                    {/* <div  className={styles.title}>
                     Вариант {selectedOption + 1}
-                    </div>
+                    </div> */}
                 </div>
                 <Dropdown 
                     trigger={["click"]}
-                    overlay={<DownloadMenu project={projectID} variant={selectedOption}/>}>
+                    overlay={<DownloadMenu project={projectID} variant={1}/>}>
                     <Button 
                         type="primary">
                         Экспорт
                     </Button>
                 </Dropdown>
             </div>
-            <Tabs defaultActiveKey="1">
-                <TabPane tab={option.materials.tabName} key="1">
+            <Tabs defaultActiveKey="2">
+                {/* <TabPane tab={option.materials.tabName} key="1">
                     <MaterialTab tables={option.materials.tables} />
+                </TabPane> */}
+                <TabPane tab={option.connection_points.tab_name} key="2">
+                    <ConnectPointsTab data={option.connection_points} />
                 </TabPane>
-                <TabPane tab={option.connectionPoints.tabName} key="2">
-                    <ConnectPointsTab data={option.connectionPoints} />
-                </TabPane>
-                <TabPane tab={option.graph.tabName} key="3">
+                <TabPane tab={option.graph.tab_name} key="3">
                     <GraphTab data={option.graph} />
                 </TabPane>
             </Tabs>

@@ -25,12 +25,13 @@ export declare namespace iActions {
     };
     type _parseDXFSuccess = iApi.Projects.DXFParsedData;
     type startCalc = {
-        project: number,
-        values: {
-                deviceType: string,
-                X: number,
-                Y: number,
-                Z: number
+        project_id: string,
+        dxf_file_id: string,
+        devices: {
+                type: string,
+                coord_x: number,
+                coord_y: number,
+                coord_z: number
             }[]
             
     };

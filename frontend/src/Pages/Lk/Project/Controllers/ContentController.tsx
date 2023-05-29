@@ -20,13 +20,15 @@ const ContentController = () => {
         );
     }
     if (selectedProject) {
-        if (selectedProject.resultOptions) {
-            if (selectedOption !== null) {
+        if (selectedProject.result) {
+            // if (selectedOption !== null) {
+
+            console.log(selectedProject);
                 
-                return <ResultView />;
-            } else {
-                return (<ResultList />);
-            }
+            return <ResultView />;
+            // } else {
+            //     return (<ResultList />);
+            // }
 
         } else {
             return (

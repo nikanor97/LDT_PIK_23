@@ -48,8 +48,10 @@ const DXF = () => {
 
     const onFinish = () => {
         const formData = form.getFieldsValue();
+        if (!DXFData) return null;
         const data = transformData({
-            project: projectID,
+            project_id: projectID,
+            dxf_file_id: DXFData.id,
             ...formData
         });
         dispatch(Actions.Projects.startCalc(data));

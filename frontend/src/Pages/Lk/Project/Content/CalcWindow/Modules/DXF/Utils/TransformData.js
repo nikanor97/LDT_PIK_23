@@ -1,24 +1,25 @@
 const transformData = (inputObj) => {
-    const {project, ...rest} = inputObj;
+    const {project_id, dxf_file_id, ...rest} = inputObj;
 
     const transformedObj = {
-        project,
-        values: []
+        project_id,
+        dxf_file_id,
+        devices: []
     };
   
     Object.keys(rest).forEach((key) => {
-        const deviceType = key.replace(/[XYZ]$/, "");
+        const type = key.replace(/[XYZ]$/, "");
         const axis = key.charAt(key.length - 1).toUpperCase();
   
-        const existingDevice = transformedObj.values.find((item) => item.deviceType === deviceType);
+        const existingDevice = transformedObj.devices.find((item) => item.type === type);
         if (existingDevice) {
-            existingDevice[axis] = inputObj[key];
+            existingDevice[`coord_${axis.toLocaleLowerCase()}`] = inputObj[key];
         } else {
             const newDevice = {
-                deviceType,
-                [axis]: inputObj[key]
+                type,
+                [`coord_${axis.toLocaleLowerCase()}`]: inputObj[key]
             };
-            transformedObj.values.push(newDevice);
+            transformedObj.devices.push(newDevice);
         }
     });
   
