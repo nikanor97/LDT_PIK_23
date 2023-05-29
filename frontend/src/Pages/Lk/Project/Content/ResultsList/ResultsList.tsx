@@ -10,7 +10,7 @@ import BackArrow from "@root/Assets/Icons/BackArrow/BackArrow";
 
 const ResultList = () => {
     const selectedProject = useAppSelector((state) => state.Projects.selectedProject);
-    const resultOptions = useAppSelector((state) => state.Projects.selectedProject?.resultOptions);
+    const resultOptions = useAppSelector((state) => state.Projects.selectedProject?.result);
     const dispatch = useAppDispatch();
     const history = useHistory();
 
@@ -35,13 +35,13 @@ const ResultList = () => {
                     Результаты расчета
                 </div>
                 <div className={styles.blockContent}>
-                    {resultOptions.map((item, index) => (
+                    {/* {resultOptions.map((item, index) => (
                         <div key={index + 1} onClick={() => dispatch(Actions.Projects.setSelectedOption(index))} className={styles.blockContentOption}>
                             <div className={styles.blockContentOptionTitle}>
                                 Вариант {index + 1}
                             </div>
                         </div>
-                    ))}
+                    ))} */}
                 </div>
             </div>
         </div>

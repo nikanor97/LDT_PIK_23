@@ -26,7 +26,7 @@ export default {
         return Request.post<Projects.oParseDXF>(url, fileData);
     },
     startCalc: (params: Projects.iStartCalc) => {
-        return Request.get<Projects.oStartCalc>(`${Endpoints.startCalc}`, params);
+        return Request.post<Projects.oStartCalc>(`${Endpoints.startCalc}`, params);
     },
     downloadResult: (params: Projects.iDownloadResult) => {
         const url = Endpoints.downloadResult;

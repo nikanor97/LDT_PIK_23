@@ -21,12 +21,13 @@ export declare namespace Projects {
     //TODO TYpe
     type oParseDXF = iApi.Projects.DXFParsedData;
     type iStartCalc = {
-        project: number,
-        values: {
-                deviceType: string,
-                X: number,
-                Y: number,
-                Z: number
+        project_id: string,
+        dxf_file_id: string,
+        devices: {
+                type: string,
+                coord_x: number,
+                coord_y: number,
+                coord_z: number
             }[]
             
     };

@@ -49,40 +49,40 @@ export declare namespace iApi {
             type: "dxf" | "manual"
         }
         type ItemDetail = Item & {
-            resultOptions?: Result[]
+            result?: Result
         }
 
         type Result = {
-            materials: {
-                tabName: "Материалы",
-                tables: {
-                    name: string,
-                    values: {
-                        id: number,
-                        name: string,
-                        diameter1: number,
-                        diameter2: number,
-                        diameter3: number,
-                        angle: number,
-                        direction: string
-                    }[]
-                }[]
-            },
-            connectionPoints: {
-                tabName: "Точки подключения",
+            // materials: {
+            //     tabName: "Материалы",
+            //     tables: {
+            //         name: string,
+            //         values: {
+            //             id: number,
+            //             name: string,
+            //             diameter1: number,
+            //             diameter2: number,
+            //             diameter3: number,
+            //             angle: number,
+            //             direction: string
+            //         }[]
+            //     }[]
+            // },
+            connection_points: {
+                tab_name: "Точки подключения",
                 table: {
                     id: number,
                     order: string,
                     type: string,
                     diameter: number,
-                    X: number,
-                    Y: number,
-                    Z: number,
+                    coord_x: number,
+                    coord_y: number,
+                    coord_z: number,
                 }[],
                 image: string
             },
             graph: {
-                tabName: "Граф подключения фитингов",
+                tab_name: "Граф подключения фитингов",
                 table: {
                     id: number,
                     graph: string,
@@ -95,6 +95,7 @@ export declare namespace iApi {
 
         type DXFParsedData = {
             type: string,
+            id: string,
             devices: {
                 name: string,
                 type: string,
