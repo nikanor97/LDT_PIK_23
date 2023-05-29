@@ -1,0 +1,40 @@
+.wrapper {
+    background: var(--component-bg);
+    display: flex;
+    padding: 0;
+    height: 48px;
+    line-height: 48px;
+    justify-content: flex-end;
+    z-index: 1000;
+    .grid {
+        padding: 0 120px 0 120px
+    }
+}
+
+.authCol {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+.row {
+    display: flex;
+    justify-content: space-between;
+    .logo {
+        display: flex;
+        align-items: center;
+    }
+}
+.back {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    font-size: 12px;
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.arrow {
+    margin-right: 16px;
+}

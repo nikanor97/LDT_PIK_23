@@ -1,1 +1,8 @@
 *.env
+*/poetry.lock
+/backend/media
+/backend/.mypy_cache
+/media
+/db_data
+/backend/logs
+*/.ipynb_checkpoints

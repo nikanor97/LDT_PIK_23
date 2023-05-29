@@ -1,0 +1,10 @@
+ezdxf
+plotly
+plotly
+pandas
+networkx
+numpy
+tqdm
+matplotlib
+numpy-stl
+vtkplotlib

@@ -1,0 +1,15 @@
+.wrapper {
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    :global {
+        .ant-checkbox-disabled {
+            & + span {
+                color: inherit;
+            }
+        }
+        .ant-checkbox {
+            margin-right: 20px;
+        }
+    }
+}
