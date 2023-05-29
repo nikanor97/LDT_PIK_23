@@ -1,15 +1,12 @@
+from pathlib import Path
+
 import ezdxf
 
-
-from coordinate_converter import (
-    coordinate2point,
-    coordinates2segment,
+import settings
+from src.trace_builder.coordinate_converter import (
     coordinates2segments,
-    point2coordinate,
-    segment2coordinates,
-    segments2coordinates,
 )
-from projections import (
+from src.trace_builder.projections import (
     extract_riser_coordinates,
     extract_rectange_points,
     find_rect_corners,
@@ -20,32 +17,27 @@ from projections import (
     build_riser_projections,
     find_optimal_riser_projection,
     projection,
-    plot_projcetions,
     distance_from_riser_to_stuff,
     calculate_max_riser_height,
     clear_sutff_duplicate,
-    save_data,
 )
 
-from path import (
+from src.trace_builder.path import (
     detect_walls_with_stuff,
     build_path_from_riser_wall_to_sutff_wall,
     build_path,
 )
-from merge_segments import merge_segments
-from geometry import (
-    is_dot_inside_segment,
-    l1_distance,
-    l2_distance,
+from src.trace_builder.merge_segments import merge_segments
+from src.trace_builder.geometry import (
     detect_wall_with_door,
 )
-from utils import load_data, save_data, dict2stuff
+from src.trace_builder.utils import dict2stuff
 from time import time
 import pandas as pd
 import os
 
 
-def run_algo(dxf_path: str, heighs: dict()):
+def run_algo(dxf_path: str, heighs: dict, save_path: Path):
     doc = ezdxf.readfile(dxf_path)
     modelspace = doc.modelspace()
     msp = modelspace
@@ -105,18 +97,19 @@ def run_algo(dxf_path: str, heighs: dict()):
     walls = sorted(walls, key=lambda x: x.length, reverse=True)[:3]
     walls = build_path_from_riser_wall_to_sutff_wall(walls)
 
-    dir_name = "outgoing"
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+    # dir_name = "outgoing"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
     timestam = int(time())
-    scrennshot_name = f"{dir_name}/{timestam}.png"
+    scrennshot_name = f"{save_path}/{timestam}.png"
     mesh = build_path(walls, riser_projections, scrennshot_name)
     mesh.save(f"{scrennshot_name}.stl")
     pd.DataFrame({"Граф": ["A-1", "1-2"], "Материал": [101, 102]}).to_csv(
-        f"{dir_name}/{timestam}.csv"
+        f"{save_path}/{timestam}.csv"
     )
-    output_dir = os.getcwd() + "/" + dir_name
-    return output_dir
+    # output_dir = os.getcwd() + "/" + str(save_path)
+    # return output_dir
+    return f"{save_path}/{timestam}.csv", scrennshot_name, f"{scrennshot_name}.stl"
 
 
 if __name__ == "__main__":
@@ -128,6 +121,10 @@ if __name__ == "__main__":
         "SND_2D_Эскиз_Мойка_Кухня - SND_2D_Эскиз_Мойка_Кухня-16115635-Битца 8_ТИПИЗАЦИЯ": 150,
         "Унитаз_3D_С бачком_Рен - 2D_Унитаз_Бачок-V58-Битца 8_ТИПИЗАЦИЯ": 100,
     }
-    run_algo("data/СТМ8-1П-Б-2.dxf", hieghts)
+    run_algo(
+        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-1П-Б-2.dxf",
+        hieghts,
+        settings.MEDIA_DIR / "buider_outputs",
+    )
 
 # %%

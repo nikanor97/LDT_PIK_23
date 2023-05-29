@@ -10,6 +10,7 @@ from src.server.projects.models import (
     ProjectExtendedWithNames,
     FittingGroupRead,
     DxfFileWithDevices,
+    ProjectWithResults,
 )
 
 
@@ -72,6 +73,15 @@ class ProjectsRouter:
             methods=[METHOD.POST],
             dependencies=[Depends(Auth(main_db_manager))],
         )
+
+        self.router.add_api_route(
+            path="/result",
+            endpoint=self._projects_endpoints.build_pipes,
+            response_model=ProjectWithResults,
+            methods=[METHOD.POST],
+            dependencies=[Depends(Auth(main_db_manager))],
+        )
+
         #
         # self.router.add_api_route(
         #     path="/excel-download",

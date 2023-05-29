@@ -1,7 +1,6 @@
 import json
-import numpy as np
 
-from coordinate_converter import (
+from src.trace_builder.coordinate_converter import (
     coordinate2point,
     coordinates2segment,
     coordinates2segments,
@@ -9,8 +8,7 @@ from coordinate_converter import (
     segment2coordinates,
     segments2coordinates,
 )
-from model import Point, Segment
-from wall import Stuff
+from src.trace_builder.wall import Stuff
 
 
 def save_data(

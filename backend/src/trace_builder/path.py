@@ -1,26 +1,16 @@
 # %%
-from coordinate_converter import (
-    coordinate2point,
-    coordinates2segment,
-    coordinates2segments,
-    point2coordinate,
-    segment2coordinates,
-    segments2coordinates,
-)
-from model import Point, Segment
-from wall import Wall, Pipe
-from utils import load_data, save_data, dict2stuff
-from geometry import is_dot_inside_segment, l1_distance
+from src.trace_builder.model import Point, Segment
+from src.trace_builder.wall import Wall, Pipe
+from src.trace_builder.geometry import is_dot_inside_segment, l1_distance
 import re
 from typing import List, Tuple
-import stl
 import vtkplotlib as vpl
 from stl import mesh
 
-from constants import FITTINGS, GLOBAL_INIT_MIN
+from src.trace_builder.constants import FITTINGS, GLOBAL_INIT_MIN
 import math
 import numpy as np
-from manipulate_3d import cutout_pipe, center_pipe, move_pipe
+from src.trace_builder.manipulate_3d import cutout_pipe, center_pipe, move_pipe
 
 # %%
 # stuffs, walls_segments, max_riser_height, optimal_segment, riser_coordinates, riser_projections = load_data(
@@ -380,12 +370,10 @@ def rotate_otvod(obj, pipe):
         if is_pipe_projection_on_right(pipe.coordinates, pipe.stuff.coordinates):
             obj.rotate([1, 0, 0], math.radians(90))
             obj.rotate([0, 0, 1], math.radians(90))
-            pass
         else:
             obj.rotate([0, 0, 1], math.radians(-90))
             obj.rotate([0, 1, 0], math.radians(90))
             # obj.rotate([1,0,0], math.radians(180))
-            pass
     return obj
 
 
@@ -406,7 +394,6 @@ def rotate_otvod_low(obj, pipe, low=False):
             # CHECKED
             if low:
                 obj.rotate([0, 1, 0], math.radians(45))
-            pass
         else:
             if low:
                 obj.rotate([0, 1, 0], math.radians(-45))

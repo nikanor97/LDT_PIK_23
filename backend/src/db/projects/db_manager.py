@@ -2,6 +2,7 @@ import base64
 import uuid
 from typing import Optional
 
+from sqlalchemy import desc
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -242,3 +243,21 @@ class ProjectsDbManager(BaseDbManager):
         session.add(file)
 
         return file
+
+    async def get_latest_dxf_file(
+        self, session: AsyncSession, project_id: uuid.UUID
+    ) -> DxfFile:
+        await Project.by_id(session, project_id)
+
+        stmt = (
+            select(DxfFile)
+            .where(DxfFile.project_id == project_id)
+            .order_by(desc(DxfFile.created_at))
+            .limit(1)
+        )
+        files = (await session.execute(stmt)).scalars().all()
+
+        if len(files) == 0:
+            raise NoResultFound("No DXF files found for this project")
+
+        return files[0]

@@ -1,3 +1,4 @@
+import base64
 import os
 import uuid
 from collections import defaultdict
@@ -5,6 +6,7 @@ from typing import Annotated
 
 import aiofiles
 import ezdxf
+import pandas as pd
 from fastapi import HTTPException, Depends, UploadFile
 from sqlalchemy.exc import NoResultFound
 
@@ -33,7 +35,15 @@ from src.server.projects.models import (
     FittingGroupRead,
     FittingRead,
     DxfFileWithDevices,
+    DevicesWithHeights,
+    ProjectWithResults,
+    ProjectResult,
+    ProjectResultConnectionPoints,
+    ConnectionPoint,
+    ProjectResultGraph,
+    GraphVertex,
 )
+from src.trace_builder.run import run_algo
 
 
 class ProjectsEndpoints:
@@ -218,7 +228,7 @@ class ProjectsEndpoints:
         modelspace = doc.modelspace()
         stuffs = entities_with_coordinates(modelspace)
 
-        dxf_file = DxfFile(project_id=project_id, source_url=file_path)
+        dxf_file = DxfFile(project_id=project_id, source_url=file_name)
 
         devices = []
         for stuff_name, coords in stuffs.items():
@@ -265,6 +275,120 @@ class ProjectsEndpoints:
             type="Кабина",
         )
         return res
+
+    async def build_pipes(
+        self, devices_configs: DevicesWithHeights
+    ) -> ProjectWithResults:
+        """
+        Appropriate DXF file can be found as one with largest created_at for this project_id
+        :param devices_configs:
+        :return:
+        """
+        devices = devices_configs.devices
+        # Assuming that there can no be two devices with the same type
+        types_to_coord_z = dict()
+        for device in devices:
+            types_to_coord_z[device.type] = device.coord_z
+
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            try:
+                dxf_file = await self._main_db_manager.projects.get_latest_dxf_file(
+                    session, project_id=devices_configs.project_id
+                )
+            except NoResultFound as e:
+                raise HTTPException(status_code=404, detail=exc_to_str(e))
+
+        file_path = settings.MEDIA_DIR / "dxf_files" / dxf_file.source_url
+        # file_path = settings.BASE_DIR.parent / 'media' / 'dxf_files' / dxf_file.source_url
+        doc = ezdxf.readfile(file_path)
+        modelspace = doc.modelspace()
+        stuffs = entities_with_coordinates(modelspace)
+
+        names_to_coord_z = dict()
+        for stuff_name, coords in stuffs.items():
+            if "унитаз" in stuff_name.lower():
+                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.toilet]
+            elif "раковина" in stuff_name.lower():
+                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.sink]
+            elif "машина" in stuff_name.lower():
+                names_to_coord_z[stuff_name] = types_to_coord_z[
+                    DeviceTypeOption.washing_machine
+                ]
+            elif "ванна" in stuff_name.lower():
+                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.bath]
+            elif "кран" in stuff_name.lower():
+                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.faucet]
+            elif "мойка" in stuff_name.lower():
+                names_to_coord_z[stuff_name] = types_to_coord_z[
+                    DeviceTypeOption.kitchen_sink
+                ]
+
+        csv_path, png_path, stl_path = run_algo(
+            file_path, names_to_coord_z, settings.MEDIA_DIR / "buider_outputs"
+        )
+
+        df = pd.read_csv(csv_path)
+
+        with open(png_path, "rb") as img:
+            img_str = base64.b64encode(img.read()).decode("utf-8")
+
+        async with self._main_db_manager.users.make_autobegin_session() as session:
+            users = await self._main_db_manager.users.get_all_users(session)
+        user_by_id: dict[uuid.UUID, User] = dict()
+        for user in users:
+            user_by_id[user.id] = user
+
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            project = await self._main_db_manager.projects.get_project(
+                session, devices_configs.project_id
+            )
+            proj = ProjectExtendedWithNames(
+                author_name=user_by_id[project.author_id].name,
+                worker_name=user_by_id[project.worker_id].name,
+                **project.dict(),
+            )
+
+        p = ProjectWithResults(
+            id=proj.id,
+            author_name=proj.author_name,
+            worker_name=proj.worker_name,
+            name=proj.name,
+            description=proj.description,
+            status=proj.status,
+            type=proj.type,
+            bathroom_type=proj.bathroom_type,
+            is_deleted=proj.is_deleted,
+            result=ProjectResult(
+                connection_points=ProjectResultConnectionPoints(
+                    tab_name="Точки подключения",
+                    table=[
+                        ConnectionPoint(
+                            id=uuid.uuid4(),
+                            order="direct",
+                            type=device.type,
+                            diameter=1,
+                            coord_x=device.coord_x,
+                            coord_y=device.coord_y,
+                            coord_z=device.coord_z,
+                        )
+                        for device in devices
+                    ],
+                    image=img_str,
+                ),
+                graph=ProjectResultGraph(
+                    tab_name="Граф подключения",
+                    table=[
+                        GraphVertex(
+                            id=uuid.uuid4(), graph="a1", material="a", probability=0.9
+                        )
+                        for row in df.iterrows()
+                    ],
+                    image=img_str,
+                ),
+            ),
+        )
+
+        return p
 
     async def _get_user_or_error(self, user_id: uuid.UUID) -> User | NoResultFound:
         """

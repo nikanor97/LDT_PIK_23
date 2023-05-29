@@ -1,36 +1,21 @@
 # %%
-import json
-import math
-from pprint import pprint
-from typing import List, Tuple
+from typing import List
 
-import ezdxf
 import matplotlib.pyplot as plt
 
 # import networkx as nx
 import numpy as np
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from tqdm import tqdm
 
-from coordinate_converter import (
+from src.trace_builder.coordinate_converter import (
     coordinate2point,
-    coordinates2segment,
-    coordinates2segments,
     point2coordinate,
     segment2coordinates,
-    segments2coordinates,
 )
 import re
-from merge_segments import merge_segments
-from model import Point, Segment
-from utils import load_data, save_data
-from geometry import (
+from src.trace_builder.model import Point, Segment
+from src.trace_builder.geometry import (
     is_dot_inside_segment,
     l1_distance,
-    l2_distance,
-    detect_wall_with_door,
 )
 
 # %%

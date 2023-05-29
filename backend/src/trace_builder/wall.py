@@ -1,6 +1,6 @@
 from typing import Optional, List
-from model import Segment, Point
-from geometry import l1_distance
+from src.trace_builder.model import Segment, Point
+from src.trace_builder.geometry import l1_distance
 import re
 
 

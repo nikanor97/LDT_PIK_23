@@ -1,14 +1,11 @@
 # %%
-from typing import List, Tuple
+from typing import List
 
-from coordinate_converter import (
-    coordinate2point,
-    coordinates2segment,
+from src.trace_builder.coordinate_converter import (
     coordinates2segments,
-    point2coordinate,
     segments2coordinates,
 )
-from model import Point, Segment
+from src.trace_builder.model import Segment
 
 
 def merge_segments(segments: List[Segment], eps: float):

@@ -1,4 +1,6 @@
-_path_pattern = "/data/fittings_3d"
+import settings
+
+_path_pattern = settings.BASE_DIR / "data" / "fittings_3d"
 FITTINGS = {
     "d50": {
         "id": 0,

@@ -57,3 +57,53 @@ class DxfFileWithDevices(BaseModel):
     project_id: uuid.UUID
     type: str
     devices: list[DeviceRead]
+
+
+class DeviceTypeWithCoords(BaseModel):
+    type: DeviceTypeOption
+    coord_x: float
+    coord_y: float
+    coord_z: float
+
+
+class DevicesWithHeights(BaseModel):
+    project_id: uuid.UUID
+    devices: list[DeviceTypeWithCoords]
+
+
+class ConnectionPoint(BaseModel):
+    id: uuid.UUID
+    order: str
+    type: str
+    diameter: Decimal
+    coord_x: Decimal
+    coord_y: Decimal
+    coord_z: Decimal
+
+
+class ProjectResultConnectionPoints(BaseModel):
+    tab_name: str
+    table: list[ConnectionPoint]
+    image: str
+
+
+class GraphVertex(BaseModel):
+    id: uuid.UUID
+    graph: str
+    material: str
+    probability: Decimal
+
+
+class ProjectResultGraph(BaseModel):
+    tab_name: str
+    table: list[GraphVertex]
+    image: str
+
+
+class ProjectResult(BaseModel):
+    connection_points: ProjectResultConnectionPoints
+    graph: ProjectResultGraph
+
+
+class ProjectWithResults(ProjectExtendedWithNames):
+    result: ProjectResult

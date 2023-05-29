@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from typing import List, Tuple
 
-from model import Point, Segment
+from src.trace_builder.model import Point, Segment
 
 
 def coordinate2point(coordinate: Tuple[float, float]) -> Point:

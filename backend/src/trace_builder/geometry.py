@@ -1,8 +1,6 @@
-from model import Point, Segment
-from coordinate_converter import (
-    coordinate2point,
+from src.trace_builder.model import Point, Segment
+from src.trace_builder.coordinate_converter import (
     coordinates2segment,
-    coordinates2segments,
     point2coordinate,
     segment2coordinates,
     segments2coordinates,
