@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import styles from "./DXF.module.less";
 import Title from "@root/Components/Title/Title";
 import {Form, Input, Upload, InputNumber} from "antd";
@@ -56,6 +56,13 @@ const DXF = () => {
         });
         dispatch(Actions.Projects.startCalc(data));
     };
+
+    useEffect(() => {
+        return () => {
+            dispatch(Actions.Projects.eraseDXFData());
+        };
+    }, []);
+
     return (
         <div className={styles.wrapper}>
             <Title variant="h3" className={styles.title}>
