@@ -27,8 +27,7 @@ const ResultView = () => {
     const dispatch = useAppDispatch();
     const {projectID} = useParams<iParams>();
     const history = useHistory();
-
-    console.log(option);
+    
     if (!option) return null;
 
     useEffect(() => {

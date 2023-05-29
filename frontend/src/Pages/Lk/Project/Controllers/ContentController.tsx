@@ -22,8 +22,6 @@ const ContentController = () => {
     if (selectedProject) {
         if (selectedProject.result) {
             // if (selectedOption !== null) {
-
-            console.log(selectedProject);
                 
             return <ResultView />;
             // } else {
