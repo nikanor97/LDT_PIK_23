@@ -261,3 +261,6 @@ class ProjectsDbManager(BaseDbManager):
             raise NoResultFound("No DXF files found for this project")
 
         return files[0]
+
+    async def get_dxf_file(self, session: AsyncSession, file_id):
+        return await DxfFile.by_id(session, file_id)

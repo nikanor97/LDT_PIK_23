@@ -292,8 +292,11 @@ class ProjectsEndpoints:
 
         async with self._main_db_manager.projects.make_autobegin_session() as session:
             try:
-                dxf_file = await self._main_db_manager.projects.get_latest_dxf_file(
-                    session, project_id=devices_configs.project_id
+                # dxf_file = await self._main_db_manager.projects.get_latest_dxf_file(
+                #     session, project_id=devices_configs.project_id
+                # )
+                dxf_file = await self._main_db_manager.projects.get_dxf_file(
+                    session, file_id=devices_configs.dxf_file_id
                 )
             except NoResultFound as e:
                 raise HTTPException(status_code=404, detail=exc_to_str(e))

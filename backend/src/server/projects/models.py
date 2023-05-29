@@ -67,6 +67,7 @@ class DeviceTypeWithCoords(BaseModel):
 
 
 class DevicesWithHeights(BaseModel):
+    dxf_file_id: uuid.UUID
     project_id: uuid.UUID
     devices: list[DeviceTypeWithCoords]
 

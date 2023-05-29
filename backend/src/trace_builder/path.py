@@ -108,8 +108,8 @@ def build_path_from_riser_wall_to_sutff_wall(walls: List[Wall]):
                     wall.path2wall_with_riser = [wall2]
                 else:
                     riser_idx = set([0, 1, 2])
-                    riser_idx = riser_idx.pop(idx)
-                    riser_idx = riser_idx.pop(idx2)
+                    riser_idx.remove(idx)
+                    riser_idx.remove(idx2)
                     riser_idx = list(riser_idx)[0]
                     path = [wall2, walls[riser_idx]]
                     wall.path2wall_with_riser = path
