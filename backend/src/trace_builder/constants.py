@@ -111,8 +111,16 @@ FITTINGS = {
         "diameter_out": 50,
         "out": 2,
         "angle": 87,
-        "path": f"{_path_pattern}/otvod-110х87_out_50_up.stl.stl",
+        "path": f"{_path_pattern}/otvod-110х87_out_50_up.stl",
+    },
+    "otvod_110_50_87_back": {
+        "id": 13,
+        "name": "отвод 110/50x87 выход назад",
+        "diameter": 110,
+        "diameter_out": 50,
+        "out": 2,
+        "angle": 87,
+        "path": f"{_path_pattern}/otvod-110_50х87_back.stl",
     },
 }
-
 GLOBAL_INIT_MIN = 80
