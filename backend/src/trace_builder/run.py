@@ -97,12 +97,7 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
         walls, riser_projections, riser_coordinates, f"{output_files}.png"
     )
     mesh.save(f"{output_files}.stl")
-    pd.DataFrame({"Граф": ["A-1", "1-2"], "Материал": [101, 102]}).to_csv(
-        f"{output_files}.csv"
-    )
     material_graph.to_csv(f"{output_files}.csv", index=True)
-    # output_dir = os.getcwd() + "/" + str(save_path)
-    # return output_dir
     return f"{output_files}.csv", f"{output_files}.png", f"{output_files}.stl"
 
 
@@ -116,7 +111,7 @@ if __name__ == "__main__":
         "Унитаз_3D_С бачком_Рен - 2D_Унитаз_Бачок-V58-Битца 8_ТИПИЗАЦИЯ": 100,
     }
     run_algo(
-        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-4П-А-1.dxf",
+        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-2Л-А-1.dxf",
         hieghts,
         settings.MEDIA_DIR / "builder_outputs",
     )
