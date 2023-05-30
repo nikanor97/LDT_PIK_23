@@ -1,22 +1,15 @@
 # %%
+import re
 from typing import List
 
 import matplotlib.pyplot as plt
-
 # import networkx as nx
 import numpy as np
-
-from src.trace_builder.coordinate_converter import (
-    coordinate2point,
-    point2coordinate,
-    segment2coordinates,
-)
-import re
+from src.trace_builder.coordinate_converter import (coordinate2point,
+                                                    point2coordinate,
+                                                    segment2coordinates)
+from src.trace_builder.geometry import is_dot_inside_segment, l1_distance
 from src.trace_builder.model import Point, Segment
-from src.trace_builder.geometry import (
-    is_dot_inside_segment,
-    l1_distance,
-)
 
 # %%
 

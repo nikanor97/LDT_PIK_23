@@ -1,13 +1,11 @@
 import json
 
-from src.trace_builder.coordinate_converter import (
-    coordinate2point,
-    coordinates2segment,
-    coordinates2segments,
-    point2coordinate,
-    segment2coordinates,
-    segments2coordinates,
-)
+from src.trace_builder.coordinate_converter import (coordinate2point,
+                                                    coordinates2segment,
+                                                    coordinates2segments,
+                                                    point2coordinate,
+                                                    segment2coordinates,
+                                                    segments2coordinates)
 from src.trace_builder.wall import Stuff
 
 

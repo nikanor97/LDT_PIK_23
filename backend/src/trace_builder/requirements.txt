@@ -1,6 +1,4 @@
 ezdxf
-plotly
-plotly
 pandas
 networkx
 numpy
