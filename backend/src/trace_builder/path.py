@@ -10,15 +10,7 @@ from stl import mesh
 from src.trace_builder.constants import FITTINGS, GLOBAL_INIT_MIN
 import math
 import numpy as np
-from src.trace_builder.manipulate_3d import cutout_pipe, center_pipe, move_pipe
-
-# %%
-# stuffs, walls_segments, max_riser_height, optimal_segment, riser_coordinates, riser_projections = load_data(
-#     "geometry.json"
-# )
-# stuffs_objects = dict2stuff(stuffs)
-
-# %%
+from src.trace_builder.manipulate_3d import cutout_pipe, center_pipe
 
 
 def is_toilet(stuff) -> bool:
@@ -27,7 +19,7 @@ def is_toilet(stuff) -> bool:
 
 def detect_walls_with_stuff(
     stuffs, walls, riser_projections
-) -> List[Tuple[Segment, bool, bool]]:
+) -> List[Tuple[Wall, bool, bool]]:
     walls_with_stuff = []
 
     for wall in walls:
@@ -106,6 +98,7 @@ def build_path_from_riser_wall_to_sutff_wall(walls: List[Wall]):
             if is_wall_nighbour(wall, wall2):
                 if wall2.with_riser:
                     wall.path2wall_with_riser = [wall2]
+                    wall.start_pipe_point = get_neighbour_wall(wall, wall2)
                 else:
                     riser_idx = set([0, 1, 2])
                     riser_idx.remove(idx)
@@ -113,7 +106,8 @@ def build_path_from_riser_wall_to_sutff_wall(walls: List[Wall]):
                     riser_idx = list(riser_idx)[0]
                     path = [wall2, walls[riser_idx]]
                     wall.path2wall_with_riser = path
-                wall.start_pipe_point = get_neighbour_wall(wall, wall2)
+                if not wall.start_pipe_point:
+                    wall.start_pipe_point = get_neighbour_wall(wall, wall2)
                 walls_new.append(wall)
     return walls_new
 
@@ -144,13 +138,6 @@ def is_pipe_projection_on_right(segment: Segment, riser_projection: Point):
     )
 
 
-# %%
-# walls = detect_walls_with_stuff(stuffs_objects, walls_segments, riser_projections)
-# walls = sorted(walls, key=lambda x: x.length, reverse=True)[:3]
-# walls = build_path_from_riser_wall_to_sutff_wall(walls)
-
-
-# %%
 def load_obj(obj):
     return mesh.Mesh.from_file(obj["path"])
 
@@ -172,7 +159,20 @@ def estimate_min_height(wall, riser_projections):
     return min_height + GLOBAL_INIT_MIN
 
 
-def count_pipes_for_wall_with_stuff(wall, riser_projections):
+def get_nearest_wall_to_point(point, wall_src, walls):
+    best_dist = float("inf")
+    best_wall = None
+    for idx, wall in enumerate(walls):
+        if wall_src == wall:
+            continue
+        dist = min(l1_distance(point, wall.start), l1_distance(point, wall.end))
+        if not best_wall or best_dist > dist:
+            best_wall = idx
+            best_dist = dist
+    return walls[best_wall]
+
+
+def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
     start, end = None, wall.start_pipe_point
     count_sutff = len(wall.stuff_point)
     is_last_stuff_is_edged = True
@@ -249,6 +249,19 @@ def count_pipes_for_wall_with_stuff(wall, riser_projections):
             start_end_pipes[0].is_end = True
             start_end_pipes[-1].is_start = True
     min_height = estimate_min_height(wall, riser_projections)
+    point = wall.start if wall.start != wall.start_pipe_point else wall.end
+    end_wall = get_nearest_wall_to_point(point, wall, walls)
+    if end_wall.has_stuff:
+        start_end_pipes.append(
+            Pipe(
+                coordinates=Segment(start_end_pipes[-1].coordinates.start, point),
+                is_toilet=False,
+                with_riser=False,
+                stuff=None,
+                is_end=True,
+            )
+        )
+        start_end_pipes[-2].is_end = False
     return start_end_pipes, min_height
 
 
@@ -274,17 +287,22 @@ def build_pipe_mesh(obj, pipe, riser_projections):
     if is_parallel_X(pipe):
         if is_pipe_projection_on_right(pipe, riser_projections):
             mesh_obj.rotate([0, 1, 0.0], math.radians(90))
+            mesh_obj.x += min(pipe.start.x, pipe.end.x)
         else:
             mesh_obj.rotate([0, 1, 0.0], math.radians(-90))
-        mesh_obj = move_pipe(mesh_obj, min(pipe.start.x, pipe.end.x), "x")
-        mesh_obj = move_pipe(mesh_obj, pipe.start.y, "y")
+            mesh_obj.x += max(pipe.start.x, pipe.end.x)
+        # mesh_obj = move_pipe(mesh_obj, min(pipe.start.x, pipe.end.x), "x")
+        # mesh_obj = move_pipe(mesh_obj, pipe.start.y, "y")
+        mesh_obj.y += pipe.start.y
     else:
         if is_pipe_projection_on_high(pipe, riser_projections):
             mesh_obj.rotate([1, 0, 0.0], math.radians(-90))
+            mesh_obj.y += min(pipe.start.y, pipe.end.y)
         else:
             mesh_obj.rotate([1, 0, 0.0], math.radians(90))
+            mesh_obj.y += max(pipe.start.y, pipe.end.y)
         mesh_obj.x += pipe.start.x
-        mesh_obj.y += min(pipe.start.y, pipe.end.y)
+        # mesh_obj.y += min(pipe.start.y, pipe.end.y)
     return mesh_obj
 
 
@@ -340,8 +358,9 @@ def rotate_reduction(obj, pipe):
     if is_parallel_X(pipe.coordinates):
         if pipe.coordinates.start.x < pipe.coordinates.end.x:
             obj.rotate([1, 0, 0], math.radians(-90))
-            obj.rotate([0, 1, 0], math.radians(90))
-            obj.y -= 250
+            obj.rotate([0, 0, 1], math.radians(90))
+            obj.y -= 0
+            obj.x -= 250
         else:
             obj.rotate([1, 0, 0], math.radians(-90))
             obj.rotate([0, 1, 0], math.radians(-90))
@@ -370,10 +389,12 @@ def rotate_otvod(obj, pipe):
         if is_pipe_projection_on_right(pipe.coordinates, pipe.stuff.coordinates):
             obj.rotate([1, 0, 0], math.radians(90))
             obj.rotate([0, 0, 1], math.radians(90))
+            pass
         else:
             obj.rotate([0, 0, 1], math.radians(-90))
             obj.rotate([0, 1, 0], math.radians(90))
             # obj.rotate([1,0,0], math.radians(180))
+            pass
     return obj
 
 
@@ -394,6 +415,7 @@ def rotate_otvod_low(obj, pipe, low=False):
             # CHECKED
             if low:
                 obj.rotate([0, 1, 0], math.radians(45))
+            pass
         else:
             if low:
                 obj.rotate([0, 1, 0], math.radians(-45))
@@ -511,14 +533,369 @@ def build_stuff_mesh(pipe: Pipe):
     return meshes
 
 
-def build_path(walls, riser_projections, scrennshot_name):
+def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
+    bias_1 = 160 if diameter == 110 else 130
+    bias_2 = 37 if diameter == 110 else 17
+    if is_parallel_X(pipe.coordinates):
+        if pipe.coordinates.end.y > riser_projections.y:  # pipe above riser
+            if pipe.coordinates.start.x < pipe.coordinates.end.x:  # right
+                obj.rotate([0, 0, 1], math.radians(180))
+                obj.rotate([0, 1, 0], math.radians(90))
+                obj.y += bias_2
+                obj.x -= bias_1 - 37
+            else:
+                obj.rotate([0, 0, 1], math.radians(180))
+                obj.rotate([0, 1, 0], math.radians(-90))
+                obj.x += bias_1 - 37
+                obj.y += bias_2
+        else:
+            if pipe.coordinates.start.x < pipe.coordinates.end.x:  # right
+                obj.rotate([0, 1, 0], math.radians(90))
+                obj.x -= bias_1
+            else:
+                obj.rotate([0, 1, 0], math.radians(-90))
+                obj.x += bias_1 - 50
+    else:
+        # CHECKED
+        if pipe.coordinates.end.x < riser_projections.x:  # pipe -> riser
+            if pipe.coordinates.start.y < pipe.coordinates.end.y:  # up
+                obj.rotate([0, 0, 1], math.radians(90))
+                obj.rotate([1, 0, 0], math.radians(-90))
+                obj.y -= bias_1
+            else:
+                obj.rotate([0, 0, 1], math.radians(90))
+                obj.rotate([1, 0, 0], math.radians(90))
+        else:  # riser -> pipe
+            # CHECKED
+            if pipe.coordinates.start.y < pipe.coordinates.end.y:  # up
+                obj.rotate([1, 0, 0], math.radians(-90))
+                obj.rotate([0, 1, 0], math.radians(90))
+                obj.y -= bias_1
+            else:
+                obj.rotate([0, 0, 1], math.radians(-90))
+                obj.rotate([1, 0, 0], math.radians(90))
+    return obj
+
+
+def build_knee_fitting(pipe, riser_projections):
+    fitting_meta = (
+        FITTINGS["otvod_110x87"] if pipe.is_toilet else FITTINGS["otvod_50x87"]
+    )
+    diameter = 110 if pipe.is_toilet else 50
+    obj = load_obj(fitting_meta)
+    obj = rotate_otvod_link_knee(obj, pipe, riser_projections, diameter)
+    obj.x += pipe.coordinates.end.x
+    obj.y += pipe.coordinates.end.y
+    return obj
+
+
+def build_riser(riser_coordinates, riser_projections, walls):
+    fitting_meta = FITTINGS["troinik_110_110x87"]
+    obj = load_obj(fitting_meta)
+    obj = rotate_riser(obj, riser_coordinates, riser_projections, walls)
+    obj.x += riser_coordinates.x
+    obj.y += riser_coordinates.y
+    obj.z += 60
+    return obj
+
+
+def rotate_riser(obj, riser_coordinates, riser_projections, walls):
+    if riser_projections.y > riser_coordinates.y:  # turn up
+        obj.rotate([1, 0, 0], math.radians(-90))
+        obj.y -= 50
+    elif riser_projections.y < riser_coordinates.y:  # turn down
+        obj.rotate([1, 0, 0], math.radians(-90))
+        obj.rotate([0, 0, 1], math.radians(180))
+    elif riser_projections.x < riser_coordinates.x:  # turn left
+        obj.rotate([1, 0, 0], math.radians(-90))
+        obj.rotate([0, 0, 1], math.radians(-90))
+    else:  # turn right
+        obj.rotate([1, 0, 0], math.radians(-90))
+        obj.rotate([0, 0, 1], math.radians(90))
+
+    # TEST
+    # obj.x -= 500
+    # obj.y -= 500
+    return obj
+
+
+def build_riser_otvod(riser_coordinates, riser_projections, walls):
+    toilet_coordinates = get_toilet_coordinates_form_wall(walls)
+    pipe = "right"
+    # fitting_meta = FITTINGS["otvod_110x87"]
+    fitting_meta = FITTINGS["otvod_110_50_87_back"]
+    obj = load_obj(fitting_meta)
+    fix_legnt, common_bias = 100, 10
+    y_bias = 120
+    x_bias = 0
+    ###
+    if riser_projections.y > riser_coordinates.y:  # up
+        if toilet_coordinates.x > riser_projections.x:  # toilet on right
+            pipe_ = "up right"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        toilet_coordinates.x + fix_legnt,
+                        riser_projections.y + fix_legnt,
+                    ),
+                    end=Point(toilet_coordinates.x, riser_projections.y + fix_legnt),
+                )
+            )
+            y_bias = -40
+        else:
+            pipe_ = "up left"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        toilet_coordinates.x - fix_legnt - common_bias,
+                        riser_projections.y + fix_legnt,
+                    ),
+                    end=Point(
+                        toilet_coordinates.x - common_bias,
+                        riser_projections.y + fix_legnt,
+                    ),
+                )
+            )
+            y_bias = -40
+    elif riser_projections.y < riser_coordinates.y:  # down
+        if not toilet_coordinates.x > riser_projections.x:  # toilet on right
+            pipe_ = "down right"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        toilet_coordinates.x + fix_legnt + common_bias,
+                        riser_projections.y,
+                    ),
+                    end=Point(toilet_coordinates.x + common_bias, riser_projections.y),
+                )
+            )
+            y_bias = -160
+            x_bias = 10
+        else:
+            pipe_ = "down left"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        toilet_coordinates.x - fix_legnt - common_bias,
+                        riser_projections.y,
+                    ),
+                    end=Point(toilet_coordinates.x - common_bias, riser_projections.y),
+                )
+            )
+            y_bias = -180
+            x_bias = 40
+    elif riser_projections.x < riser_coordinates.x:  # left
+        if toilet_coordinates.y > riser_projections.y:  # toilet on up
+            pipe_ = "left up"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        riser_projections.x - fix_legnt,
+                        toilet_coordinates.y + fix_legnt,
+                    ),
+                    end=Point(riser_projections.x - fix_legnt, toilet_coordinates.y),
+                )
+            )
+            y_bias = 120
+            x_bias = -150
+        else:
+            pipe_ = "left down"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        riser_projections.x - fix_legnt,
+                        toilet_coordinates.y - fix_legnt,
+                    ),
+                    end=Point(riser_projections.x - fix_legnt, toilet_coordinates.y),
+                )
+            )
+            y_bias = 20
+            x_bias = 0
+    else:  # right
+        if toilet_coordinates.y > riser_projections.y:  # toilet on up
+            pipe_ = "right up"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        riser_projections.x + fix_legnt,
+                        toilet_coordinates.y + fix_legnt,
+                    ),
+                    end=Point(riser_projections.x + fix_legnt, toilet_coordinates.y),
+                )
+            )
+            y_bias = 120
+            x_bias = 180
+        else:
+            pipe_ = "right down"
+            pipe = Pipe(
+                Segment(
+                    start=Point(
+                        riser_projections.x + fix_legnt,
+                        toilet_coordinates.y - fix_legnt,
+                    ),
+                    end=Point(riser_projections.x + fix_legnt, toilet_coordinates.y),
+                )
+            )
+            y_bias = 40
+            x_bias = 150
+    # print(pipe_)
+    obj = rotate_otvod_link_knee(obj, pipe, riser_projections, 110)
+    obj.x += riser_projections.x
+    obj.y += riser_projections.y
+    obj.y += y_bias
+    obj.x += x_bias
+    return obj
+
+
+def build_riser_to_otvod_pipe(riser_coordinates, riser_projections, treshold=200):
+    bias1 = 0
+    bias2 = 0
+    if (
+        riser_coordinates.y <= riser_projections.y - treshold
+    ):  # proj higher more than 200
+        riser_projection_ = riser_coordinates
+        pipe = Pipe(
+            Segment(
+                start=Point(riser_projections.x, riser_projections.y),
+                end=Point(riser_projections.x, riser_coordinates.y),
+            )
+        )
+        bias2 = -70
+    elif (
+        riser_coordinates.y - treshold >= riser_projections.y
+    ):  # proj lower more than 200
+        riser_projection_ = riser_coordinates
+        pipe = Pipe(
+            Segment(
+                start=Point(riser_projections.x, riser_projections.y),
+                end=Point(riser_projections.x, riser_coordinates.y),
+            )
+        )
+        bias2 = -60
+
+    elif (
+        riser_coordinates.x - treshold >= riser_projections.x
+    ):  # proj left more than 200
+        riser_projection_ = riser_coordinates
+        pipe = Pipe(
+            Segment(
+                start=Point(riser_coordinates.x, riser_projections.y),
+                end=Point(riser_projections.x, riser_coordinates.y),
+            )
+        )
+        bias1 = -60
+    elif (
+        riser_projections.x - treshold >= riser_coordinates.x
+    ):  # proj right more than 200
+        riser_projection_ = riser_coordinates
+        pipe = Pipe(
+            Segment(
+                start=Point(riser_coordinates.x, riser_projections.y),
+                end=Point(riser_projections.x, riser_coordinates.y),
+            )
+        )
+        bias1 = 60
+    else:
+        return None
+    obj = build_pipe_mesh(FITTINGS["d110"], pipe.coordinates, riser_projection_)
+    obj.x += bias1
+    obj.y += bias2
+    return obj
+
+
+def build_otvod_to_knee_pipe(riser_projections, walls, riser_wall):
+    bias_x, bias_y = 0, 0
+    toilet_coordinates = get_toilet_coordinates_form_wall(walls)
+
+    if riser_projections.x <= (toilet_coordinates.x - 200) and is_parallel_X(
+        riser_wall.coordinates
+    ):
+        pipe = Pipe(
+            Segment(
+                start=Point(toilet_coordinates.x - 30, riser_projections.y),
+                end=Point(riser_projections.x + 30, riser_projections.y),
+            )
+        )
+        # bias_x = 60
+    elif (riser_projections.x - 200) >= toilet_coordinates.x and is_parallel_X(
+        riser_wall.coordinates
+    ):
+        pipe = Pipe(
+            Segment(
+                start=Point(riser_projections.x - 30, riser_projections.y),
+                end=Point(toilet_coordinates.x + 30, riser_projections.y),
+            )
+        )
+    elif (riser_projections.y - 200) >= toilet_coordinates.y and is_parallel_Y(
+        riser_wall.coordinates
+    ):
+        pipe = Pipe(
+            Segment(
+                start=Point(riser_projections.x, toilet_coordinates.y + 30),
+                end=Point(riser_projections.x, toilet_coordinates.y - 30),
+            )
+        )
+    elif riser_projections.y <= (toilet_coordinates.y - 200) and is_parallel_Y(
+        riser_wall.coordinates
+    ):
+        pipe = Pipe(
+            Segment(
+                start=Point(riser_projections.x, toilet_coordinates.y - 30),
+                end=Point(riser_projections.x, riser_projections.y + 30),
+            )
+        )
+        # bias_x = 60
+    else:
+        return None
+    obj = build_pipe_mesh(FITTINGS["d110"], pipe.coordinates, riser_projections)
+    obj.x += bias_x
+    obj.y += bias_y
+    return obj
+
+
+def get_toilet_coordinates_form_wall(walls):
+    for wall in walls:
+        if wall.has_toilet:
+            for stuff in wall.stuff_point:
+                if stuff.is_toilet:
+                    return stuff.coordinates
+    return None
+
+
+# %%
+def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
     mesh_data = []
+    # riser_coordinates.y -= 200
+    bi = 0
+    print(riser_coordinates.x)
+    riser_coordinates_test = Point(riser_coordinates.x + bi, riser_coordinates.y + bi)
+    riser_projections_test = Point(riser_projections.x + bi, riser_projections.y + bi)
+    # riser_coordinates_test.y -= 1000
+    # riser_coordinates_test.x -= 900
+    # riser_projections_test.x -= 900
+    # riser_projections_test.y -= 400
+    # riser_projections_test.y  = riser_coordinates_test.y
+    riser_obj = build_riser(
+        riser_coordinates_test, riser_projections_test, walls
+    ).data.copy()
+    # riser_obj = build_riser(riser_coordinates, riser_projections, walls).data.copy()
+    mesh_data.append(riser_obj)
+    riser_obj_p = build_riser_to_otvod_pipe(
+        riser_coordinates_test, riser_projections_test
+    )
+    if riser_obj_p:
+        mesh_data.append(riser_obj_p.data.copy())
+    # pipe_turn = build_riser_pipes(riser_coordinates, riser_projections, walls).data.copy()
+    pipe_turn = build_riser_otvod(
+        riser_coordinates_test, riser_projections_test, walls
+    ).data.copy()
+    mesh_data.append(pipe_turn)
     for wall in walls:
         obj = FITTINGS["d50"]
         if not wall.with_riser and wall.has_stuff:
             # TODO move end for enable right turn
             pipes, start_height = count_pipes_for_wall_with_stuff(
-                wall, riser_projections
+                wall, walls, riser_projections
             )
             for idx, pipe in enumerate(pipes):
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
@@ -527,21 +904,48 @@ def build_path(walls, riser_projections, scrennshot_name):
                     toilet_objets = build_toilet_mesh(pipe)
                     mesh_data.extend([objects.data.copy() for objects in toilet_objets])
                 else:
-                    stuff_object = build_stuff_mesh(pipe)
-                    mesh_data.extend([objects.data.copy() for objects in stuff_object])
-                if pipe.is_end:
-                    pass
+                    if pipe.stuff:
+                        stuff_object = build_stuff_mesh(pipe)
+                        mesh_data.extend(
+                            [objects.data.copy() for objects in stuff_object]
+                        )
+                if pipe.is_start:
+                    knee_obj = build_knee_fitting(pipe, riser_projections).data.copy()
+                    mesh_data.append(knee_obj)
                 mesh_data.append(mesh_obj.data.copy())
         elif wall.with_riser:
             # pipes for whole wall
-            pipes = wall_with_riser(wall, riser_projections)
-            for idx, pipe in enumerate(pipes):
-                mesh_obj = build_pipe_mesh(obj, pipe, riser_projections)
-                mesh_data.append(mesh_obj.data.copy())
+            # pipes = wall_with_riser(wall, riser_projections)
+            # for idx, pipe in enumerate(pipes):
+            #     mesh_obj = build_pipe_mesh(obj, pipe, riser_projections)
+            #     mesh_data.append(mesh_obj.data.copy())
+            if not wall.has_toilet:
+                riser_obj_p = build_otvod_to_knee_pipe(
+                    riser_projections_test, walls, wall
+                )
+                if riser_obj_p:
+                    mesh_data.append(riser_obj_p.data.copy())
             wall.start_pipe_point = riser_projections
-            pipes, start_height = count_pipes_for_wall_with_stuff(
-                wall, riser_projections
-            )
+            if len(wall.stuff_point) == 0:
+                end = wall.coordinates.start
+                for wall_ in walls:
+                    if wall_ == wall:
+                        continue
+                    else:
+                        if get_neighbour_wall(wall, wall_):
+                            end = get_neighbour_wall(wall, wall_)
+                pipes = [
+                    Pipe(
+                        Segment(wall.start_pipe_point, end),
+                        is_start=True,
+                        is_end=True,
+                        with_riser=True,
+                    )
+                ]
+            else:
+                pipes, start_height = count_pipes_for_wall_with_stuff(
+                    wall, walls, riser_projections
+                )
             # pipes wall
             for idx, pipe in enumerate(pipes):
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
@@ -550,18 +954,19 @@ def build_path(walls, riser_projections, scrennshot_name):
                     toilet_objets = build_toilet_mesh(pipe)
                     mesh_data.extend([objects.data.copy() for objects in toilet_objets])
                 else:
-                    stuff_object = build_stuff_mesh(pipe)
-                    mesh_data.extend([objects.data.copy() for objects in stuff_object])
+                    if pipe.stuff:
+                        stuff_object = build_stuff_mesh(pipe)
+                        mesh_data.extend(
+                            [objects.data.copy() for objects in stuff_object]
+                        )
                 mesh_data.append(mesh_obj.data.copy())
         else:
             if_wall_in_path_for_riser(wall, walls, riser_projections)
     all_figures = mesh.Mesh(np.concatenate(mesh_data))
+    all_figures = mesh.Mesh(np.concatenate(mesh_data))
     vpl.mesh_plot(all_figures)
-    vpl.save_fig(scrennshot_name)
-    return all_figures
+    vpl.view(camera_direction=(0.1,0.6,-0.8))
+    vpl.save_fig(scrennshot_name, pixels=(1920,1080), off_screen=True)
+    # vpl.mesh_plot(all_figures)
     # vpl.show()
-
-
-# build_path(walls, riser_projections)
-
-# %%
+    return all_figures
