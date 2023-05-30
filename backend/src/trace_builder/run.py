@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import ezdxf
+from random import randint
 
 import settings
 from src.trace_builder.coordinate_converter import (
@@ -67,7 +68,8 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
 
     segments_with_wall_flag = detect_wall_with_door(mid_point_filtered)
 
-    stuff_projections = get_stuff_projcetions(stuffs, segments_with_wall_flag, False)
+    verbose = True if os.getenv("LOCAL_ALGO") else False
+    stuff_projections = get_stuff_projcetions(stuffs, segments_with_wall_flag, verbose)
 
     riser_projection_distances = build_riser_projections(
         riser_coordinates, mid_point_filtered
@@ -83,7 +85,7 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
     distance_from_riser_to_stuff(riser_projection, stuff_projections)
 
     for key in stuff_projections.keys():
-        stuff_projections[key]["height"] = heighs[key]
+        stuff_projections[key]["height"] = heighs.get(key, randint(150, 350))
 
     max_riser_height = calculate_max_riser_height(stuff_projections)
     # %%
@@ -122,9 +124,12 @@ if __name__ == "__main__":
         "Унитаз_3D_С бачком_Рен - 2D_Унитаз_Бачок-V58-Битца 8_ТИПИЗАЦИЯ": 100,
     }
     run_algo(
-        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-1П-Б-2.dxf",
+        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-4П-А-1.dxf",
         hieghts,
         settings.MEDIA_DIR / "builder_outputs",
     )
-
-# %%
+# "СТМ8-1П-А-1.dxf"
+# "СТМ8-1П-Б-2.dxf"
+# "СТМ8-2Л-А-1.dxf"
+# "СТМ8-2Л-Б-1.dxf"
+# "СТМ8-4П-А-1.dxf"
