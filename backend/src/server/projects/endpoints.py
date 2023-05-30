@@ -251,8 +251,8 @@ class ProjectsEndpoints:
                 project_id=project_id,
                 name=device_type_to_name[device_type],
                 type=device_type,
-                coord_x=coords[0],
-                coord_y=coords[1],
+                coord_x=round(coords[0]),
+                coord_y=round(coords[1]),
             )
             devices.append(device)
 

@@ -250,7 +250,9 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
     min_height = estimate_min_height(wall, riser_projections)
     point = wall.start if wall.start != wall.start_pipe_point else wall.end
     end_wall, end_wall_dist = get_nearest_wall_to_point(point, wall, walls)
-    if end_wall_dist < 500 and (end_wall.has_stuff or if_wall_in_path_for_riser(end_wall, walls)):
+    if end_wall_dist < 500 and (
+        end_wall.has_stuff or if_wall_in_path_for_riser(end_wall, walls)
+    ):
         start_end_pipes.append(
             Pipe(
                 coordinates=Segment(start_end_pipes[-1].coordinates.start, point),
@@ -974,15 +976,22 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
         else:
             if if_wall_in_path_for_riser(wall, walls):
                 obj = FITTINGS["d50"]
-                pipe_coordinates = Segment(wall.start, wall.end) if l1_distance(wall.start, riser_projections) < l1_distance(wall.end, riser_projections) else Segment(wall.end, wall.start)
+                pipe_coordinates = (
+                    Segment(wall.start, wall.end)
+                    if l1_distance(wall.start, riser_projections)
+                    < l1_distance(wall.end, riser_projections)
+                    else Segment(wall.end, wall.start)
+                )
                 pipe = Pipe(pipe_coordinates, is_start=True, is_end=True)
-                pipe_obj = build_pipe_mesh(obj, pipe.coordinates, riser_projections).data.copy()
+                pipe_obj = build_pipe_mesh(
+                    obj, pipe.coordinates, riser_projections
+                ).data.copy()
                 knee_obj = build_knee_fitting(pipe, riser_projections).data.copy()
                 mesh_data.extend([pipe_obj, knee_obj])
     all_figures = mesh.Mesh(np.concatenate(mesh_data))
     vpl.mesh_plot(all_figures)
-    vpl.view(camera_direction=(0.1,0.6,-0.8))
-    vpl.save_fig(scrennshot_name, pixels=(1920,1080), off_screen=True)
-    vpl.mesh_plot(all_figures)
-    vpl.show()
+    vpl.view(camera_direction=(0.1, 0.6, -0.8))
+    vpl.save_fig(scrennshot_name, pixels=(1920, 1080), off_screen=True)
+    # vpl.mesh_plot(all_figures)
+    # vpl.show()
     return all_figures
