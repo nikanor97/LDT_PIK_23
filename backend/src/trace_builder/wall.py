@@ -16,9 +16,9 @@ class Wall:
         path2wall_with_riser: Optional[List] = None,
         stuff_point: Optional[List[Point]] = None,
     ):
-        self.wall = wall
-        self.start = self.wall.start
-        self.end = self.wall.end
+        self.coordinates = wall
+        self.start = self.coordinates.start
+        self.end = self.coordinates.end
         self.has_toilet = has_toilet
         self.has_stuff = has_stuff
         self.entery_wall = entery_wall
@@ -29,7 +29,7 @@ class Wall:
         self.stuff_point = stuff_point
         self.start_pipe_point = None
 
-        self.length = l1_distance(self.wall.start, self.wall.end)
+        self.length = l1_distance(self.coordinates.start, self.coordinates.end)
 
     def comput_start_wall(self):
         if not self.start_pipe_point:

@@ -29,7 +29,7 @@ services:
     build:
       context: backend/
     hostname: backend
-    command: bash -c "poetry run python main/run_server.py"
+    command: bash -c "Xvfb :99 & export DISPLAY=:99 && poetry run python main/run_server.py"
     environment:
       - HOST_WORKING_DIRECTORY=${HOST_WORKING_DIRECTORY}
     volumes:

@@ -965,7 +965,7 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
     all_figures = mesh.Mesh(np.concatenate(mesh_data))
     all_figures = mesh.Mesh(np.concatenate(mesh_data))
     vpl.mesh_plot(all_figures)
-    vpl.save_fig(scrennshot_name)
+    vpl.save_fig(scrennshot_name, off_screen=True)
     # vpl.mesh_plot(all_figures)
     # vpl.show()
     return all_figures

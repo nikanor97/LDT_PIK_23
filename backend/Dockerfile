@@ -22,10 +22,11 @@ ENV POETRY_VERSION=1.3.1
 ENV PYTHONPATH "${PYTHONPATH}:/code"
 
 RUN pip install "poetry==$POETRY_VERSION"
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 libgl1-mesa-dev xvfb -y
 
 WORKDIR /code
-COPY . /code
+COPY pyproject.toml ./pyproject.toml
+RUN poetry install --only main --no-interaction --no-ansi
 
+COPY . /code
 RUN poetry config installer.max-workers 10
-RUN poetry install --no-dev --no-interaction --no-ansi

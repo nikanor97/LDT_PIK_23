@@ -101,15 +101,15 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     timestam = int(time())
-    scrennshot_name = f"{save_path}/{timestam}.png"
-    mesh = build_path(walls, riser_projections, scrennshot_name)
-    mesh.save(f"{scrennshot_name}.stl")
+    output_files = f"{save_path}/{timestam}"
+    mesh = build_path(walls, riser_projections, riser_coordinates, f"{output_files}.png")
+    mesh.save(f"{output_files}.stl")
     pd.DataFrame({"Граф": ["A-1", "1-2"], "Материал": [101, 102]}).to_csv(
-        f"{save_path}/{timestam}.csv"
+        f"{output_files}.csv"
     )
     # output_dir = os.getcwd() + "/" + str(save_path)
     # return output_dir
-    return f"{save_path}/{timestam}.csv", scrennshot_name, f"{scrennshot_name}.stl"
+    return f"{output_files}.csv", output_files, f"{output_files}.stl"
 
 
 if __name__ == "__main__":
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     run_algo(
         settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-1П-Б-2.dxf",
         hieghts,
-        settings.MEDIA_DIR / "buider_outputs",
+        settings.MEDIA_DIR / "builder_outputs",
     )
 
 # %%
