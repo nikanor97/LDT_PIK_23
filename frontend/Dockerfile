@@ -13,8 +13,10 @@ RUN yarn run build
 ##Ветка для запуска
 FROM nginx:1.19-alpine as PROD
 COPY --from=PROD_build /opt/src/build /usr/share/nginx/html
+#COPY ./nginx.conf.template /nginx.conf.template
 COPY config/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
+#CMD ["/bin/sh" , "-c" ,"envsubst < /nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
 CMD ["nginx", "-g", "daemon off;"]
 
 #Ветка для дева

@@ -104,14 +104,16 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
         os.makedirs(save_path)
     timestam = int(time())
     output_files = f"{save_path}/{timestam}"
-    mesh = build_path(walls, riser_projections, riser_coordinates, f"{output_files}.png")
+    mesh = build_path(
+        walls, riser_projections, riser_coordinates, f"{output_files}.png"
+    )
     mesh.save(f"{output_files}.stl")
     pd.DataFrame({"Граф": ["A-1", "1-2"], "Материал": [101, 102]}).to_csv(
         f"{output_files}.csv"
     )
     # output_dir = os.getcwd() + "/" + str(save_path)
     # return output_dir
-    return f"{output_files}.csv", output_files, f"{output_files}.stl"
+    return f"{output_files}.csv", f"{output_files}.png", f"{output_files}.stl"
 
 
 if __name__ == "__main__":
