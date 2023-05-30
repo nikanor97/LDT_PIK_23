@@ -3,7 +3,7 @@ import settings
 _path_pattern = settings.BASE_DIR / "data" / "fittings_3d"
 FITTINGS = {
     "d50": {
-        "id": 0,
+        "id": 501,
         "name": "труба 50",
         "diameter": 50,
         "out": 1,
@@ -11,7 +11,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/d50.stl",
     },
     "d110": {
-        "id": 1,
+        "id": 500,
         "name": "труба 110",
         "diameter": 110,
         "out": 1,
@@ -19,7 +19,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/d110.stl",
     },
     "otvod_50x45": {
-        "id": 2,
+        "id": 304,
         "name": "отвод 50/45",
         "diameter": 50,
         "out": 1,
@@ -27,7 +27,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/otvod-50x45.stl",
     },
     "otvod_50x87": {
-        "id": 3,
+        "id": 305,
         "name": "отвод 50/87",
         "diameter": 50,
         "out": 1,
@@ -35,7 +35,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/otvod-50x87.stl",
     },
     "otvod_110x45": {
-        "id": 4,
+        "id": 300,
         "name": "отвод 110/45",
         "diameter": 110,
         "out": 1,
@@ -43,7 +43,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/otvod-110x45.stl",
     },
     "otvod_110x87": {
-        "id": 5,
+        "id": 301,
         "name": "отвод 110/87",
         "diameter": 110,
         "out": 1,
@@ -51,7 +51,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/otvod-110x87.stl",
     },
     "reduction": {
-        "id": 6,
+        "id": 401,
         "name": "редукция 110/50",
         "diameter": 110,
         "diameter_out": 50,
@@ -60,7 +60,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/reduction-110x50.stl",
     },
     "troinik_50_50x45": {
-        "id": 7,
+        "id": 106,
         "name": "редуктройник 50/50/45",
         "diameter": 50,
         "diameter_out": 50,
@@ -69,7 +69,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/troinik-50x50x45.stl",
     },
     "troinik_50_50x87": {
-        "id": 8,
+        "id": 105,
         "name": "редуктройник 50/50/87",
         "diameter": 50,
         "diameter_out": 50,
@@ -78,7 +78,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/troinik-50x50x87.stl",
     },
     "troinik_110_110x45": {
-        "id": 9,
+        "id": 103,
         "name": "тройник 110/110/45",
         "diameter": 110,
         "diameter_out": 110,
@@ -87,7 +87,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/troinik-110x110x45.stl",
     },
     "troinik_110_50x45": {
-        "id": 10,
+        "id": 104,
         "name": "тройник 110/50/45",
         "diameter": 110,
         "diameter_out": 110,
@@ -96,7 +96,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/troinik-110x50x45.stl",
     },
     "troinik_110_110x87": {
-        "id": 11,
+        "id": 101,
         "name": "тройник 110/110/87",
         "diameter": 110,
         "diameter_out": 110,
@@ -105,7 +105,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/troinik-110x110x87.stl",
     },
     "otvod_110_50_87": {
-        "id": 12,
+        "id": 102,
         "name": "отвод 110/50x87 выход вверх",
         "diameter": 110,
         "diameter_out": 50,
@@ -114,7 +114,7 @@ FITTINGS = {
         "path": f"{_path_pattern}/otvod-110х87_out_50_up.stl",
     },
     "otvod_110_50_87_back": {
-        "id": 13,
+        "id": 202,
         "name": "отвод 110/50x87 выход назад",
         "diameter": 110,
         "diameter_out": 50,
