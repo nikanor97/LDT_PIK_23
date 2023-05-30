@@ -382,9 +382,12 @@ class ProjectsEndpoints:
                     tab_name="Граф подключения",
                     table=[
                         GraphVertex(
-                            id=uuid.uuid4(), graph="a1", material="a", probability=0.9
+                            id=uuid.uuid4(),
+                            graph=row["Граф"],
+                            material=row["Материал"],
+                            probability=0.9,
                         )
-                        for row in df.iterrows()
+                        for id, row in df.iterrows()
                     ],
                     image=img_str,
                 ),

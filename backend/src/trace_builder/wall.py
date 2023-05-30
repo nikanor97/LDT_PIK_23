@@ -1,7 +1,8 @@
-from typing import Optional, List
-from src.trace_builder.model import Segment, Point
-from src.trace_builder.geometry import l1_distance
 import re
+from typing import List, Optional
+
+from src.trace_builder.geometry import l1_distance
+from src.trace_builder.model import Point, Segment
 
 
 class Wall:

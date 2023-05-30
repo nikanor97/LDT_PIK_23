@@ -1,16 +1,19 @@
 # %%
-from src.trace_builder.model import Point, Segment
-from src.trace_builder.wall import Wall, Pipe
-from src.trace_builder.geometry import is_dot_inside_segment, l1_distance
+import math
+import os
 import re
 from typing import List, Tuple
-import vtkplotlib as vpl
-from stl import mesh
 
-from src.trace_builder.constants import FITTINGS, GLOBAL_INIT_MIN
-import math
 import numpy as np
-from src.trace_builder.manipulate_3d import cutout_pipe, center_pipe
+import vtkplotlib as vpl
+from src.trace_builder.constants import FITTINGS, GLOBAL_INIT_MIN
+from src.trace_builder.geometry import is_dot_inside_segment, l1_distance
+from src.trace_builder.graph_models import Node, PipeGraph
+from src.trace_builder.manipulate_3d import center_pipe, cutout_pipe
+from src.trace_builder.meterial_graph import build_material_graph
+from src.trace_builder.model import Point, Segment
+from src.trace_builder.wall import Pipe, Wall
+from stl import mesh
 
 
 def is_toilet(stuff) -> bool:
@@ -316,7 +319,8 @@ def build_pipe_mesh(obj, pipe, riser_projections):
             mesh_obj.y += max(pipe.start.y, pipe.end.y)
         mesh_obj.x += pipe.start.x
         # mesh_obj.y += min(pipe.start.y, pipe.end.y)
-    return mesh_obj
+    node = Node(obj["name"], obj["id"], pipe_length)
+    return mesh_obj, node
 
 
 def rotate_troinik_toilet(obj, pipe, is_low=False):
@@ -470,13 +474,17 @@ def shift_otvod(obj, pipe, diameter=110):
     return obj
 
 
-def build_toilet_mesh(pipe: Pipe):
+def build_toilet_mesh(pipe: Pipe, material_graph: PipeGraph):
     mesh_objs = []
+    nodes = []
     if pipe.is_end:
         obj = load_obj(FITTINGS["otvod_110x87"])
         obj = rotate_otvod_low(obj, pipe, low=True)
         obj = shift_rotate_low(obj, pipe, 110)
         obj.x -= 85
+        nodes.append(
+            Node(FITTINGS["otvod_110x87"]["name"], FITTINGS["otvod_110x87"]["id"])
+        )
     else:
         obj = load_obj(FITTINGS["troinik_110_110x87"])
         obj_reduction = load_obj(FITTINGS["reduction"])
@@ -485,6 +493,20 @@ def build_toilet_mesh(pipe: Pipe):
         obj_reduction.y += pipe.coordinates.start.y
         obj = rotate_troinik_toilet(obj, pipe, is_low=True)
         mesh_objs.append(obj_reduction)
+        nodes.append(
+            Node(
+                FITTINGS["troinik_110_110x87"]["name"],
+                FITTINGS["otvod_110x87"]["id"],
+                is_troinik=True,
+            )
+        )
+        nodes.append(
+            Node(
+                FITTINGS["reduction"]["name"],
+                FITTINGS["otvod_110x87"]["id"],
+                is_inside_troinik=True,
+            )
+        )
 
     obj_otvod = load_obj(FITTINGS["otvod_110x45"])
     obj_otvod = rotate_otvod(obj_otvod, pipe)
@@ -492,6 +514,14 @@ def build_toilet_mesh(pipe: Pipe):
     obj_otvod.x += pipe.coordinates.start.x
     obj_otvod.y += pipe.coordinates.start.y
     mesh_objs.append(obj_otvod)
+    nodes.append(
+        Node(
+            FITTINGS["otvod_110x87"]["name"],
+            FITTINGS["otvod_110x87"]["id"],
+            is_inside_troinik=True,
+            is_end=True,
+        )
+    )
     # obj = rotate_troinik_toilet(obj, pipe, is_low=True)
     obj.x += pipe.coordinates.start.x
     obj.y += pipe.coordinates.start.y
@@ -501,19 +531,31 @@ def build_toilet_mesh(pipe: Pipe):
         obj.x -= 125
 
     mesh_objs.append(obj)
+    material_graph.add_node(nodes, end=True)
     return mesh_objs
 
 
-def build_stuff_mesh(pipe: Pipe):
+def build_stuff_mesh(pipe: Pipe, material_graph: PipeGraph):
     meshes = []
+    nodes = []
     if pipe.is_end:
         troinik = load_obj(FITTINGS["otvod_50x87"])
         troinik = rotate_otvod_low(troinik, pipe)
         troinik = shift_rotate_low(troinik, pipe, 50)
+        nodes.append(
+            Node(FITTINGS["otvod_50x87"]["name"], FITTINGS["otvod_50x87"]["id"])
+        )
         # TODO
     else:
         troinik = load_obj(FITTINGS["troinik_50_50x87"])
         troinik = rotate_troinik_toilet(troinik, pipe)
+        nodes.append(
+            Node(
+                FITTINGS["troinik_50_50x87"]["name"],
+                FITTINGS["troinik_50_50x87"]["id"],
+                is_troinik=True,
+            )
+        )
     troinik.x += pipe.coordinates.start.x
     troinik.y += pipe.coordinates.start.y
     bias = 100
@@ -524,10 +566,21 @@ def build_stuff_mesh(pipe: Pipe):
     straight_obj.x += pipe.coordinates.start.x
     straight_obj.y += pipe.coordinates.start.y
     straight_obj.z += pipe.stuff.height
+    nodes.append(
+        Node(FITTINGS["d50"]["name"], FITTINGS["d50"]["id"], is_inside_troinik=True)
+    )
 
     otvod = load_obj(FITTINGS["otvod_50x87"])
     otvod = rotate_otvod(otvod, pipe)
     shift_otvod(otvod, pipe, 50)
+    nodes.append(
+        Node(
+            FITTINGS["otvod_50x87"]["name"],
+            FITTINGS["d50"]["id"],
+            is_inside_troinik=True,
+            is_end=True,
+        )
+    )
     otvod.x += pipe.coordinates.start.x
     # otvod.x -= 80
     otvod.y += pipe.coordinates.start.y
@@ -543,6 +596,7 @@ def build_stuff_mesh(pipe: Pipe):
         otvod.x -= bias - 30
 
     meshes = [straight_obj, troinik, otvod]
+    material_graph.add_node(nodes, end=True)
     return meshes
 
 
@@ -599,7 +653,8 @@ def build_knee_fitting(pipe, riser_projections):
     obj = rotate_otvod_link_knee(obj, pipe, riser_projections, diameter)
     obj.x += pipe.coordinates.end.x
     obj.y += pipe.coordinates.end.y
-    return obj
+    node = Node(fitting_meta["name"], fitting_meta["id"])
+    return obj, node
 
 
 def build_riser(riser_coordinates, riser_projections, walls):
@@ -609,8 +664,8 @@ def build_riser(riser_coordinates, riser_projections, walls):
     obj.x += riser_coordinates.x
     obj.y += riser_coordinates.y
     obj.z += 60
-    # GRAPH[""] = fitting_meta.name
-    return obj
+    node = Node(fitting_meta["name"], fitting_meta["id"], is_start=True)
+    return obj, node
 
 
 def rotate_riser(obj, riser_coordinates, riser_projections, walls):
@@ -758,7 +813,8 @@ def build_riser_otvod(riser_coordinates, riser_projections, walls):
     obj.y += riser_projections.y
     obj.y += y_bias
     obj.x += x_bias
-    return obj
+    node = Node(fitting_meta["name"], fitting_meta["id"])
+    return obj, node
 
 
 def build_riser_to_otvod_pipe(riser_coordinates, riser_projections, treshold=400):
@@ -810,11 +866,17 @@ def build_riser_to_otvod_pipe(riser_coordinates, riser_projections, treshold=400
         )
         bias1 = 60
     else:
-        return None
-    obj = build_pipe_mesh(FITTINGS["d110"], pipe.coordinates, riser_projection_)
+        return None, None
+    obj_meta = FITTINGS["d110"]
+    obj, node = build_pipe_mesh(obj_meta, pipe.coordinates, riser_projection_)
     obj.x += bias1
     obj.y += bias2
-    return obj
+    node = Node(
+        obj_meta["name"],
+        obj_meta["id"],
+        l1_distance(pipe.coordinates.start, pipe.coordinates.end),
+    )
+    return obj, node
 
 
 def build_otvod_to_knee_pipe(riser_projections, walls, riser_wall):
@@ -860,11 +922,12 @@ def build_otvod_to_knee_pipe(riser_projections, walls, riser_wall):
         )
         # bias_x = 60
     else:
-        return None
-    obj = build_pipe_mesh(FITTINGS["d110"], pipe.coordinates, riser_projections)
+        return None, None
+    meta_obj = FITTINGS["d110"]
+    obj, node = build_pipe_mesh(meta_obj, pipe.coordinates, riser_projections)
     obj.x += bias_x
     obj.y += bias_y
-    return obj
+    return obj, node
 
 
 def get_toilet_coordinates_form_wall(walls):
@@ -878,6 +941,7 @@ def get_toilet_coordinates_form_wall(walls):
 
 # %%
 def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
+    material_graph = PipeGraph()
     mesh_data = []
     # riser_coordinates.y -= 200
     bi = 0
@@ -888,21 +952,20 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
     # riser_projections_test.x -= 900
     # riser_projections_test.y -= 400
     # riser_projections_test.y  = riser_coordinates_test.y
-    riser_obj = build_riser(
-        riser_coordinates_test, riser_projections_test, walls
-    ).data.copy()
-    # riser_obj = build_riser(riser_coordinates, riser_projections, walls).data.copy()
-    mesh_data.append(riser_obj)
-    riser_obj_p = build_riser_to_otvod_pipe(
+    riser_obj, node = build_riser(riser_coordinates_test, riser_projections_test, walls)
+    mesh_data.append(riser_obj.data.copy())
+    material_graph.add_node(node)
+    riser_obj_p, node = build_riser_to_otvod_pipe(
         riser_coordinates_test, riser_projections_test
     )
     if riser_obj_p:
         mesh_data.append(riser_obj_p.data.copy())
-    # pipe_turn = build_riser_pipes(riser_coordinates, riser_projections, walls).data.copy()
-    pipe_turn = build_riser_otvod(
+        material_graph.add_node(node)
+    pipe_turn, node = build_riser_otvod(
         riser_coordinates_test, riser_projections_test, walls
-    ).data.copy()
-    mesh_data.append(pipe_turn)
+    )
+    mesh_data.append(pipe_turn.data.copy())
+    material_graph.add_node(node)
     for wall in walls:
         obj = FITTINGS["d50"]
         if not wall.with_riser and wall.has_stuff:
@@ -912,32 +975,37 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
             )
             for idx, pipe in enumerate(pipes):
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
-                mesh_obj = build_pipe_mesh(obj, pipe.coordinates, riser_projections)
+                mesh_obj, node = build_pipe_mesh(
+                    obj, pipe.coordinates, riser_projections
+                )
+                material_graph.add_node(node)
                 if pipe.is_toilet:
-                    toilet_objets = build_toilet_mesh(pipe)
+                    toilet_objets = build_toilet_mesh(pipe, material_graph)
                     mesh_data.extend([objects.data.copy() for objects in toilet_objets])
                 else:
                     if pipe.stuff:
-                        stuff_object = build_stuff_mesh(pipe)
+                        stuff_object = build_stuff_mesh(pipe, material_graph)
                         mesh_data.extend(
                             [objects.data.copy() for objects in stuff_object]
                         )
                 if pipe.is_start:
-                    knee_obj = build_knee_fitting(pipe, riser_projections).data.copy()
-                    mesh_data.append(knee_obj)
+                    knee_obj, node = build_knee_fitting(pipe, riser_projections)
+                    mesh_data.append(knee_obj.data.copy())
+                    material_graph.add_node(node)
                 mesh_data.append(mesh_obj.data.copy())
         elif wall.with_riser:
             # pipes for whole wall
             # pipes = wall_with_riser(wall, riser_projections)
             # for idx, pipe in enumerate(pipes):
-            #     mesh_obj = build_pipe_mesh(obj, pipe, riser_projections)
+            #     mesh_obj, node = build_pipe_mesh(obj, pipe, riser_projections)
             #     mesh_data.append(mesh_obj.data.copy())
             if not wall.has_toilet:
-                riser_obj_p = build_otvod_to_knee_pipe(
+                riser_obj_p, node = build_otvod_to_knee_pipe(
                     riser_projections_test, walls, wall
                 )
                 if riser_obj_p:
                     mesh_data.append(riser_obj_p.data.copy())
+                    material_graph.add_node(node)
             wall.start_pipe_point = riser_projections
             if len(wall.stuff_point) == 0:
                 end = wall.coordinates.start
@@ -962,13 +1030,16 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
             # pipes wall
             for idx, pipe in enumerate(pipes):
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
-                mesh_obj = build_pipe_mesh(obj, pipe.coordinates, riser_projections)
+                mesh_obj, node = build_pipe_mesh(
+                    obj, pipe.coordinates, riser_projections
+                )
+                material_graph.add_node(node)
                 if pipe.is_toilet:
-                    toilet_objets = build_toilet_mesh(pipe)
+                    toilet_objets = build_toilet_mesh(pipe, material_graph)
                     mesh_data.extend([objects.data.copy() for objects in toilet_objets])
                 else:
                     if pipe.stuff:
-                        stuff_object = build_stuff_mesh(pipe)
+                        stuff_object = build_stuff_mesh(pipe, material_graph)
                         mesh_data.extend(
                             [objects.data.copy() for objects in stuff_object]
                         )
@@ -983,15 +1054,18 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
                     else Segment(wall.end, wall.start)
                 )
                 pipe = Pipe(pipe_coordinates, is_start=True, is_end=True)
-                pipe_obj = build_pipe_mesh(
+                pipe_obj, node = build_pipe_mesh(
                     obj, pipe.coordinates, riser_projections
-                ).data.copy()
-                knee_obj = build_knee_fitting(pipe, riser_projections).data.copy()
-                mesh_data.extend([pipe_obj, knee_obj])
+                )
+                material_graph.add_node(node)
+                knee_obj, node = build_knee_fitting(pipe, riser_projections)
+                material_graph.add_node(node)
+                mesh_data.extend([pipe_obj.data.copy(), knee_obj.data.copy()])
     all_figures = mesh.Mesh(np.concatenate(mesh_data))
+    grap_df = build_material_graph(material_graph)
     vpl.mesh_plot(all_figures)
     vpl.view(camera_direction=(0.1, 0.6, -0.8))
     vpl.save_fig(scrennshot_name, pixels=(1920, 1080), off_screen=True)
-    # vpl.mesh_plot(all_figures)
-    # vpl.show()
-    return all_figures
+    if os.getenv("LOCAL_ALGO"):
+        vpl.show()
+    return all_figures, grap_df

@@ -1,10 +1,8 @@
 # %%
 from typing import List
 
-from src.trace_builder.coordinate_converter import (
-    coordinates2segments,
-    segments2coordinates,
-)
+from src.trace_builder.coordinate_converter import (coordinates2segments,
+                                                    segments2coordinates)
 from src.trace_builder.model import Segment
 
 

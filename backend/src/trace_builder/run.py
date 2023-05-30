@@ -1,41 +1,30 @@
+import os
 from pathlib import Path
+from random import randint
+from time import time
 
 import ezdxf
-from random import randint
-
-import settings
-from src.trace_builder.coordinate_converter import (
-    coordinates2segments,
-)
-from src.trace_builder.projections import (
-    extract_riser_coordinates,
-    extract_rectange_points,
-    find_rect_corners,
-    find_middle_points,
-    entities_with_coordinates,
-    filter_wall_by_distance,
-    get_stuff_projcetions,
-    build_riser_projections,
-    find_optimal_riser_projection,
-    projection,
-    distance_from_riser_to_stuff,
-    calculate_max_riser_height,
-    clear_sutff_duplicate,
-)
-
-from src.trace_builder.path import (
-    detect_walls_with_stuff,
-    build_path_from_riser_wall_to_sutff_wall,
-    build_path,
-)
-from src.trace_builder.merge_segments import merge_segments
-from src.trace_builder.geometry import (
-    detect_wall_with_door,
-)
-from src.trace_builder.utils import dict2stuff
-from time import time
 import pandas as pd
-import os
+import settings
+from src.trace_builder.coordinate_converter import coordinates2segments
+from src.trace_builder.geometry import detect_wall_with_door
+from src.trace_builder.merge_segments import merge_segments
+from src.trace_builder.path import (build_path,
+                                    build_path_from_riser_wall_to_sutff_wall,
+                                    detect_walls_with_stuff)
+from src.trace_builder.projections import (build_riser_projections,
+                                           calculate_max_riser_height,
+                                           clear_sutff_duplicate,
+                                           distance_from_riser_to_stuff,
+                                           entities_with_coordinates,
+                                           extract_rectange_points,
+                                           extract_riser_coordinates,
+                                           filter_wall_by_distance,
+                                           find_middle_points,
+                                           find_optimal_riser_projection,
+                                           find_rect_corners,
+                                           get_stuff_projcetions, projection)
+from src.trace_builder.utils import dict2stuff
 
 
 def run_algo(dxf_path: str, heighs: dict, save_path: Path):
@@ -104,15 +93,11 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
         os.makedirs(save_path)
     timestam = int(time())
     output_files = f"{save_path}/{timestam}"
-    mesh = build_path(
+    mesh, material_graph = build_path(
         walls, riser_projections, riser_coordinates, f"{output_files}.png"
     )
     mesh.save(f"{output_files}.stl")
-    pd.DataFrame({"Граф": ["A-1", "1-2"], "Материал": [101, 102]}).to_csv(
-        f"{output_files}.csv"
-    )
-    # output_dir = os.getcwd() + "/" + str(save_path)
-    # return output_dir
+    material_graph.to_csv(f"{output_files}.csv", index=True)
     return f"{output_files}.csv", f"{output_files}.png", f"{output_files}.stl"
 
 
@@ -126,7 +111,7 @@ if __name__ == "__main__":
         "Унитаз_3D_С бачком_Рен - 2D_Унитаз_Бачок-V58-Битца 8_ТИПИЗАЦИЯ": 100,
     }
     run_algo(
-        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-4П-А-1.dxf",
+        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-2Л-А-1.dxf",
         hieghts,
         settings.MEDIA_DIR / "builder_outputs",
     )
