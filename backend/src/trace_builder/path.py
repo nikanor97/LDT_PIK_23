@@ -1064,10 +1064,11 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
     all_figures = mesh.Mesh(np.concatenate(mesh_data))
     grap_df = build_material_graph(material_graph)
     figure = vpl.gcf()
-    mesh = vpl.mesh_plot(all_figures)
+    plotted_mesh = vpl.mesh_plot(all_figures)
     vpl.view(camera_direction=(0.1, 0.6, -0.8))
     vpl.save_fig(scrennshot_name, pixels=(1920, 1080), off_screen=True)
     if os.getenv("LOCAL_ALGO"):
         vpl.show()
-    figure -= mesh
+    figure -= plotted_mesh
+    figure.close()
     return all_figures, grap_df
