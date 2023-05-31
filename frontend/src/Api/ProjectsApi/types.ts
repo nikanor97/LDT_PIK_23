@@ -33,8 +33,8 @@ export declare namespace Projects {
     };
     type oStartCalc = iApi.Projects.ItemDetail;
     type iDownloadResult = {
-        project: string,
-        variant: number,
-        file_type: "xls" | "stl"
+        project_id: string,
+        variant_num: number,
+        file_type: "csv" | "stl"
     }
 }

@@ -1,13 +1,14 @@
 import Actions from "@actions";
-import React from "react";
+import React, {useState} from "react";
 import {Modal} from "@root/Components/Controls";
-import {useAppDispatch, useAppSelector} from "@root/Hooks";
+import {useAppDispatch, useAppSelector, useNotification} from "@root/Hooks";
 import CloseIcon from "@assets/Icons/Close/Close";
 import {Checkbox, Form, Radio, Image} from "antd";
 import {Input, Button, FormItem, Select} from "@components/Controls";
 import styles from "./CreateProjectModal.module.less";
 import GridContainer from "@root/Components/GridContainer/GridContainer";
 import Title from "@root/Components/Title/Title";
+import {CheckboxChangeEvent} from "antd/lib/checkbox";
 const {Option} = Select;
 
 const CreateProjectModal = () => {
@@ -16,23 +17,80 @@ const CreateProjectModal = () => {
     const users = useAppSelector((state) => state.User.users);
     const dispatch = useAppDispatch();
     const [form] = Form.useForm();
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const notification = useNotification();
 
     if (!users) return null;
     if (!fittings) return null;
+
+    const allIds = fittings.flatMap((group) => group.values.map((value) => value.id));
+
+    const handleCheckboxChange = (id: string) => {
+        const selectedIndex = selectedIds.indexOf(id);
+        let updatedSelectedIds: string[];
+    
+        if (selectedIndex === -1) {
+            // Add the ID to the selected IDs array
+            updatedSelectedIds = [...selectedIds, id];
+        } else {
+            // Remove the ID from the selected IDs array
+            updatedSelectedIds = [
+                ...selectedIds.slice(0, selectedIndex),
+                ...selectedIds.slice(selectedIndex + 1),
+            ];
+        }
+    
+        setSelectedIds(updatedSelectedIds);
+    };
+    
+    const handleSelectAllChange = (event: CheckboxChangeEvent) => {
+    
+        setSelectedIds(event.target.checked ? allIds : []);
+    };
 
     const onSuccess = () => {
         form.resetFields();
     };
 
     const onCreate = () => {
-        const fittingsNames = fittings.map((item) => item.groupname);
+
+        if (!form.getFieldValue("worker_id")) {
+            form.setFields([
+                {
+                    name: "worker_id",
+                    errors: ["Поле не может быть пустым"]
+                },
+            ]);
+        }
+
+        if (!form.getFieldValue("name")) {
+            form.setFields([
+                {
+                    name: "name",
+                    errors: ["Поле не может быть пустым"]
+                },
+            ]);
+        }
+
+        if (!form.getFieldValue("worker_id") || !form.getFieldValue("name")) {
+            notification({
+                type: "error",
+                message: "Поля название и исполнитель обязательные"
+            });
+            return null;
+        }
+
+        if (selectedIds.length === 0) {
+            notification({
+                type: "error",
+                message: "Необходимо выбрать фитинги"
+            });
+            return null;
+        }
 
         const data = {
             worker_id: form.getFieldValue("worker_id"),
-            fittings_ids: fittingsNames
-                .map((item) => form.getFieldValue(item))
-                .flat()
-                .filter((item) => item !== undefined && item !== null),
+            fittings_ids: selectedIds,
             type: "dxf",
             name: form.getFieldValue("name"),
             onSuccess
@@ -141,7 +199,38 @@ const CreateProjectModal = () => {
                     <Title variant="h3" className={styles.fittingsSubTitle}>
                         Выберите необходимые фитинги
                     </Title>
-                    {fittings.map((item) => (
+                    <div>
+                        <div  className={styles.checkboxWrapper}>
+                            <Checkbox
+                                onChange={handleSelectAllChange}
+                                indeterminate={selectedIds.length > 0 && selectedIds.length < allIds.length}
+                                checked={selectedIds.length === allIds.length}>
+                                Выбрать все
+                            </Checkbox>
+                        </div>
+                        {fittings.map((group) => (
+                            <div key={group.groupname}>
+                                <Title variant="h2" className={styles.checkboxGroupTitle}>
+                                    {group.groupname}
+                                </Title>
+                                {group.values.map((item) => (
+                                    <div key={item.id} className={styles.checkboxWrapper}>
+                                        <Checkbox
+                                            key={item.id}
+                                            value={item.id}
+                                            checked={selectedIds.includes(item.id)}
+                                            onChange={() => handleCheckboxChange(item.id)}/>
+                                        <Image src={`data:image/png;base64,${item.image}`} width={40} height={40} className={styles.checkboxImage} alt="fit"/>
+                                        <div className={styles.checkboxChildren} >
+                                            {item.name}
+                                        </div>
+                                                                        
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                    {/* {fittings.map((item) => (
                         <FormItem
                             name={item.groupname}
                             key={item.groupname}
@@ -165,7 +254,7 @@ const CreateProjectModal = () => {
                             </Checkbox.Group>
                         </FormItem>
 
-                    ))}
+                    ))} */}
                 </Form>
                 
             </GridContainer>

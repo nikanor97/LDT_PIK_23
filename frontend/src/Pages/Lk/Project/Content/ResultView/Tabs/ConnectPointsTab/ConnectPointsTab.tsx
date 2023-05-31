@@ -2,6 +2,7 @@ import React from "react";
 import {Table, Image, Row, Col} from "antd";
 import {ColumnsType} from "antd/es/table";
 import styles from "./ConnectPointsTab.module.less";
+import useColumns from "./Hooks/useColumns";
 
 type TableData = {
     id: number,
@@ -24,38 +25,7 @@ type ConnectPointsTabProps = {
 
 const ConnectPointsTab = (props: ConnectPointsTabProps) => {
     const {data} = props;
-    const columns: ColumnsType<TableData> = [
-        {
-            title: "Порядок",
-            dataIndex: "order",
-            key: "order",
-        },
-        {
-            title: "Тип",
-            dataIndex: "type",
-            key: "type",
-        },
-        {
-            title: "Диаметр",
-            dataIndex: "diameter",
-            key: "diameter",
-        },
-        {
-            title: "X",
-            dataIndex: "coord_x",
-            key: "coord_x",
-        },
-        {
-            title: "Y",
-            dataIndex: "coord_y",
-            key: "coord_y",
-        },
-        {
-            title: "Z",
-            dataIndex: "coord_z",
-            key: "coord_z",
-        },
-    ];
+    const columns = useColumns();
 
     return (
         <Row gutter={24} className={styles.row}>

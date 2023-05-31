@@ -6,7 +6,6 @@ import {iActions} from "@redux/Projects/types";
 import React from "react";
 import useNotification from "@root/Hooks/useNotification/useNotification";
 import {iApi} from "@root/types";
-import base64 from "@root/Pages/Lk/Projects/Content/TopBar/Modules/CreateProject/Modules/CreateProjectModal/base64";
 
 const startCalc = function* (action: PayloadAction<iActions.startCalc>) {
     const {payload} = action;
