@@ -230,33 +230,7 @@ const CreateProjectModal = () => {
                             </div>
                         ))}
                     </div>
-                    {/* {fittings.map((item) => (
-                        <FormItem
-                            name={item.groupname}
-                            key={item.groupname}
-                            className={styles.formItem}>
-                            <Checkbox.Group  className={styles.checkboxGroup}>
-                                <Title variant="h2" className={styles.checkboxGroupTitle}>
-                                    {item.groupname}
-                                </Title>
-                                {item.values.map((item) => (
-                                    <div key={item.id} className={styles.checkboxWrapper}>
-                                        
-                                        <Checkbox key={item.id} value={item.id} />
-                                        <Image src={`data:image/png;base64,${item.image}`} width={40} height={40} className={styles.checkboxImage} alt="fit"/>
-                                        <div className={styles.checkboxChildren} >
-                                            {item.name}
-                                        </div>
-                                        
-                                    </div>
-
-                                ))}
-                            </Checkbox.Group>
-                        </FormItem>
-
-                    ))} */}
                 </Form>
-                
             </GridContainer>
             
         </Modal>
