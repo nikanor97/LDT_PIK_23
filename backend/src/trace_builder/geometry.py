@@ -68,3 +68,47 @@ def detect_wall_with_door(segments: List[Segment]):
         (coordinates2segment(segment), is_wall)
         for segment, is_wall in zip(segments, is_walls)
     ]
+
+
+def is_parallel_X(segment: Segment):
+    return True if segment.start.y == segment.end.y else False
+
+
+def is_parallel_Y(segment: Segment):
+    return True if segment.start.x == segment.end.x else False
+
+
+def is_wall_nighbour(wall_src, wall_dist, threshold=90):
+    if (
+        min(
+            [
+                l1_distance(wall_src.start, wall_dist.start),
+                l1_distance(wall_src.start, wall_dist.end),
+                l1_distance(wall_src.end, wall_dist.start),
+                l1_distance(wall_src.end, wall_dist.end),
+            ]
+        )
+        <= threshold
+    ):
+        return True
+    return False
+
+
+def is_point_near_wall(point: Point, wall: Segment, threshold: float = 90.0):
+    if (
+        min(
+            [
+                l1_distance(point, wall.start),
+                l1_distance(point, wall.end),
+            ]
+        )
+        <= threshold
+    ):
+        return True
+    return False
+
+
+def is_points_nighbour(point1, point2, threshold=90):
+    if l1_distance(point1, point2) <= threshold:
+        return True
+    return False

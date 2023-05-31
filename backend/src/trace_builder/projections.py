@@ -8,7 +8,10 @@ import numpy as np
 from src.trace_builder.coordinate_converter import (coordinate2point,
                                                     point2coordinate,
                                                     segment2coordinates)
-from src.trace_builder.geometry import is_dot_inside_segment, l1_distance
+from src.trace_builder.geometry import (is_dot_inside_segment, is_parallel_X,
+                                        is_parallel_Y, is_point_near_wall,
+                                        is_points_nighbour, is_wall_nighbour,
+                                        l1_distance, l2_distance)
 from src.trace_builder.model import Point, Segment
 
 # %%
@@ -181,7 +184,8 @@ def get_stuff_projcetions(stuffs, segments, verbose=False):
         min_dist, best_segmet, best_projectioned = float("inf"), None, None
         if verbose:
             plt.scatter(coordinates.x, coordinates.y, marker="*", linewidths=3)
-        for segment, is_has_door in segments:
+        # for segment, is_has_door in segments:
+        for segment in segments:
             projectioned = projection(coordinates, segment)
             # seg = Segment(Point(segment[0][0], segment[0][1]), Point(segment[1][0], segment[1][1]))
             # projectioned_point = projection(Point(coordinates[0], coordinates[1]), seg)
@@ -196,7 +200,7 @@ def get_stuff_projcetions(stuffs, segments, verbose=False):
                     l1_distance(projectioned, segment.start),
                     l1_distance(projectioned, segment.end),
                 )
-            if (l1_dist < min_dist or not best_segmet) and not is_has_door:
+            if l1_dist < min_dist or not best_segmet:
                 min_dist = l1_dist
                 best_segmet = segment
                 best_projectioned = projectioned
@@ -235,7 +239,9 @@ def find_optimal_riser_projection(riser_projections, stuff_projections):
         cum_sum = 0
         segment, projected_point, l1_dist = riser_projection
         for stuff, info in stuff_projections.items():
-            cum_sum += l1_distance(projected_point, info["projection"])
+            cum_sum += np.log(l2_distance(projected_point, info["projection"]))
+        cum_sum += l1_dist**2
+        print(idx_projection, cum_sum, l1_dist)
         if cum_sum < best_dist:
             best_project = riser_projection
             best_dist = cum_sum
@@ -257,6 +263,12 @@ def plot_projcetions(
                 (riser_coordinates.x, projectioned.x),
                 (riser_coordinates.y, projectioned.y),
                 linewidth=3,
+            )
+            plt.scatter(
+                riser_coordinates.x,
+                riser_coordinates.y,
+                linewidth=3,
+                marker="X",
             )
 
     for stuff, info in stuff_projections.items():
@@ -302,6 +314,77 @@ def clear_sutff_duplicate(stuffs):
     for key in keys_to_delete:
         stuffs.pop(key, None)
     return stuffs
+
+
+def get_top3_segmets(segments, topk=3):
+    for segment in segments:
+        segment.length = l1_distance(segment.start, segment.end)
+    return sorted(segments, key=lambda x: x.length, reverse=True)[:topk]
+
+
+def update_wall_y(wall_for_update, reference_wall_bad, reference_wall_good):
+    if is_point_near_wall(wall_for_update.end, reference_wall_good):
+        delt = wall_for_update.end.y - reference_wall_good.start.y
+        wall_for_update.start.y = reference_wall_bad.start.y - delt
+    else:
+        delt = wall_for_update.start.y - reference_wall_good.start.y
+        wall_for_update.end.y = reference_wall_bad.start.y
+    return wall_for_update
+
+
+def update_wall_x(wall_for_update, reference_wall_bad, reference_wall_good):
+    if is_point_near_wall(wall_for_update.end, reference_wall_good):
+        delt = wall_for_update.end.x - reference_wall_good.start.x
+        wall_for_update.start.x = reference_wall_bad.start.y - delt
+    else:
+        delt = wall_for_update.start.x - reference_wall_good.start.x
+        wall_for_update.end.x = reference_wall_bad.start.y - delt
+    return wall_for_update
+
+
+def check_wall_coordinates(walls):
+    parallel_x_cnt, parallel_y_cnt = 0, 0
+    parallel_x_walls = []
+    parallel_y_walls = []
+    out_walls = []
+    for wall in walls:
+        if is_parallel_X(wall):
+            parallel_x_cnt += 1
+            parallel_x_walls.append(wall)
+        if is_parallel_Y(wall):
+            parallel_y_cnt += 1
+            parallel_y_walls.append(wall)
+    if parallel_x_cnt == 2 and parallel_y_cnt == 1:
+        if is_wall_nighbour(
+            parallel_x_walls[0], parallel_y_walls[0]
+        ) and not is_wall_nighbour(parallel_x_walls[1], parallel_y_walls[0]):
+            parallel_y_walls[0] = update_wall_y(
+                parallel_y_walls[0], parallel_x_walls[1], parallel_x_walls[0]
+            )
+        elif not is_wall_nighbour(
+            parallel_x_walls[0], parallel_y_walls[0]
+        ) and is_wall_nighbour(parallel_x_walls[1], parallel_y_walls[0]):
+            parallel_y_walls[0] = update_wall_y(
+                parallel_y_walls[0], parallel_x_walls[0], parallel_x_walls[1]
+            )
+        out_walls = parallel_x_walls + parallel_y_walls
+    elif parallel_x_cnt == 1 and parallel_y_cnt == 2:
+        if is_wall_nighbour(
+            parallel_x_walls[0], parallel_y_walls[0]
+        ) and not is_wall_nighbour(parallel_x_walls[0], parallel_y_walls[1]):
+            parallel_x_walls[0] = update_wall_x(
+                parallel_x_walls[0], parallel_y_walls[1], parallel_y_walls[0]
+            )
+        elif is_wall_nighbour(
+            parallel_x_walls[0], parallel_y_walls[1]
+        ) and not is_wall_nighbour(parallel_x_walls[0], parallel_y_walls[0]):
+            parallel_x_walls[0] = update_wall_x(
+                parallel_x_walls[0], parallel_y_walls[0], parallel_y_walls[1]
+            )
+        out_walls = parallel_x_walls + parallel_y_walls
+    else:
+        out_walls = walls
+    return out_walls
 
 
 # %% Extract rectange coordinates

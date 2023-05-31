@@ -11,3 +11,4 @@ class Point:
 class Segment:
     start: Point
     end: Point
+    length: float = None

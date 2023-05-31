@@ -14,6 +14,7 @@ from src.trace_builder.path import (build_path,
                                     detect_walls_with_stuff)
 from src.trace_builder.projections import (build_riser_projections,
                                            calculate_max_riser_height,
+                                           check_wall_coordinates,
                                            clear_sutff_duplicate,
                                            distance_from_riser_to_stuff,
                                            entities_with_coordinates,
@@ -23,7 +24,9 @@ from src.trace_builder.projections import (build_riser_projections,
                                            find_middle_points,
                                            find_optimal_riser_projection,
                                            find_rect_corners,
-                                           get_stuff_projcetions, projection)
+                                           get_stuff_projcetions,
+                                           get_top3_segmets, plot_projcetions,
+                                           projection)
 from src.trace_builder.utils import dict2stuff
 
 
@@ -54,11 +57,11 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
         for segment in mid_points_merged
         if filter_wall_by_distance(segment, 100)
     ]
+    mid_point_filtered = get_top3_segmets(mid_point_filtered)
+    mid_point_filtered = check_wall_coordinates(mid_point_filtered)
+    # segments_with_wall_flag = detect_wall_with_door(mid_point_filtered)
 
-    segments_with_wall_flag = detect_wall_with_door(mid_point_filtered)
-
-    verbose = True if os.getenv("LOCAL_ALGO") else False
-    stuff_projections = get_stuff_projcetions(stuffs, segments_with_wall_flag, verbose)
+    stuff_projections = get_stuff_projcetions(stuffs, mid_point_filtered)
 
     riser_projection_distances = build_riser_projections(
         riser_coordinates, mid_point_filtered
@@ -70,6 +73,8 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
     riser_projection = projection(
         riser_coordinates, mid_point_filtered[optimal_segment]
     )
+    # if os.getenv("LOCAL_ALGO"):
+    #     plot_projcetions(riser_coordinates, riser_projection_distances, stuff_projections, optimal_segment)
 
     distance_from_riser_to_stuff(riser_projection, stuff_projections)
 
@@ -110,11 +115,20 @@ if __name__ == "__main__":
         "SND_2D_Эскиз_Мойка_Кухня - SND_2D_Эскиз_Мойка_Кухня-16115635-Битца 8_ТИПИЗАЦИЯ": 150,
         "Унитаз_3D_С бачком_Рен - 2D_Унитаз_Бачок-V58-Битца 8_ТИПИЗАЦИЯ": 100,
     }
-    run_algo(
-        settings.BASE_DIR / "data_samples" / "setup_examples" / "СТМ8-2Л-А-1.dxf",
-        hieghts,
-        settings.MEDIA_DIR / "builder_outputs",
-    )
+    files = [
+        # "СТМ8-1П-А-1.dxf",
+        # "СТМ8-1П-Б-2.dxf",
+        # "СТМ8-2Л-А-1.dxf",
+        # "СТМ8-2Л-Б-1.dxf",
+        "СТМ8-4П-А-1.dxf",
+    ]
+    for file in files:
+        run_algo(
+            settings.BASE_DIR / "data_samples" / "setup_examples" / file,
+            hieghts,
+            settings.MEDIA_DIR / "builder_outputs",
+        )
+
 # "СТМ8-1П-А-1.dxf"
 # "СТМ8-1П-Б-2.dxf"
 # "СТМ8-2Л-А-1.dxf"

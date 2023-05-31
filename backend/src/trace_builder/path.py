@@ -7,7 +7,9 @@ from typing import List, Tuple
 import numpy as np
 import vtkplotlib as vpl
 from src.trace_builder.constants import FITTINGS, GLOBAL_INIT_MIN
-from src.trace_builder.geometry import is_dot_inside_segment, l1_distance
+from src.trace_builder.geometry import (is_dot_inside_segment, is_parallel_X,
+                                        is_parallel_Y, is_wall_nighbour,
+                                        l1_distance)
 from src.trace_builder.graph_models import Node, PipeGraph
 from src.trace_builder.manipulate_3d import center_pipe, cutout_pipe
 from src.trace_builder.meterial_graph import build_material_graph
@@ -45,22 +47,6 @@ def detect_walls_with_stuff(
         )
         walls_with_stuff.append(wall_info)
     return walls_with_stuff
-
-
-def is_wall_nighbour(wall_src, wall_dist, threshold=90):
-    if (
-        min(
-            [
-                l1_distance(wall_src.start, wall_dist.start),
-                l1_distance(wall_src.start, wall_dist.end),
-                l1_distance(wall_src.end, wall_dist.start),
-                l1_distance(wall_src.end, wall_dist.end),
-            ]
-        )
-        <= threshold
-    ):
-        return True
-    return False
 
 
 def get_neighbour_wall(wall_src, wall_dist, threshold=90):
@@ -112,14 +98,6 @@ def build_path_from_riser_wall_to_sutff_wall(walls: List[Wall]):
                     wall.start_pipe_point = get_neighbour_wall(wall, wall2)
                 walls_new.append(wall)
     return walls_new
-
-
-def is_parallel_X(segment: Segment):
-    return True if segment.start.y == segment.end.y else False
-
-
-def is_parallel_Y(segment: Segment):
-    return True if segment.start.x == segment.end.x else False
 
 
 def is_pipe_projection_on_high(segment: Segment, riser_projection: Point):
@@ -601,8 +579,9 @@ def build_stuff_mesh(pipe: Pipe, material_graph: PipeGraph):
 
 
 def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
-    bias_1 = 160 if diameter == 110 else 130
-    bias_2 = 37 if diameter == 110 else 17
+    bias_1 = 160 if diameter == 110 else 90
+    bias_2 = 37 if diameter == 110 else 0
+    bias_3 = 55
     if is_parallel_X(pipe.coordinates):
         if pipe.coordinates.end.y > riser_projections.y:  # pipe above riser
             if pipe.coordinates.start.x < pipe.coordinates.end.x:  # right
@@ -618,10 +597,11 @@ def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
         else:
             if pipe.coordinates.start.x < pipe.coordinates.end.x:  # right
                 obj.rotate([0, 1, 0], math.radians(90))
-                obj.x -= bias_1
+                obj.x -= bias_3
             else:
                 obj.rotate([0, 1, 0], math.radians(-90))
                 obj.x += bias_1 - 50
+                obj.y += bias_1
     else:
         # CHECKED
         if pipe.coordinates.end.x < riser_projections.x:  # pipe -> riser
@@ -637,7 +617,7 @@ def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
             if pipe.coordinates.start.y < pipe.coordinates.end.y:  # up
                 obj.rotate([1, 0, 0], math.radians(-90))
                 obj.rotate([0, 1, 0], math.radians(90))
-                obj.y -= bias_1
+                obj.y -= 120
             else:
                 obj.rotate([0, 0, 1], math.radians(-90))
                 obj.rotate([1, 0, 0], math.radians(90))
@@ -727,7 +707,7 @@ def build_riser_otvod(riser_coordinates, riser_projections, walls):
             )
             y_bias = -40
     elif riser_projections.y < riser_coordinates.y:  # down
-        if not toilet_coordinates.x > riser_projections.x:  # toilet on right
+        if toilet_coordinates.x > riser_projections.x:  # toilet on right
             pipe_ = "down right"
             pipe = Pipe(
                 Segment(
@@ -751,7 +731,7 @@ def build_riser_otvod(riser_coordinates, riser_projections, walls):
                     end=Point(toilet_coordinates.x - common_bias, riser_projections.y),
                 )
             )
-            y_bias = -180
+            y_bias = 0
             x_bias = 40
     elif riser_projections.x < riser_coordinates.x:  # left
         if toilet_coordinates.y > riser_projections.y:  # toilet on up
@@ -778,7 +758,7 @@ def build_riser_otvod(riser_coordinates, riser_projections, walls):
                     end=Point(riser_projections.x - fix_legnt, toilet_coordinates.y),
                 )
             )
-            y_bias = 20
+            y_bias = 40
             x_bias = 0
     else:  # right
         if toilet_coordinates.y > riser_projections.y:  # toilet on up
@@ -806,7 +786,7 @@ def build_riser_otvod(riser_coordinates, riser_projections, walls):
                 )
             )
             y_bias = 40
-            x_bias = 150
+            x_bias = 0
     # print(pipe_)
     obj = rotate_otvod_link_knee(obj, pipe, riser_projections, 110)
     obj.x += riser_projections.x
