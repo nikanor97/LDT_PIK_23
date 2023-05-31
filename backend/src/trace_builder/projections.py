@@ -241,7 +241,7 @@ def find_optimal_riser_projection(riser_projections, stuff_projections):
         for stuff, info in stuff_projections.items():
             cum_sum += np.log(l2_distance(projected_point, info["projection"]))
         cum_sum += l1_dist**2
-        print(idx_projection, cum_sum, l1_dist)
+        # print(idx_projection, cum_sum, l1_dist)
         if cum_sum < best_dist:
             best_project = riser_projection
             best_dist = cum_sum

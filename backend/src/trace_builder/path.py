@@ -234,16 +234,26 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
     if end_wall_dist < 500 and (
         end_wall.has_stuff or if_wall_in_path_for_riser(end_wall, walls)
     ):
-        start_end_pipes.append(
-            Pipe(
-                coordinates=Segment(start_end_pipes[-1].coordinates.start, point),
-                is_toilet=False,
-                with_riser=False,
-                stuff=None,
-                is_end=True,
+        if is_last_stuff_is_edged:
+            start_end_pipes.append(
+                Pipe(
+                    coordinates=Segment(start_end_pipes[-1].coordinates.start, point),
+                    is_toilet=False,
+                    with_riser=False,
+                    stuff=None,
+                    is_end=True,
+                )
             )
-        )
-        start_end_pipes[-2].is_end = False
+            start_end_pipes[-2].is_end = False
+        else:
+            start_end_pipes = [Pipe(
+                    coordinates=Segment(start_end_pipes[-1].coordinates.start, point),
+                    is_toilet=False,
+                    with_riser=False,
+                    stuff=None,
+                    is_end=True,
+                )] + start_end_pipes
+            start_end_pipes[1].is_end = False
     return start_end_pipes, min_height
 
 
@@ -273,11 +283,11 @@ def wall_with_riser(wall_riser, riser_projections):
     return start_end_pipes
 
 
-def build_pipe_mesh(obj, pipe, riser_projections):
+def build_pipe_mesh(obj, pipe, riser_projections, cut_lenght = 0):
     mesh_obj = load_obj(obj)
     pipe_length = l1_distance(pipe.start, pipe.end)
     mesh_obj = center_pipe(mesh_obj, "z")
-    mesh_obj = cutout_pipe(mesh_obj, pipe_length)
+    mesh_obj = cutout_pipe(mesh_obj, pipe_length - cut_lenght)
     if is_parallel_X(pipe):
         if is_pipe_projection_on_right(pipe, riser_projections):
             mesh_obj.rotate([0, 1, 0.0], math.radians(90))
@@ -600,8 +610,9 @@ def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
                 obj.x -= bias_3
             else:
                 obj.rotate([0, 1, 0], math.radians(-90))
-                obj.x += bias_1 - 50
+                obj.x += bias_1 - 40
                 obj.y += bias_1
+                obj.y -= bias_1 if diameter == 50 else 0
     else:
         # CHECKED
         if pipe.coordinates.end.x < riser_projections.x:  # pipe -> riser
@@ -732,7 +743,7 @@ def build_riser_otvod(riser_coordinates, riser_projections, walls):
                 )
             )
             y_bias = 0
-            x_bias = 40
+            x_bias = -60
     elif riser_projections.x < riser_coordinates.x:  # left
         if toilet_coordinates.y > riser_projections.y:  # toilet on up
             pipe_ = "left up"
@@ -821,7 +832,7 @@ def build_riser_to_otvod_pipe(riser_coordinates, riser_projections, treshold=400
                 end=Point(riser_projections.x, riser_coordinates.y),
             )
         )
-        bias2 = -60
+        bias2 = +50
 
     elif (
         riser_coordinates.x - treshold >= riser_projections.x
@@ -848,7 +859,7 @@ def build_riser_to_otvod_pipe(riser_coordinates, riser_projections, treshold=400
     else:
         return None, None
     obj_meta = FITTINGS["d110"]
-    obj, node = build_pipe_mesh(obj_meta, pipe.coordinates, riser_projection_)
+    obj, node = build_pipe_mesh(obj_meta, pipe.coordinates, riser_projection_, 30)
     obj.x += bias1
     obj.y += bias2
     node = Node(
@@ -1028,10 +1039,10 @@ def build_path(walls, riser_projections, riser_coordinates, scrennshot_name):
             if if_wall_in_path_for_riser(wall, walls):
                 obj = FITTINGS["d50"]
                 pipe_coordinates = (
-                    Segment(wall.start, wall.end)
+                    Segment(wall.end, wall.start)
                     if l1_distance(wall.start, riser_projections)
                     < l1_distance(wall.end, riser_projections)
-                    else Segment(wall.end, wall.start)
+                    else Segment(wall.start, wall.end)
                 )
                 pipe = Pipe(pipe_coordinates, is_start=True, is_end=True)
                 pipe_obj, node = build_pipe_mesh(
