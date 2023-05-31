@@ -37,8 +37,8 @@ export declare namespace iActions {
     };
     type _startCalcSuccess = iApi.Projects.ItemDetail;
     type downloadResult = {
-        project: string,
-        variant: number,
-        file_type: "xls" | "stl"
+        project_id: string,
+        variant_num: number,
+        file_type: "csv" | "stl"
     }
 }
