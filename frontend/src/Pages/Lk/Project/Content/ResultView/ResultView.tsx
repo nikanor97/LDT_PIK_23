@@ -45,14 +45,14 @@ const ResultView = () => {
                     Вариант {selectedOption + 1}
                     </div> */}
                 </div>
-                {/* <Dropdown 
+                <Dropdown 
                     trigger={["click"]}
                     overlay={<DownloadMenu project={projectID} variant={1}/>}>
                     <Button 
                         type="primary">
                         Экспорт
                     </Button>
-                </Dropdown> */}
+                </Dropdown>
             </div>
             <Tabs defaultActiveKey="2">
                 {/* <TabPane tab={option.materials.tabName} key="1">

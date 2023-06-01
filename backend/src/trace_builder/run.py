@@ -4,33 +4,35 @@ from random import randint
 from time import time
 
 import ezdxf
-import pandas as pd
 import settings
 from src.trace_builder.coordinate_converter import coordinates2segments
-from src.trace_builder.geometry import detect_wall_with_door
 from src.trace_builder.merge_segments import merge_segments
-from src.trace_builder.path import (build_path,
-                                    build_path_from_riser_wall_to_sutff_wall,
-                                    detect_walls_with_stuff)
-from src.trace_builder.projections import (build_riser_projections,
-                                           calculate_max_riser_height,
-                                           check_wall_coordinates,
-                                           clear_sutff_duplicate,
-                                           distance_from_riser_to_stuff,
-                                           entities_with_coordinates,
-                                           extract_rectange_points,
-                                           extract_riser_coordinates,
-                                           filter_wall_by_distance,
-                                           find_middle_points,
-                                           find_optimal_riser_projection,
-                                           find_rect_corners,
-                                           get_stuff_projcetions,
-                                           get_top3_segmets, plot_projcetions,
-                                           projection)
+from src.trace_builder.path import (
+    build_path,
+    build_path_from_riser_wall_to_sutff_wall,
+    detect_walls_with_stuff,
+)
+from src.trace_builder.projections import (
+    build_riser_projections,
+    calculate_max_riser_height,
+    check_wall_coordinates,
+    clear_sutff_duplicate,
+    distance_from_riser_to_stuff,
+    entities_with_coordinates,
+    extract_rectange_points,
+    extract_riser_coordinates,
+    filter_wall_by_distance,
+    find_middle_points,
+    find_optimal_riser_projection,
+    find_rect_corners,
+    get_stuff_projcetions,
+    get_top3_segmets,
+    projection,
+)
 from src.trace_builder.utils import dict2stuff
 
 
-def run_algo(dxf_path: str, heighs: dict, save_path: Path):
+def run_algo(dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = ""):
     doc = ezdxf.readfile(dxf_path)
     modelspace = doc.modelspace()
     msp = modelspace
@@ -97,7 +99,7 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     timestam = int(time())
-    output_files = f"{save_path}/{timestam}"
+    output_files = f"{save_path}/{timestam}{file_suffix}"
     mesh, material_graph = build_path(
         walls,
         riser_projections,

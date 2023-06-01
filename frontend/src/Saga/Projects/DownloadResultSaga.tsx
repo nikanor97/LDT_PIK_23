@@ -19,7 +19,7 @@ const DownloadResult = function* (action: PayloadAction<iActions.downloadResult>
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            const filename = response.headers["content-disposition"].replace("inline; filename*=utf-8''", "");
+            const filename = response.headers["content-disposition"].replace("attachment; filename=", "");
             link.setAttribute("download", decodeURIComponent(filename));
             document.body.appendChild(link);
             link.click();
@@ -28,11 +28,13 @@ const DownloadResult = function* (action: PayloadAction<iActions.downloadResult>
             type: "info",
             message: "Результаты скачаны"
         });
+        yield put(Actions.Projects._downloadResultSuccess());
     } catch (error) {
         notification({
             type: "error",
             message: "При скачивании результатов произошла ошибка"
         });
+        yield put(Actions.Projects._downloadResultError());
     }
 };
 

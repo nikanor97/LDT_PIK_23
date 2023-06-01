@@ -1,3 +1,4 @@
+import enum
 import uuid
 from _decimal import Decimal
 from typing import Optional
@@ -108,3 +109,8 @@ class ProjectResult(BaseModel):
 
 class ProjectWithResults(ProjectExtendedWithNames):
     result: ProjectResult
+
+
+class ExportFileType(str, enum.Enum):
+    csv = "csv"
+    stl = "stl"
