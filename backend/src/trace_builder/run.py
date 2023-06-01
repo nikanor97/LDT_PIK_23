@@ -82,7 +82,7 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
         stuff_projections[key]["height"] = heighs.get(key, randint(150, 350))
 
     max_riser_height = calculate_max_riser_height(stuff_projections)
-    # %%
+
     clear_sutff_duplicate(stuff_projections)
     stuffs = stuff_projections
     walls_segments = mid_point_filtered
@@ -99,7 +99,11 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path):
     timestam = int(time())
     output_files = f"{save_path}/{timestam}"
     mesh, material_graph = build_path(
-        walls, riser_projections, riser_coordinates, f"{output_files}.png"
+        walls,
+        riser_projections,
+        riser_coordinates,
+        f"{output_files}.png",
+        scenario="45",
     )
     mesh.save(f"{output_files}.stl")
     material_graph.to_csv(f"{output_files}.csv", index=True)
