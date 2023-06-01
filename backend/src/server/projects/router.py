@@ -82,6 +82,13 @@ class ProjectsRouter:
             dependencies=[Depends(Auth(main_db_manager))],
         )
 
+        self.router.add_api_route(
+            path="/export",
+            endpoint=self._projects_endpoints.export_files,
+            methods=[METHOD.GET],
+            dependencies=[Depends(Auth(main_db_manager))],
+        )
+
         #
         # self.router.add_api_route(
         #     path="/excel-download",

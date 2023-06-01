@@ -2,6 +2,7 @@ import base64
 import os
 import uuid
 from collections import defaultdict
+from os.path import isfile, join
 from typing import Annotated
 
 import aiofiles
@@ -9,6 +10,7 @@ import ezdxf
 import pandas as pd
 from fastapi import HTTPException, Depends, UploadFile
 from sqlalchemy.exc import NoResultFound
+from starlette.responses import FileResponse
 
 import settings
 from src.architecture_utils.dxf import entities_with_coordinates
@@ -42,6 +44,7 @@ from src.server.projects.models import (
     ConnectionPoint,
     ProjectResultGraph,
     GraphVertex,
+    ExportFileType,
 )
 from src.trace_builder.run import run_algo
 
@@ -327,7 +330,10 @@ class ProjectsEndpoints:
                 ]
 
         csv_path, png_path, stl_path = run_algo(
-            file_path, names_to_coord_z, settings.MEDIA_DIR / "buider_outputs"
+            file_path,
+            names_to_coord_z,
+            settings.MEDIA_DIR / "builder_outputs",
+            f"_{devices_configs.dxf_file_id}",
         )
 
         df = pd.read_csv(csv_path)
@@ -395,6 +401,34 @@ class ProjectsEndpoints:
         )
 
         return p
+
+    async def export_files(
+        self,
+        project_id: uuid.UUID,
+        variant_num: int = 1,
+        file_type: ExportFileType = ExportFileType.csv,
+    ):
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            dxf_file = await self._main_db_manager.projects.get_latest_dxf_file(
+                session, project_id=project_id
+            )
+
+        files_dir = settings.MEDIA_DIR / "builder_outputs"
+        filenames_all = [f for f in os.listdir(files_dir) if isfile(join(files_dir, f))]
+        if file_type == ExportFileType.csv:
+            filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.csv")]
+            media_type = "text/csv"
+        elif file_type == ExportFileType.stl:
+            filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.stl")]
+            media_type = "application/wavefront-stl"
+        needed_filename = filenames[0]
+        headers = {"Content-Disposition": f"attachment; filename={needed_filename}"}
+        return FileResponse(
+            files_dir / needed_filename,
+            media_type=media_type,
+            headers=headers,
+            status_code=200,
+        )
 
     async def _get_user_or_error(self, user_id: uuid.UUID) -> User | NoResultFound:
         """

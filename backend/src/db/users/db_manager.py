@@ -246,12 +246,14 @@ class UsersDbManager(BaseDbManager):
             stmt = stmt.where(UserToken.access_token == token)
         elif token_kind == TokenKindOption.refresh:
             stmt = stmt.where(UserToken.refresh_token == token)
-        token_from_db: Optional[UserToken] = (
-            await session.execute(stmt)
-        ).scalar_one_or_none()
+        tokens_from_db: list[UserToken] = (await session.execute(stmt)).scalars().all()
+        # ).scalar_one_or_none()
 
-        if token_from_db is None:
+        # if token_from_db is None:
+        #     return False
+        if len(tokens_from_db) != 1:
             return False
+        token_from_db = tokens_from_db[0]
 
         # I MUST NOT DISABLE A PAIR OF TOKENS IF ACCESS TOKEN IS EXPIRED CAUSE OTHERWISE REFRESH WON'T WORK
         if (
