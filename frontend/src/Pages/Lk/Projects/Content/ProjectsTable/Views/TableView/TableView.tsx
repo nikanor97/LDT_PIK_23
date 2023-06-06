@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import useColumns from "../../Hooks/useColumns";
 import  {
     useGetValidNoun,
@@ -12,15 +12,12 @@ import routes from "@routes";
 import {useHistory} from "react-router-dom";
 import {iApi} from "@root/types";
 import EmptyDocuments from "@root/Assets/Icons/EmptyDocuments/EmptyDocuments";
-import useNotification from "@root/Hooks/useNotification/useNotification";
 
 const TableView = () => {
-
     const projects = useAppSelector((state) => state.Projects.projects);
     const columns = useColumns();
     const history = useHistory();
     const dispatch = useAppDispatch();
-    const notification = useNotification();
     const nounTypes = {
         type1: "проект",
         type2: "проекта",
@@ -29,7 +26,7 @@ const TableView = () => {
 
     const rowSelection = {
         onChange: (selectedRowKeys: React.Key[], selectedRows: iApi.Projects.Item[]) => {
-            dispatch(Actions.Projects.setSelectedProjects(selectedRows));
+            dispatch(Actions.Projects.setSelectedProjects(selectedRowKeys));
         },
         getCheckboxProps: (record: iApi.Projects.Item) => ({
             name: record.name,
@@ -46,7 +43,7 @@ const TableView = () => {
 
     return (
         <Table
-            // rowSelection={rowSelection}
+            rowSelection={rowSelection}
             onRow={(record) => {
                 return {
                     onClick: () => {
@@ -63,10 +60,13 @@ const TableView = () => {
                 showSizeChanger: true,
                 locale: {items_per_page: ""},
                 showTotal: (total) =>
-                    `Всего ${total} ${useGetValidNoun({
-                        nounTypes,
-                        number: total,
-                    })}`,
+                    <div className={styles.paginationTotal}>
+                            Всего {total} {useGetValidNoun({
+                            nounTypes,
+                            number: total,
+                        })}
+                    </div>
+                ,
                 selectPrefixCls: styles.test,
             }}
             scroll={{
@@ -76,8 +76,7 @@ const TableView = () => {
             rowKey="id"
             size="small"
             locale={{emptyText: (<EmptyDocuments />)}}
-            
-        />
+        />        
     );
 };
 
