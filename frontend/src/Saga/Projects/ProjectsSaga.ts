@@ -6,6 +6,7 @@ import GetSelectedProject from "./GetSelectedProject";
 import ParseDXF from "./ParseDXF";
 import StartCalcSaga from "./StartCalcSaga";
 import DownloadResultSaga from "./DownloadResultSaga";
+import DownloadFileSaga from "./DownloadFileSaga";
 
 export default function* rootSaga() {
     yield rootSagaCreator([
@@ -15,6 +16,7 @@ export default function* rootSaga() {
         GetSelectedProject,
         ParseDXF,
         StartCalcSaga,
-        DownloadResultSaga
+        DownloadResultSaga,
+        DownloadFileSaga
     ], "PROJECTS");
 }

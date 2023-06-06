@@ -1,6 +1,9 @@
 import React from "react";
 import {Table, Image, Row, Col} from "antd";
 import styles from "./Graph.module.less";
+import {useAppSelector} from "@root/Hooks";
+import STLViewer from "../../Modules/StlViewer/StlViewer";
+import Loading from "@root/Components/Loading/Loading";
 
 type TableData = {
     id: number,
@@ -19,6 +22,8 @@ type GraphTabProps = {
 }
 
 const GraphTab = (props: GraphTabProps) => {
+    const stl = useAppSelector((state) => state.Projects.file);
+    const stlLoading = useAppSelector((state) => state.Projects.loadFile);
     const {data} = props;
     
     const columns = [
@@ -56,10 +61,23 @@ const GraphTab = (props: GraphTabProps) => {
                 />
             </Col>
             <Col span={12}>
-                <Image
-                    className={styles.image}
-                    src={`data:image/png;base64,${data.image}`}
-                />
+                {
+                    stlLoading ? (
+                        <Loading>
+                            Загрузка 3D модели...
+                        </Loading>
+                    ) : (
+                        stl ? (
+                            <STLViewer file={stl} />
+                        ) : (
+                            <Image
+                                className={styles.image}
+                                src={`data:image/png;base64,${data.image}`}
+                            />
+                        )
+                    )
+                }
+
             </Col>
         </Row>
     );
