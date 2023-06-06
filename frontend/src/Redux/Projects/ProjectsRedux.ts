@@ -17,6 +17,8 @@ type iState = {
     DXFdata: iApi.Projects.DXFParsedData | null,
     startCalcStatus: "loading" | "success" | "error" | null;
     loadingDownload: boolean;
+    file: File | null;
+    loadFile: boolean,
 }
 
 const initialState:iState  = {
@@ -33,7 +35,9 @@ const initialState:iState  = {
     parseDXFStatus: null,
     DXFdata: null,
     startCalcStatus: null,
-    loadingDownload: false
+    loadingDownload: false,
+    file: null,
+    loadFile: false,
 };
 
 const Slice = createSlice({
@@ -129,7 +133,17 @@ const Slice = createSlice({
         },
         _downloadResultError: (state) => {
             state.loadingDownload = false;
-        }
+        },
+        downloadFile: (state, action: PayloadAction<iActions.downloadResult>) => {
+            state.loadFile = true;
+        },
+        _downloadFileSuccess: (state, action: PayloadAction<iActions._downloadFileSuccess>) => {
+            state.file = action.payload;
+            state.loadFile = false;
+        },
+        _downloadFileError: (state) => {
+            state.loadFile = false;
+        },
     }
 });
 

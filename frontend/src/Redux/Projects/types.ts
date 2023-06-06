@@ -41,4 +41,5 @@ export declare namespace iActions {
         variant_num: number,
         file_type: "csv" | "stl"
     }
+    type _downloadFileSuccess = File;
 }

@@ -1,10 +1,8 @@
-import {useAppDispatch, useAppSelector} from "@root/Hooks";
 import React, {useEffect} from "react";
 import MaterialTab from "./Tabs/MaterialTab/MaterialTab";
 import ConnectPointsTab from "./Tabs/ConnectPointsTab/ConnectPointsTab";
 import GraphTab from "./Tabs/GraphTab/GraphTab";
-import styles from "./ResultView.module.less";
-
+import {useAppDispatch, useAppSelector} from "@root/Hooks";
 import {Dropdown, Tabs} from "antd";
 import Icon from "@ant-design/icons/lib/components/Icon";
 import Back from "./Icons/Back";
@@ -13,6 +11,7 @@ import {Button} from "@root/Components/Controls";
 import {useHistory, useParams} from "react-router-dom";
 import DownloadMenu from "./Modules/DownloadMenu/DownloadMenu";
 import routes from "@root/Routes/Routes";
+import styles from "./ResultView.module.less";
 
 const {TabPane} = Tabs;
 
@@ -31,6 +30,11 @@ const ResultView = () => {
     if (!option) return null;
 
     useEffect(() => {
+        dispatch(Actions.Projects.downloadFile({
+            project_id: projectID,
+            variant_num: 1,
+            file_type: "stl"
+        }));
         return () => {
             dispatch(Actions.Projects.setSelectedOption(null));
         };
@@ -54,7 +58,7 @@ const ResultView = () => {
                     </Button>
                 </Dropdown>
             </div>
-            <Tabs defaultActiveKey="2">
+            <Tabs defaultActiveKey="2" >
                 {/* <TabPane tab={option.materials.tabName} key="1">
                     <MaterialTab tables={option.materials.tables} />
                 </TabPane> */}

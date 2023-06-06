@@ -2,33 +2,33 @@ import React, {useEffect, useRef, useState} from "react";
 import {STLLoader} from "three/examples/jsm/loaders/STLLoader";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import * as THREE from "three";
+import styles from "./StlViewer.module.less";
 
 interface Props {
-  fileUrl: File;
+  file: File;
 }
 
-const STLViewer: React.FC<Props> = ({fileUrl}) => {
+const STLViewer: React.FC<Props> = ({file}) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [url, setUrl] = useState<string>();
 
     useEffect(() => {
         const reader = new FileReader();
         reader.onload = (event) => {
-            setUrl(URL.createObjectURL(new Blob([new Uint8Array(event.target?.result as any)], {type: fileUrl.type})));
+            setUrl(URL.createObjectURL(new Blob([new Uint8Array(event.target?.result as ArrayBufferLike)], {type: file.type})));
         };
-        reader.readAsArrayBuffer(fileUrl);
-    }, [fileUrl]);
+        reader.readAsArrayBuffer(file);
+    }, [file]);
 
     useEffect(() => {
         if (!containerRef.current) return;
         if (!url) return;
-        console.log(url);
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(26, 400 / 400, 1, 100000);
+        const camera = new THREE.PerspectiveCamera(26, containerRef.current.offsetWidth / containerRef.current.offsetHeight, 1, 100000);
         const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(600, 600);
-        renderer.setClearColor(0xF9FAFB);
+        renderer.setSize(containerRef.current.offsetWidth, containerRef.current.offsetHeight);
+        renderer.setClearColor(0xE3E3E3);
         containerRef.current.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -36,15 +36,23 @@ const STLViewer: React.FC<Props> = ({fileUrl}) => {
         controls.zoomSpeed = 1.2;
         controls.panSpeed = 0.8;
 
-        const directionalLight = new THREE.DirectionalLight(0xffffee, 1.5);
+        //Directional Light
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
         scene.add(directionalLight);
-        scene.add(new THREE.AmbientLight(0xffffee, 0.4));
+
+        //AmbientLight
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+
+        //Point Light
+        const pointLight = new THREE.PointLight( 0xffffff, 0.8 );
+        scene.add( pointLight );
 
         const loader = new STLLoader();
         loader.load(
             url,
             (geometry) => {
-                const material = new THREE.MeshStandardMaterial({color: 0xFC4C02});
+                const material = new THREE.MeshPhongMaterial({color: 0x8C8C8C});
                 const mesh = new THREE.Mesh(geometry, material);
         
                 // Определение границ и центра объекта для корректного позиционирования
@@ -55,9 +63,9 @@ const STLViewer: React.FC<Props> = ({fileUrl}) => {
                 controls.reset();
 
                 camera.position.copy(center);
-                camera.position.x += size / 2.0;
-                camera.position.y += size / 2.0;
-                camera.position.z += size / 2.0;
+                camera.position.x += size / 0.8;
+                camera.position.y += size / 0.8;
+                camera.position.z += size / 0.8;
                 camera.lookAt(center);
 
                 controls.maxDistance = size * 10;
@@ -67,7 +75,7 @@ const STLViewer: React.FC<Props> = ({fileUrl}) => {
             },
             undefined,
             (error) => {
-                console.error("An error happened", error);
+                console.error("При создании 3D элемента произошла ошибка", error);
             }
         );
 
@@ -86,7 +94,7 @@ const STLViewer: React.FC<Props> = ({fileUrl}) => {
         };
     }, [url]);
 
-    return <div ref={containerRef} />;
+    return <div ref={containerRef} className={styles.stl}/>;
 };
 
 export default STLViewer;
