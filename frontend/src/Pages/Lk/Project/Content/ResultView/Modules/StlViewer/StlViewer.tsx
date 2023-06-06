@@ -54,6 +54,7 @@ const STLViewer: React.FC<Props> = ({file}) => {
             (geometry) => {
                 const material = new THREE.MeshPhongMaterial({color: 0x8C8C8C});
                 const mesh = new THREE.Mesh(geometry, material);
+                mesh.rotation.set(Math.PI / -2,0,0);
         
                 // Определение границ и центра объекта для корректного позиционирования
                 const box = new THREE.Box3().setFromObject(mesh);
