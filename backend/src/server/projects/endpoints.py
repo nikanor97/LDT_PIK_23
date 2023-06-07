@@ -2,8 +2,7 @@ import base64
 import os
 import uuid
 from collections import defaultdict
-from os.path import isfile, join
-from typing import Annotated
+from typing import Annotated, Optional
 
 import aiofiles
 import ezdxf
@@ -26,6 +25,7 @@ from src.db.projects.models import (
     Device,
     device_type_to_name,
     DeviceTypeOption,
+    ProjectStatusOption,
 )
 from src.db.users.models import User
 from src.server.auth_utils import oauth2_scheme, get_user_id_from_token
@@ -45,6 +45,8 @@ from src.server.projects.models import (
     ProjectResultGraph,
     GraphVertex,
     ExportFileType,
+    ProjectsDelete,
+    ProjectSewerVariant,
 )
 from src.trace_builder.run import run_algo
 
@@ -205,6 +207,16 @@ class ProjectsEndpoints:
 
             return result
 
+    async def delete_projects(self, projects_delete: ProjectsDelete) -> list[Project]:
+        try:
+            async with self._main_db_manager.projects.make_autobegin_session() as session:
+                projects = await self._main_db_manager.projects.delete_projects(
+                    session, projects_delete.project_ids
+                )
+        except NoResultFound as e:
+            raise HTTPException(status_code=404, detail=exc_to_str(e))
+        return projects
+
     async def upload_dxf(
         self, project_id: uuid.UUID, file: UploadFile
     ) -> DxfFileWithDevices:
@@ -233,27 +245,27 @@ class ProjectsEndpoints:
 
         dxf_file = DxfFile(project_id=project_id, source_url=file_name)
 
+        try:
+            async with self._main_db_manager.projects.make_autobegin_session() as session:
+                dxf_file_created = await self._main_db_manager.projects.create_dxf_file(
+                    session, dxf_file
+                )
+                await self._main_db_manager.projects.update_project_status(
+                    session, project_id, ProjectStatusOption.in_progress
+                )
+        except NoResultFound as e:
+            raise HTTPException(status_code=404, detail=exc_to_str(e))
+
         devices = []
         for stuff_name, coords in stuffs.items():
-            if "унитаз" in stuff_name.lower():
-                device_type = DeviceTypeOption.toilet
-            elif "раковина" in stuff_name.lower():
-                device_type = DeviceTypeOption.sink
-            elif "машина" in stuff_name.lower():
-                device_type = DeviceTypeOption.washing_machine
-            elif "ванна" in stuff_name.lower():
-                device_type = DeviceTypeOption.bath
-            elif "кран" in stuff_name.lower():
-                device_type = DeviceTypeOption.faucet
-            elif "мойка" in stuff_name.lower():
-                device_type = DeviceTypeOption.kitchen_sink
-            else:
-                print(f"Unknown device {stuff_name}")
+            device_type = self._device_type_by_name(stuff_name)
+            if device_type is None:  # Unknown device
                 continue
             device = Device(
-                project_id=project_id,
-                name=device_type_to_name[device_type],
+                dxf_file_id=dxf_file_created.id,
+                name=stuff_name,
                 type=device_type,
+                type_human=device_type_to_name[device_type],
                 coord_x=round(coords[0]),
                 coord_y=round(coords[1]),
             )
@@ -264,10 +276,6 @@ class ProjectsEndpoints:
                 devices_created = await self._main_db_manager.projects.create_devices(
                     session, devices
                 )
-                dxf_file_created = await self._main_db_manager.projects.create_dxf_file(
-                    session, dxf_file
-                )
-
         except NoResultFound as e:
             raise HTTPException(status_code=404, detail=exc_to_str(e))
 
@@ -279,15 +287,119 @@ class ProjectsEndpoints:
         )
         return res
 
+    def _device_type_by_name(self, device_name: str) -> Optional[DeviceTypeOption]:
+        if "унитаз" in device_name.lower():
+            device_type = DeviceTypeOption.toilet
+        elif "раковина" in device_name.lower():
+            device_type = DeviceTypeOption.sink
+        elif "машина" in device_name.lower():
+            device_type = DeviceTypeOption.washing_machine
+        elif "ванна" in device_name.lower():
+            device_type = DeviceTypeOption.bath
+        elif "кран" in device_name.lower():
+            device_type = DeviceTypeOption.faucet
+        elif "мойка" in device_name.lower():
+            device_type = DeviceTypeOption.kitchen_sink
+        else:
+            print(f"Unknown device {device_name}")
+            device_type = None
+        return device_type
+
+    async def _get_project_with_results(
+        self, project_id: uuid.UUID
+    ) -> ProjectWithResults:
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            devices = await self._main_db_manager.projects.get_devices(
+                session, project_id
+            )
+            variants = await self._main_db_manager.projects.get_sewer_variants(
+                session, project_id
+            )
+
+        dfs: dict[int, pd.DataFrame] = dict()
+        imgs: dict[int, str] = dict()
+        for idx, variant in enumerate(variants):
+            dfs[variant.variant_num] = pd.read_csv(variant.excel_source_url)
+            variants[idx].n_fittings = idx  # TODO: CHANGE ME !!!!!!!
+            variants[idx].sewer_length = idx
+
+            with open(variant.png_source_url, "rb") as img:
+                img_str = base64.b64encode(img.read()).decode("utf-8")
+                imgs[variant.variant_num] = img_str
+
+        async with self._main_db_manager.users.make_autobegin_session() as session:
+            users = await self._main_db_manager.users.get_all_users(session)
+        user_by_id: dict[uuid.UUID, User] = dict()
+        for user in users:
+            user_by_id[user.id] = user
+
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            project = await self._main_db_manager.projects.get_project(
+                session, project_id
+            )
+            proj = ProjectExtendedWithNames(
+                author_name=user_by_id[project.author_id].name,
+                worker_name=user_by_id[project.worker_id].name,
+                **project.dict(),
+            )
+
+        project_with_results = ProjectWithResults(
+            id=proj.id,
+            author_name=proj.author_name,
+            worker_name=proj.worker_name,
+            name=proj.name,
+            description=proj.description,
+            status=proj.status,
+            type=proj.type,
+            bathroom_type=proj.bathroom_type,
+            is_deleted=proj.is_deleted,
+            results=[
+                ProjectSewerVariant(
+                    variant_num=variant.variant_num,
+                    n_fittings=variant.n_fittings,
+                    sewer_length=variant.sewer_length,
+                    result=ProjectResult(
+                        connection_points=ProjectResultConnectionPoints(
+                            tab_name="Точки подключения",
+                            table=[
+                                ConnectionPoint(
+                                    id=uuid.uuid4(),
+                                    order="direct",
+                                    type=device.type,
+                                    diameter=1,
+                                    coord_x=device.coord_x,
+                                    coord_y=device.coord_y,
+                                    coord_z=device.coord_z,
+                                )
+                                for device in devices
+                            ],
+                            image=img_str,
+                        ),
+                        graph=ProjectResultGraph(
+                            tab_name="Граф подключения",
+                            table=[
+                                GraphVertex(
+                                    id=uuid.uuid4(),
+                                    graph=row["Граф"],
+                                    material=row["Материал"],
+                                    probability=0.9,
+                                )
+                                for id, row in dfs[variant.variant_num].iterrows()
+                            ],
+                            image=img_str,
+                        ),
+                    ),
+                )
+                for variant in variants
+            ],
+        )
+        return project_with_results
+
     async def build_pipes(
         self, devices_configs: DevicesWithHeights
     ) -> ProjectWithResults:
-        """
-        Appropriate DXF file can be found as one with largest created_at for this project_id
-        :param devices_configs:
-        :return:
-        """
         devices = devices_configs.devices
+        project_id = devices_configs.project_id
         # Assuming that there can no be two devices with the same type
         types_to_coord_z = dict()
         for device in devices:
@@ -312,95 +424,100 @@ class ProjectsEndpoints:
 
         names_to_coord_z = dict()
         for stuff_name, coords in stuffs.items():
-            if "унитаз" in stuff_name.lower():
-                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.toilet]
-            elif "раковина" in stuff_name.lower():
-                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.sink]
-            elif "машина" in stuff_name.lower():
-                names_to_coord_z[stuff_name] = types_to_coord_z[
-                    DeviceTypeOption.washing_machine
-                ]
-            elif "ванна" in stuff_name.lower():
-                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.bath]
-            elif "кран" in stuff_name.lower():
-                names_to_coord_z[stuff_name] = types_to_coord_z[DeviceTypeOption.faucet]
-            elif "мойка" in stuff_name.lower():
-                names_to_coord_z[stuff_name] = types_to_coord_z[
-                    DeviceTypeOption.kitchen_sink
-                ]
+            device_type = self._device_type_by_name(stuff_name)
+            if device_type is not None:
+                names_to_coord_z[stuff_name] = types_to_coord_z[device_type]
 
-        csv_path, png_path, stl_path = run_algo(
+        # csv_path, png_path, stl_path = run_algo(
+        sewer_variants = run_algo(
             file_path,
             names_to_coord_z,
             settings.MEDIA_DIR / "builder_outputs",
             f"_{devices_configs.dxf_file_id}",
         )
 
-        df = pd.read_csv(csv_path)
-
-        with open(png_path, "rb") as img:
-            img_str = base64.b64encode(img.read()).decode("utf-8")
-
-        async with self._main_db_manager.users.make_autobegin_session() as session:
-            users = await self._main_db_manager.users.get_all_users(session)
-        user_by_id: dict[uuid.UUID, User] = dict()
-        for user in users:
-            user_by_id[user.id] = user
+        devices_z_coords = {d.id: d.coord_z for d in devices}
 
         async with self._main_db_manager.projects.make_autobegin_session() as session:
-            project = await self._main_db_manager.projects.get_project(
-                session, devices_configs.project_id
+            variants = await self._main_db_manager.projects.create_sewer_variants(
+                session, sewer_variants, project_id
             )
-            proj = ProjectExtendedWithNames(
-                author_name=user_by_id[project.author_id].name,
-                worker_name=user_by_id[project.worker_id].name,
-                **project.dict(),
+            devices = await self._main_db_manager.projects.update_devices_z_coord(
+                session, devices_z_coords
             )
 
-        p = ProjectWithResults(
-            id=proj.id,
-            author_name=proj.author_name,
-            worker_name=proj.worker_name,
-            name=proj.name,
-            description=proj.description,
-            status=proj.status,
-            type=proj.type,
-            bathroom_type=proj.bathroom_type,
-            is_deleted=proj.is_deleted,
-            result=ProjectResult(
-                connection_points=ProjectResultConnectionPoints(
-                    tab_name="Точки подключения",
-                    table=[
-                        ConnectionPoint(
-                            id=uuid.uuid4(),
-                            order="direct",
-                            type=device.type,
-                            diameter=1,
-                            coord_x=device.coord_x,
-                            coord_y=device.coord_y,
-                            coord_z=device.coord_z,
-                        )
-                        for device in devices
-                    ],
-                    image=img_str,
-                ),
-                graph=ProjectResultGraph(
-                    tab_name="Граф подключения",
-                    table=[
-                        GraphVertex(
-                            id=uuid.uuid4(),
-                            graph=row["Граф"],
-                            material=row["Материал"],
-                            probability=0.9,
-                        )
-                        for id, row in df.iterrows()
-                    ],
-                    image=img_str,
-                ),
-            ),
-        )
+        project_with_results = await self._get_project_with_results(project_id)
 
-        return p
+        # df = pd.read_csv(csv_path)
+        #
+        # with open(png_path, "rb") as img:
+        #     img_str = base64.b64encode(img.read()).decode("utf-8")
+
+        # async with self._main_db_manager.users.make_autobegin_session() as session:
+        #     users = await self._main_db_manager.users.get_all_users(session)
+        # user_by_id: dict[uuid.UUID, User] = dict()
+        # for user in users:
+        #     user_by_id[user.id] = user
+        #
+        # async with self._main_db_manager.projects.make_autobegin_session() as session:
+        #     project = await self._main_db_manager.projects.get_project(
+        #         session, devices_configs.project_id
+        #     )
+        #     proj = ProjectExtendedWithNames(
+        #         author_name=user_by_id[project.author_id].name,
+        #         worker_name=user_by_id[project.worker_id].name,
+        #         **project.dict(),
+        #     )
+        #
+        # p = ProjectWithResults(
+        #     id=proj.id,
+        #     author_name=proj.author_name,
+        #     worker_name=proj.worker_name,
+        #     name=proj.name,
+        #     description=proj.description,
+        #     status=proj.status,
+        #     type=proj.type,
+        #     bathroom_type=proj.bathroom_type,
+        #     is_deleted=proj.is_deleted,
+        #     result=ProjectResult(
+        #         connection_points=ProjectResultConnectionPoints(
+        #             tab_name="Точки подключения",
+        #             table=[
+        #                 ConnectionPoint(
+        #                     id=uuid.uuid4(),
+        #                     order="direct",
+        #                     type=device.type,
+        #                     diameter=1,
+        #                     coord_x=device.coord_x,
+        #                     coord_y=device.coord_y,
+        #                     coord_z=device.coord_z,
+        #                 )
+        #                 for device in devices
+        #             ],
+        #             image=img_str,
+        #         ),
+        #         graph=ProjectResultGraph(
+        #             tab_name="Граф подключения",
+        #             table=[
+        #                 GraphVertex(
+        #                     id=uuid.uuid4(),
+        #                     graph=row["Граф"],
+        #                     material=row["Материал"],
+        #                     probability=0.9,
+        #                 )
+        #                 for id, row in df.iterrows()
+        #             ],
+        #             image=img_str,
+        #         ),
+        #     ),
+        # )
+
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            await self._main_db_manager.projects.update_project_status(
+                session, project_id, ProjectStatusOption.ready
+            )
+
+        return project_with_results
 
     async def export_files(
         self,
@@ -408,27 +525,68 @@ class ProjectsEndpoints:
         variant_num: int = 1,
         file_type: ExportFileType = ExportFileType.csv,
     ):
+        # filename, file_path = await self._get_filename(project_id, variant_num, file_type)
         async with self._main_db_manager.projects.make_autobegin_session() as session:
-            dxf_file = await self._main_db_manager.projects.get_latest_dxf_file(
-                session, project_id=project_id
-            )
+            try:
+                sewer_variants = (
+                    await self._main_db_manager.projects.get_sewer_variants(
+                        session, project_id
+                    )
+                )
+            except NoResultFound as e:
+                raise HTTPException(status_code=404, detail=exc_to_str(e))
 
-        files_dir = settings.MEDIA_DIR / "builder_outputs"
-        filenames_all = [f for f in os.listdir(files_dir) if isfile(join(files_dir, f))]
+        sewer_variant = None
+        for sw in sewer_variants:
+            if sw.variant_priority == variant_num:
+                sewer_variant = sw
+
         if file_type == ExportFileType.csv:
-            filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.csv")]
+            filename = sewer_variant.excel_source_url
             media_type = "text/csv"
         elif file_type == ExportFileType.stl:
-            filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.stl")]
+            filename = sewer_variant.stl_source_url
             media_type = "application/wavefront-stl"
-        needed_filename = filenames[0]
-        headers = {"Content-Disposition": f"attachment; filename={needed_filename}"}
+        elif file_type == ExportFileType.png:
+            filename = sewer_variant.png_source_url
+            media_type = "image/png"
+        else:
+            raise ValueError(f"Unsupported file type")
+        headers = {
+            "Content-Disposition": f"attachment; filename={filename.split('/')[-1]}"
+        }
         return FileResponse(
-            files_dir / needed_filename,
+            filename,
             media_type=media_type,
             headers=headers,
             status_code=200,
         )
+
+    # async def _get_filename(
+    #     self,
+    #     project_id: uuid.UUID,
+    #     file_types: list[ExportFileType],
+    #     variant_num: int = 1,
+    # ) -> tuple[str, str]:
+    #     async with self._main_db_manager.projects.make_autobegin_session() as session:
+    #         dxf_file = await self._main_db_manager.projects.get_latest_dxf_file(
+    #             session, project_id=project_id
+    #         )
+    #
+    #     files_dir = settings.MEDIA_DIR / "builder_outputs"
+    #     filenames_all = [f for f in os.listdir(files_dir) if isfile(join(files_dir, f))]
+    #     if file_type == ExportFileType.csv:
+    #         filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.csv")]
+    #     elif file_type == ExportFileType.stl:
+    #         filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.stl")]
+    #     elif file_type == ExportFileType.png:
+    #         filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.png")]
+    #     else:
+    #         raise ValueError(f"Unsupported file_type {file_type}")
+    #
+    #     assert len(filenames) == 1, f"Several files were found, but only one should exist"
+    #     needed_filename = filenames[0]
+    #     return needed_filename, files_dir / needed_filename
 
     async def _get_user_or_error(self, user_id: uuid.UUID) -> User | NoResultFound:
         """

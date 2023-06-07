@@ -2,7 +2,6 @@ import base64
 import uuid
 from typing import Optional
 
-from sqlalchemy import desc
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -25,6 +24,9 @@ from src.db.projects.models import (
     Device,
     DxfFileBase,
     DxfFile,
+    SewerVariant,
+    SewerVariantBase,
+    ProjectStatusOption,
 )
 from src.server.projects.models import ProjectExtendedWithIds
 
@@ -110,7 +112,7 @@ class ProjectsDbManager(BaseDbManager):
             elif ur.role_type == RoleTypeOption.worker:
                 worker_id_by_project_id[ur.project_id] = ur.user_id
 
-        stmt = select(Project)
+        stmt = select(Project).where(Project.is_deleted == False)
         projects = (await session.execute(stmt)).scalars().all()
 
         result = []
@@ -123,6 +125,27 @@ class ProjectsDbManager(BaseDbManager):
             result.append(proj)
 
         return result
+
+    async def delete_projects(
+        self, session: AsyncSession, projects_ids: set[uuid.UUID]
+    ):
+        stmt = (
+            select(Project)
+            .where(Project.is_deleted == False)
+            .where(col(Project.id).in_(projects_ids))
+        )
+        projects = (await session.execute(stmt)).scalars().all()
+        not_found_projects_ids = set(projects_ids) - set([p.id for p in projects])
+        if len(not_found_projects_ids) > 0:
+            raise NoResultFound(
+                f"Projects with ids {not_found_projects_ids} were not found"
+            )
+
+        for idx, project in enumerate(projects):
+            projects[idx].is_deleted = True
+
+        session.add_all(projects)
+        return projects
 
     async def get_user_roles(
         self,
@@ -224,10 +247,12 @@ class ProjectsDbManager(BaseDbManager):
 
         return fittings
 
-    async def create_devices(self, session: AsyncSession, devices: list[DeviceBase]):
-        projects_ids = {d.project_id for d in devices}
-        for project_id in projects_ids:
-            await Project.by_id(session, project_id)
+    async def create_devices(
+        self, session: AsyncSession, devices: list[DeviceBase]
+    ) -> list[Device]:
+        dxf_file_ids = {d.dxf_file_id for d in devices}
+        for dxf_file_id in dxf_file_ids:
+            await DxfFile.by_id(session, dxf_file_id)
 
         new_devices = [Device.parse_obj(d) for d in devices]
 
@@ -235,32 +260,100 @@ class ProjectsDbManager(BaseDbManager):
 
         return new_devices
 
+    async def update_devices_z_coord(
+        self, session: AsyncSession, new_z_coords: dict[uuid.UUID, int]
+    ) -> list[Device]:
+        stmt = select(Device).where(col(Device.id).in_(new_z_coords.keys()))
+        devices = (await session.execute(stmt)).scalars().all()
+        updated_devices = []
+        for device in devices:
+            device.coord_z = new_z_coords[device.id]
+            updated_devices.append(device)
+        session.add_all(updated_devices)
+        return updated_devices
+
+    async def get_devices(
+        self, session: AsyncSession, project_id: uuid.UUID
+    ) -> list[Device]:
+        project = await Project.by_id(session, project_id)
+        devices: list[Device] = []
+        if project.dxf_file_id is None:
+            return devices
+        stmt = select(Device).where(Device.dxf_file_id == project.dxf_file_id)
+        devices: list[Device] = (await session.execute(stmt)).scalars().all()
+        return devices
+
     async def create_dxf_file(
         self, session: AsyncSession, dxf_file: DxfFileBase
     ) -> DxfFile:
-        await Project.by_id(session, dxf_file.project_id)
+        project = await Project.by_id(session, dxf_file.project_id)
         file = DxfFile.parse_obj(dxf_file)
         session.add(file)
 
+        project.dxf_file_id = file.id
+        session.add(project)
+
         return file
 
-    async def get_latest_dxf_file(
+    async def create_sewer_variants(
+        self,
+        session: AsyncSession,
+        sewer_variants: list[SewerVariantBase],
+        project_id: uuid.UUID,
+    ) -> list[SewerVariant]:
+        old_sewer_variants = await self.get_sewer_variants(session, project_id)
+        for variant in old_sewer_variants:
+            await session.delete(variant)
+
+        new_sewer_variants = []
+        for sv in sewer_variants:
+            new_sewer_variant = SewerVariant(
+                project_id=project_id,
+                **sv.dict(),
+            )
+            new_sewer_variants.append(new_sewer_variant)
+        session.add_all(new_sewer_variants)
+        return new_sewer_variants
+
+    async def get_sewer_variants(
         self, session: AsyncSession, project_id: uuid.UUID
-    ) -> DxfFile:
+    ) -> list[SewerVariant]:
         await Project.by_id(session, project_id)
 
-        stmt = (
-            select(DxfFile)
-            .where(DxfFile.project_id == project_id)
-            .order_by(desc(DxfFile.created_at))
-            .limit(1)
+        stmt = select(SewerVariant).where(SewerVariant.project_id == project_id)
+        sewer_variants: list[SewerVariant] = (
+            (await session.execute(stmt)).scalars().all()
         )
-        files = (await session.execute(stmt)).scalars().all()
+        return sewer_variants
 
-        if len(files) == 0:
-            raise NoResultFound("No DXF files found for this project")
+    async def update_project_status(
+        self,
+        session: AsyncSession,
+        project_id: uuid.UUID,
+        new_status: ProjectStatusOption,
+    ) -> Project:
+        project = await Project.by_id(session, project_id)
+        project.status = new_status
+        session.add(project)
+        return project
 
-        return files[0]
+    # async def get_latest_dxf_file(
+    #     self, session: AsyncSession, project_id: uuid.UUID
+    # ) -> DxfFile:
+    #     await Project.by_id(session, project_id)
+    #
+    #     stmt = (
+    #         select(DxfFile)
+    #         .where(DxfFile.project_id == project_id)
+    #         .order_by(desc(DxfFile.created_at))
+    #         .limit(1)
+    #     )
+    #     files = (await session.execute(stmt)).scalars().all()
+    #
+    #     if len(files) == 0:
+    #         raise NoResultFound("No DXF files found for this project")
+    #
+    #     return files[0]
 
     async def get_dxf_file(self, session: AsyncSession, file_id):
         return await DxfFile.by_id(session, file_id)

@@ -5,6 +5,7 @@ from time import time
 
 import ezdxf
 import settings
+from src.db.projects.models import SewerVariantBase
 from src.trace_builder.coordinate_converter import coordinates2segments
 from src.trace_builder.merge_segments import merge_segments
 from src.trace_builder.path import (
@@ -32,7 +33,9 @@ from src.trace_builder.projections import (
 from src.trace_builder.utils import dict2stuff
 
 
-def run_algo(dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = ""):
+def run_algo(
+    dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = ""
+) -> list[SewerVariantBase]:
     doc = ezdxf.readfile(dxf_path)
     modelspace = doc.modelspace()
     msp = modelspace
@@ -105,7 +108,15 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = ""
     )
     mesh.save(f"{output_files}.stl")
     material_graph.to_csv(f"{output_files}.csv", index=True)
-    return f"{output_files}.csv", f"{output_files}.png", f"{output_files}.stl"
+
+    sewer_variant = SewerVariantBase(
+        excel_source_url=f"{output_files}.csv",
+        stl_source_url=f"{output_files}.stl",
+        png_source_url=f"{output_files}.png",
+        variant_num=1,
+    )
+
+    return [sewer_variant]
 
 
 if __name__ == "__main__":

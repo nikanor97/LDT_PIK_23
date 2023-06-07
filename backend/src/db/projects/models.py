@@ -36,7 +36,8 @@ class RoleTypeOption(str, enum.Enum):
 
 
 class ProjectStatusOption(int, enum.Enum):
-    created = 100  # When project is created or sent to the building stage
+    created = 0  # When project is created, but no trace buildings initialised
+    in_progress = 100  # When project is sent to the building stage
     ready = 200
     error = 400  # When the project is totally finished
 
@@ -78,6 +79,7 @@ class ProjectBase(ProjectsSQLModel):
     )
     bathroom_type: Optional[str] = Field(nullable=True)
     is_deleted: Optional[bool] = Field(default=False)
+    dxf_file_id: Optional[uuid.UUID] = Field(nullable=True)  # ID of actual dxf file
 
 
 class Project(ProjectBase, TimeStampWithIdMixin, table=True):
@@ -85,12 +87,10 @@ class Project(ProjectBase, TimeStampWithIdMixin, table=True):
     roles: list["UserRole"] = Relationship(
         back_populates="project", sa_relationship_kwargs={"lazy": "selectin"}
     )
-    devices: list["Device"] = Relationship(
+    dxf_file: Optional["DxfFile"] = Relationship(
         back_populates="project", sa_relationship_kwargs={"lazy": "selectin"}
     )
-    dxf_file: "DxfFile" = Relationship(
-        back_populates="project", sa_relationship_kwargs={"lazy": "selectin"}
-    )
+    sewer_variants: list["SewerVariant"] = Relationship(back_populates="project")
 
 
 class UserRoleBase(ProjectsSQLModel):
@@ -126,8 +126,9 @@ class Fitting(FittingBase, TimeStampWithIdMixin, table=True):
 
 
 class DeviceBase(ProjectsSQLModel):
-    project_id: uuid.UUID = Field(foreign_key="projects.id")
-    name: str = Field(nullable=False)  # same sense as type
+    dxf_file_id: uuid.UUID = Field(foreign_key="dxf_files.id")
+    name: str = Field(nullable=False)
+    type_human: str = Field(nullable=False)  # same sense as type
     type: DeviceTypeOption = Field(
         sa_column=Column(sqlalchemy.Enum(DeviceTypeOption), nullable=False)
     )
@@ -138,7 +139,7 @@ class DeviceBase(ProjectsSQLModel):
 
 class Device(DeviceBase, TimeStampWithIdMixin, table=True):
     __tablename__ = "devices"
-    project: Project = Relationship(
+    dxf_file: "DxfFile" = Relationship(
         back_populates="devices", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
@@ -153,6 +154,7 @@ class DxfFile(DxfFileBase, TimeStampWithIdMixin, table=True):
     project: Project = Relationship(
         back_populates="dxf_file", sa_relationship_kwargs={"lazy": "selectin"}
     )
+    devices: list[Device] = Relationship(back_populates="dxf_file")
 
 
 class ProjectFitting(ProjectsSQLModel, TimeStampWithIdMixin, table=True):
@@ -164,3 +166,19 @@ class ProjectFitting(ProjectsSQLModel, TimeStampWithIdMixin, table=True):
     fitting_id: uuid.UUID = Field(foreign_key="fittings.id", index=True)
     fitting: Fitting = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
     project: Project = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+
+class SewerVariantBase(ProjectsSQLModel):
+    excel_source_url: str = Field(nullable=False)
+    stl_source_url: str = Field(nullable=False)
+    png_source_url: str = Field(nullable=False)
+    variant_num: Optional[int] = Field(nullable=True)
+    n_fittings: Optional[int] = Field(nullable=True)
+    sewer_length: Optional[Decimal] = Field(nullable=True)
+
+
+class SewerVariant(SewerVariantBase, TimeStampWithIdMixin, table=True):
+    __tablename__ = "sewer_variants"
+    project_id: uuid.UUID = Field(foreign_key="projects.id", index=True)
+
+    project: Project = Relationship(back_populates="sewer_variants")

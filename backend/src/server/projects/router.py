@@ -67,6 +67,14 @@ class ProjectsRouter:
         )
 
         self.router.add_api_route(
+            path="/delete",
+            endpoint=self._projects_endpoints.delete_projects,
+            response_model=list[Project],
+            methods=[METHOD.POST],
+            dependencies=[Depends(Auth(main_db_manager))],
+        )
+
+        self.router.add_api_route(
             path="/dxf-upload",
             endpoint=self._projects_endpoints.upload_dxf,
             response_model=DxfFileWithDevices,
