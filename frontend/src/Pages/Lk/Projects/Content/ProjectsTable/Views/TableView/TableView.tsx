@@ -52,7 +52,7 @@ const TableView = () => {
                         onClick: () => {
                             notification({
                                 type: "info",
-                                message: "Подождите, еще происходит расчет"
+                                message: "Подождите, еще происходит расчёт"
                             });
                         },
                     };

@@ -12,7 +12,7 @@ type iState = {
     selectedProjects: null | React.Key[];
     fittingsGroups: iApi.Projects.FittingGroup[] | null;
     getFittings: boolean,
-    selectedOption: number | null,
+    selectedOption: iApi.Projects.Results | null,
     parseDXFStatus: "loading" | "success" | "error" | null;
     DXFdata: iApi.Projects.DXFParsedData | null,
     startCalcStatus: "loading" | "success" | "error" | null;

@@ -25,21 +25,19 @@ const ContentController = () => {
                 <CalcWindow />
             );
         } else {
-            return (<ResultView />);
+            if (selectedOption !== null) {
+                return <ResultView />;
+            } else {
+                if (!selectedProject.results) return <Empty
+                    imageStyle={{height: "200px",
+                        width: "200px",
+                        margin: "auto"}}
+                    image={<EmptyDocuments />}
+                    style={{margin: "auto"}}
+                    description="Информация о проекте не загрузилась. Вернитесь назад и попробуйте еще раз"/>;
+                return (<ResultList />);
+            }
         }
-        // if (selectedProject.result) {
-        //     // if (selectedOption !== null) {
-                
-        //     return <ResultView />;
-        //     // } else {
-        //     //     return (<ResultList />);
-        //     // }
-
-        // } else {
-        //     return (
-        //         <CalcWindow />
-        //     );
-        // }
     }
     if (!selectedProject) return (
         <Empty

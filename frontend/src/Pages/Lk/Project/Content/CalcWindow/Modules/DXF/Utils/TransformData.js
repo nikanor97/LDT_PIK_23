@@ -8,7 +8,12 @@ const transformData = (inputObj) => {
     };
   
     Object.keys(rest).forEach((key) => {
-        const type = key.replace(/[XYZ]$/, "");
+        const splitedKey = key.split("/");
+        // const type = key.replace(/[XYZ]$/, "");
+        const type = splitedKey[0];
+        const id = splitedKey[1];
+        const name = splitedKey[2];
+
         const axis = key.charAt(key.length - 1).toUpperCase();
   
         const existingDevice = transformedObj.devices.find((item) => item.type === type);
@@ -17,6 +22,8 @@ const transformData = (inputObj) => {
         } else {
             const newDevice = {
                 type,
+                id,
+                name,
                 [`coord_${axis.toLocaleLowerCase()}`]: inputObj[key]
             };
             transformedObj.devices.push(newDevice);

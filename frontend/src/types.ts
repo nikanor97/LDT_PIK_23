@@ -49,7 +49,14 @@ export declare namespace iApi {
             type: "dxf" | "manual"
         }
         type ItemDetail = Item & {
-            result?: Result
+            results?: Results[]
+        }
+
+        type Results = {
+            n_fittings: number;
+            sewer_length: number;
+            variant_num: number;
+            result: Result;
         }
 
         type Result = {
@@ -99,6 +106,7 @@ export declare namespace iApi {
             devices: {
                 name: string,
                 type: string,
+                id: string,
                 coord_x: number,
                 coord_y: number,
             }[]

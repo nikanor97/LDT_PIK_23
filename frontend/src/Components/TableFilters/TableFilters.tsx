@@ -5,10 +5,10 @@ import {FilterDropdownProps} from "antd/es/table/interface";
 import {Scrollbars} from "react-custom-scrollbars";
 import {CheckboxChangeEvent} from "antd/lib/checkbox";
 import Hightlight from "react-highlight-words";
-import EmptyImage from "@assets/Icons/EmptyImage/EmptyImage";
 import Icon from "@ant-design/icons";
 import styles from "./TableFilters.module.less";
 import Tooltip from "../Tooltip/Tooltip";
+import EmptyDocuments from "@root/Assets/Icons/EmptyDocuments/EmptyDocuments";
 
 type iTableFilters =  FilterDropdownProps;
 
@@ -107,7 +107,7 @@ const TableFilters = (props:iTableFilters) => {
                                         <Empty
                                             className={styles.empty}
                                             description="Совпадений не найдено"
-                                            image={<Icon component={EmptyImage}/>}
+                                            image={<Icon component={EmptyDocuments}/>}
                                         />
                                     )
                             }
