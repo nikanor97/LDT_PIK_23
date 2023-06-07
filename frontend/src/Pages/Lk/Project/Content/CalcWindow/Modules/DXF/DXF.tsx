@@ -102,7 +102,7 @@ const DXF = () => {
                                 {DXFData.devices.map((item, index) => (
                                     <div key={index}>
                                         <Title variant="h3" className={styles.configTitle}>
-                                            {item.name} 
+                                            {item.type_human}
                                         </Title>
                                         <div className={styles.inputs}>
                                             <FormItem name={`${item.type}/${item.id}/${item.name}/X`} initialValue={item.coord_x} label={"X"}>

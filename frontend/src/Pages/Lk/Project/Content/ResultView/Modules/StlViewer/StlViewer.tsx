@@ -18,6 +18,9 @@ const STLViewer: React.FC<Props> = ({file}) => {
             setUrl(URL.createObjectURL(new Blob([new Uint8Array(event.target?.result as ArrayBufferLike)], {type: file.type})));
         };
         reader.readAsArrayBuffer(file);
+        return () => {
+            if (url) URL.revokeObjectURL(url);
+        };
     }, [file]);
 
     useEffect(() => {
@@ -94,6 +97,12 @@ const STLViewer: React.FC<Props> = ({file}) => {
             containerRef.current?.removeChild(renderer.domElement);
         };
     }, [url]);
+
+    useEffect(() => {
+        return () => {
+            setUrl("");
+        };
+    }, []);
 
     return <div ref={containerRef} className={styles.stl}/>;
 };

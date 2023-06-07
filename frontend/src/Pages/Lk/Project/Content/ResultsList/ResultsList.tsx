@@ -1,6 +1,6 @@
 import Title from "@root/Components/Title/Title";
 import {useAppDispatch, useAppSelector} from "@root/Hooks";
-import React from "react";
+import React, {useEffect} from "react";
 import styles from "./ResultsList.module.less";
 import {Tag} from "antd";
 import Actions from "@actions";

@@ -3,14 +3,13 @@ import MaterialTab from "./Tabs/MaterialTab/MaterialTab";
 import ConnectPointsTab from "./Tabs/ConnectPointsTab/ConnectPointsTab";
 import GraphTab from "./Tabs/GraphTab/GraphTab";
 import {useAppDispatch, useAppSelector} from "@root/Hooks";
-import {Dropdown, Tabs} from "antd";
+import {Divider, Dropdown, Tabs} from "antd";
 import Icon from "@ant-design/icons/lib/components/Icon";
 import Back from "./Icons/Back";
 import Actions from "@actions";
 import {Button} from "@root/Components/Controls";
-import {useHistory, useParams} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import DownloadMenu from "./Modules/DownloadMenu/DownloadMenu";
-import routes from "@root/Routes/Routes";
 import styles from "./ResultView.module.less";
 
 const {TabPane} = Tabs;
@@ -21,10 +20,10 @@ type iParams = {
 
 const ResultView = () => {
     const option = useAppSelector((state) => state.Projects.selectedOption);
+    const selectedProject = useAppSelector((state) => state.Projects.selectedProject);
     const file = useAppSelector((state) => state.Projects.file);
     const dispatch = useAppDispatch();
     const {projectID} = useParams<iParams>();
-    const history = useHistory();
     
     if (!option) return null;
 
@@ -38,8 +37,9 @@ const ResultView = () => {
         }
         return () => {
             dispatch(Actions.Projects.setSelectedOption(null));
+            dispatch(Actions.Projects.eraseFile());
         };
-    });
+    }, []);
 
     return (
         <div className={styles.wrapper}>
@@ -48,6 +48,10 @@ const ResultView = () => {
                     <Icon component={Back} onClick={() => dispatch(Actions.Projects.setSelectedOption(null))}/>
                     <div className={styles.title}>
                         Расчёт №{option.variant_num}
+                    </div>
+                    <Divider className={styles.divider} />
+                    <div className={styles.subTitle}>
+                        {selectedProject?.name}
                     </div>
                 </div>
                 <Dropdown 

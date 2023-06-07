@@ -144,6 +144,9 @@ const Slice = createSlice({
         _downloadFileError: (state) => {
             state.loadFile = false;
         },
+        eraseFile: (state) => {
+            state.file = null;
+        },
         deleteProjects: (state, action: PayloadAction<iActions.deleteProjects>) => {
             return state;
         },

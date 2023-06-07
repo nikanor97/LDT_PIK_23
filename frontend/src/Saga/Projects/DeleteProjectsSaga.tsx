@@ -17,6 +17,7 @@ const DeleteProjects = function* (action: PayloadAction<iActions.deleteProjects>
             message: "Проекты удалены"
         });
         yield put(Actions.Projects._deleteProjectsSuccess(payload));
+        yield put(Actions.Projects.setSelectedProjects([]));
     } catch (error) {
         notification({
             type: "error",

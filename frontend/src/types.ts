@@ -106,6 +106,7 @@ export declare namespace iApi {
             devices: {
                 name: string,
                 type: string,
+                type_human: string,
                 id: string,
                 coord_x: number,
                 coord_y: number,
