@@ -552,7 +552,7 @@ class ProjectsEndpoints:
 
         sewer_variant = None
         for sw in sewer_variants:
-            if sw.variant_priority == variant_num:
+            if sw.variant_num == variant_num:
                 sewer_variant = sw
 
         if file_type == ExportFileType.csv:
