@@ -25,6 +25,8 @@ const GraphTab = (props: GraphTabProps) => {
     const stl = useAppSelector((state) => state.Projects.file);
     const stlLoading = useAppSelector((state) => state.Projects.loadFile);
     const {data} = props;
+
+    console.log(stl);
     
     const columns = [
         {

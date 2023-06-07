@@ -38,8 +38,9 @@ const ResultView = () => {
         }
         return () => {
             dispatch(Actions.Projects.setSelectedOption(null));
+            dispatch(Actions.Projects.eraseFile());
         };
-    });
+    }, []);
 
     return (
         <div className={styles.wrapper}>
