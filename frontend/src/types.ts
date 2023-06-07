@@ -44,7 +44,7 @@ export declare namespace iApi {
             name: string,
             bathroom_type: string,
             author_name: string,
-            status: 100 | 200 | 400 | 300,
+            status: 0 | 100 | 200 | 400 | 300,
             worker_name: string,
             type: "dxf" | "manual"
         }

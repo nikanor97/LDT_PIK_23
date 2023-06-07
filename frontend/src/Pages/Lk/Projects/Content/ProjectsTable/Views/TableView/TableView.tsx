@@ -3,7 +3,8 @@ import useColumns from "../../Hooks/useColumns";
 import  {
     useGetValidNoun,
     useAppDispatch,
-    useAppSelector
+    useAppSelector,
+    useNotification
 } from "@root/Hooks";
 import Actions from "@actions";
 import {Table} from "antd";
@@ -18,6 +19,7 @@ const TableView = () => {
     const columns = useColumns();
     const history = useHistory();
     const dispatch = useAppDispatch();
+    const notification = useNotification();
     const nounTypes = {
         type1: "проект",
         type2: "проекта",
@@ -45,11 +47,23 @@ const TableView = () => {
         <Table
             rowSelection={rowSelection}
             onRow={(record) => {
-                return {
-                    onClick: () => {
-                        history.push(routes.lk.project.root(record.id.toString()));
-                    },
-                };
+                if (record.status === 100) {
+                    return {
+                        onClick: () => {
+                            notification({
+                                type: "info",
+                                message: "Подождите, еще происходит расчет"
+                            });
+                        },
+                    };
+                } else {
+                    return {
+                        onClick: () => {
+                            history.push(routes.lk.project.root(record.id.toString()));
+                        },
+                    };
+                }
+
             }}
             className={styles.table}
             dataSource={projects}

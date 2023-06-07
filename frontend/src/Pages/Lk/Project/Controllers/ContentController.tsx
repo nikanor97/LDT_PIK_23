@@ -20,19 +20,26 @@ const ContentController = () => {
         );
     }
     if (selectedProject) {
-        if (selectedProject.result) {
-            // if (selectedOption !== null) {
-                
-            return <ResultView />;
-            // } else {
-            //     return (<ResultList />);
-            // }
-
-        } else {
+        if (selectedProject.status === 0 || selectedProject.status === 400) {
             return (
                 <CalcWindow />
             );
+        } else {
+            return (<ResultView />);
         }
+        // if (selectedProject.result) {
+        //     // if (selectedOption !== null) {
+                
+        //     return <ResultView />;
+        //     // } else {
+        //     //     return (<ResultList />);
+        //     // }
+
+        // } else {
+        //     return (
+        //         <CalcWindow />
+        //     );
+        // }
     }
     if (!selectedProject) return (
         <Empty

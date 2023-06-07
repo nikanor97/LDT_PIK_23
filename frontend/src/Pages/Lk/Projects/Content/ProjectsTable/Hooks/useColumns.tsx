@@ -39,7 +39,9 @@ const useColumns = () => {
     };
 
     const checkStatus = (value: number) => {
-        if (value === null || value === 100) {
+        if (value === null || value === 0) {
+            return "Создан";
+        } else if (value === 100) {
             return "В процессе";
         } else if (value === 400) {
             return "Ошибка";
