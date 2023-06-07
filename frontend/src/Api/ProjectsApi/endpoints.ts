@@ -6,5 +6,6 @@ export default {
     getProjectInfo: "/v1/projects/project",
     parseDXF: "/v1/projects/dxf-upload?project_id={projectID}",
     startCalc: "/v1/projects/result",
-    downloadResult: "v1/projects/export"
+    downloadResult: "v1/projects/export",
+    deleteProjects: "/v1/projects/delete",
 };

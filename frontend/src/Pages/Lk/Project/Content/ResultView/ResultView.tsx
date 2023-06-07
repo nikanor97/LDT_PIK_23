@@ -20,9 +20,8 @@ type iParams = {
 }
 
 const ResultView = () => {
-    // const selectedOption = useAppSelector((state) => state.Projects.selectedOption);
-    // if (selectedOption === null) return null;
-    const option = useAppSelector((state) => state.Projects.selectedProject?.result);
+    const option = useAppSelector((state) => state.Projects.selectedOption);
+    const file = useAppSelector((state) => state.Projects.file);
     const dispatch = useAppDispatch();
     const {projectID} = useParams<iParams>();
     const history = useHistory();
@@ -30,11 +29,13 @@ const ResultView = () => {
     if (!option) return null;
 
     useEffect(() => {
-        dispatch(Actions.Projects.downloadFile({
-            project_id: projectID,
-            variant_num: 1,
-            file_type: "stl"
-        }));
+        if (!file) {
+            dispatch(Actions.Projects.downloadFile({
+                project_id: projectID,
+                variant_num: option.variant_num,
+                file_type: "stl"
+            }));
+        }
         return () => {
             dispatch(Actions.Projects.setSelectedOption(null));
         };
@@ -44,14 +45,14 @@ const ResultView = () => {
         <div className={styles.wrapper}>
             <div className={styles.header}>
                 <div className={styles.back}>
-                    <Icon component={Back} onClick={() => history.push(routes.lk.projects)}/>
-                    {/* <div  className={styles.title}>
-                    Вариант {selectedOption + 1}
-                    </div> */}
+                    <Icon component={Back} onClick={() => dispatch(Actions.Projects.setSelectedOption(null))}/>
+                    <div className={styles.title}>
+                        Расчёт №{option.variant_num}
+                    </div>
                 </div>
                 <Dropdown 
                     trigger={["click"]}
-                    overlay={<DownloadMenu project={projectID} variant={1}/>}>
+                    overlay={<DownloadMenu project={projectID} variant={option.variant_num}/>}>
                     <Button 
                         type="primary">
                         Экспорт
@@ -62,11 +63,11 @@ const ResultView = () => {
                 {/* <TabPane tab={option.materials.tabName} key="1">
                     <MaterialTab tables={option.materials.tables} />
                 </TabPane> */}
-                <TabPane tab={option.connection_points.tab_name} key="2">
-                    <ConnectPointsTab data={option.connection_points} />
+                <TabPane tab={option.result.connection_points.tab_name} key="2">
+                    <ConnectPointsTab data={option.result.connection_points} />
                 </TabPane>
-                <TabPane tab={option.graph.tab_name} key="3">
-                    <GraphTab data={option.graph} />
+                <TabPane tab={option.result.graph.tab_name} key="3">
+                    <GraphTab data={option.result.graph} />
                 </TabPane>
             </Tabs>
         </div>

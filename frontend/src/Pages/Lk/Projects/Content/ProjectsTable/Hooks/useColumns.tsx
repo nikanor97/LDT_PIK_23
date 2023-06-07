@@ -39,7 +39,9 @@ const useColumns = () => {
     };
 
     const checkStatus = (value: number) => {
-        if (value === null || value === 100) {
+        if (value === null || value === 0) {
+            return "Создан";
+        } else if (value === 100) {
             return "В процессе";
         } else if (value === 400) {
             return "Ошибка";
@@ -48,7 +50,7 @@ const useColumns = () => {
         }
     };
     const nameFD = useMemo(() => getDataForFilters((item) => item.name), [projects]);
-    const bathroomTypeFD = useMemo(() => getDataForFilters((item) => item.bathroom_type), [projects]);
+    const bathroomTypeFD = useMemo(() => getDataForFilters((item) => (item.bathroom_type ? item.bathroom_type : "-")), [projects]);
     const authorFD = useMemo(() => getDataForFilters((item) => item.author_name), [projects]);
     const performerFD = useMemo(() => getDataForFilters((item) => item.worker_name), [projects]);
     const statusFD = ["Готово", "В процессе", "Ошибка"];
@@ -116,17 +118,30 @@ const useColumns = () => {
             key: "status",
             sorter: (first: ProjectListItem, second: ProjectListItem) => first.status - second.status,
             render: (status: ProjectListItem["status"]) => {
-                if (status === null || status === 100) {
+                if (status === null || status === 0) {
                     return (
-                        <Tag className={styles.tagProcess}>В процессе</Tag>
+                        <div style={{width: useGetMinColumnWidthForTable("Статус")}}>
+                            <Tag className={styles.tagProcess}>Создан</Tag>
+                        </div>
+                    );
+                } else if (status === 100) {
+                    return (
+                        <div style={{width: useGetMinColumnWidthForTable("Статус")}}>
+                            <Tag className={styles.tagProcess}>В процессе</Tag>
+                        </div>
+                        
                     );
                 } else if (status === 400) {
                     return (
-                        <Tag className={styles.tagError}>Ошибка</Tag>
+                        <div style={{width: useGetMinColumnWidthForTable("Статус")}}>
+                            <Tag className={styles.tagError}>Ошибка</Tag>
+                        </div>
                     );
                 } else {
                     return (
-                        <Tag className={styles.tagSuccess}>Готово</Tag>
+                        <div style={{width: useGetMinColumnWidthForTable("Статус")}}>
+                            <Tag className={styles.tagSuccess}>Готово</Tag>
+                        </div>
                     );
                 }
             },
@@ -165,7 +180,7 @@ const useColumns = () => {
             onFilter: (
                 value: string | number | boolean,
                 record: iApi.Projects.Item
-            ) => record.bathroom_type === value,
+            ) => (record.bathroom_type ? record.bathroom_type : "-") === value,
             ellipsis: true,
         },
         {

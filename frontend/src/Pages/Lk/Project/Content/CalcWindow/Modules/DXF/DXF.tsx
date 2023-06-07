@@ -105,19 +105,19 @@ const DXF = () => {
                                             {item.name} 
                                         </Title>
                                         <div className={styles.inputs}>
-                                            <FormItem name={`${item.type}X`} initialValue={item.coord_x} label={"X"}>
+                                            <FormItem name={`${item.type}/${item.id}/${item.name}/X`} initialValue={item.coord_x} label={"X"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}
                                                     disabled/>
                                             </FormItem>
-                                            <FormItem name={`${item.type}Y`} initialValue={item.coord_y} label={"Y"}>
+                                            <FormItem name={`${item.type}/${item.id}/${item.name}/Y`} initialValue={item.coord_y} label={"Y"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}
                                                     disabled/>
                                             </FormItem>
-                                            <FormItem name={`${item.type}Z`} label={"Z"} required>
+                                            <FormItem name={`${item.type}/${item.id}/${item.name}/Z`} label={"Z"} required>
                                                 <InputNumber required controls={false}/>
                                             </FormItem>
                                         </div>

@@ -38,4 +38,13 @@ export default {
             }
         );
     },
+    deleteProjects: (params: React.Key[]) => {
+        const url =  Endpoints.deleteProjects;
+        return Request.post(
+            url,
+            {
+                project_ids: params
+            }
+        );
+    }
 };

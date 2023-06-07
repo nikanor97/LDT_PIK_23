@@ -9,10 +9,10 @@ type iState = {
     createFetching: boolean;
     getSelectedProject: boolean;
     getFetching: boolean;
-    selectedProjects: null | iApi.Projects.Item[];
+    selectedProjects: null | React.Key[];
     fittingsGroups: iApi.Projects.FittingGroup[] | null;
     getFittings: boolean,
-    selectedOption: number | null,
+    selectedOption: iApi.Projects.Results | null,
     parseDXFStatus: "loading" | "success" | "error" | null;
     DXFdata: iApi.Projects.DXFParsedData | null,
     startCalcStatus: "loading" | "success" | "error" | null;
@@ -143,6 +143,14 @@ const Slice = createSlice({
         },
         _downloadFileError: (state) => {
             state.loadFile = false;
+        },
+        deleteProjects: (state, action: PayloadAction<iActions.deleteProjects>) => {
+            return state;
+        },
+        _deleteProjectsSuccess: (state, action: PayloadAction<iActions._deleteProjectsSuccess>) => {
+            if (state.projects) {
+                state.projects = state.projects.filter((item: iApi.Projects.Item) => !action.payload.includes(item.id));
+            }
         },
     }
 });

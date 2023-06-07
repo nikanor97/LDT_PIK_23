@@ -17,7 +17,7 @@ const MenuModule = (props: DownloadMenuProps) => {
     const onDownloadStl = () => {
         dispatch(Actions.Projects.downloadResult({
             project_id: project,
-            variant_num: 0,
+            variant_num: variant,
             file_type: "stl"
         }));
     };
@@ -25,7 +25,7 @@ const MenuModule = (props: DownloadMenuProps) => {
     const onDownloadXls = () => {
         dispatch(Actions.Projects.downloadResult({
             project_id: project,
-            variant_num: 0,
+            variant_num: variant,
             file_type: "csv"
         }));
     };
