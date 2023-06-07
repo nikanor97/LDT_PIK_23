@@ -165,27 +165,40 @@ class ProjectsEndpoints:
 
         return new_project
 
-    async def get_project(self, project_id: uuid.UUID) -> ProjectExtendedWithNames:
-        async with self._main_db_manager.users.make_autobegin_session() as session:
-            users = await self._main_db_manager.users.get_all_users(session)
-        user_by_id: dict[uuid.UUID, User] = dict()
-        for user in users:
-            user_by_id[user.id] = user
-
+    async def get_project(self, project_id: uuid.UUID) -> ProjectWithResults:
         async with self._main_db_manager.projects.make_autobegin_session() as session:
             try:
                 project = await self._main_db_manager.projects.get_project(
                     session, project_id
                 )
-                proj = ProjectExtendedWithNames(
+            except NoResultFound as e:
+                raise HTTPException(status_code=404, detail=exc_to_str(e))
+
+        if project.status == ProjectStatusOption.ready:
+            project_with_results = await self._get_project_with_results(project_id)
+            return project_with_results
+
+        else:  # TODO: Most probably this case can be covered with the first one, cause if no results found,
+            # the list will be empty (So maybe I'll have to put None there by hands after the _get_project_with... run
+            async with self._main_db_manager.users.make_autobegin_session() as session:
+                users = await self._main_db_manager.users.get_all_users(session)
+            user_by_id: dict[uuid.UUID, User] = dict()
+            for user in users:
+                user_by_id[user.id] = user
+
+            async with self._main_db_manager.projects.make_autobegin_session() as session:
+                try:
+                    project = await self._main_db_manager.projects.get_project(
+                        session, project_id
+                    )
+                except NoResultFound as e:
+                    raise HTTPException(status_code=404, detail=exc_to_str(e))
+                proj = ProjectWithResults(
                     author_name=user_by_id[project.author_id].name,
                     worker_name=user_by_id[project.worker_id].name,
                     **project.dict(),
                 )
                 return proj
-            except NoResultFound as e:
-                # return UnifiedResponse(error=exc_to_str(e), status_code=404)
-                raise HTTPException(status_code=404, detail=exc_to_str(e))
 
     async def get_all_projects(self) -> list[ProjectExtendedWithNames]:
         async with self._main_db_manager.users.make_autobegin_session() as session:
@@ -353,6 +366,7 @@ class ProjectsEndpoints:
             type=proj.type,
             bathroom_type=proj.bathroom_type,
             is_deleted=proj.is_deleted,
+            dxf_file_id=proj.dxf_file_id,
             results=[
                 ProjectSewerVariant(
                     variant_num=variant.variant_num,

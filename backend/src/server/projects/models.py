@@ -47,7 +47,7 @@ class FittingGroupRead(BaseModel):
 
 class DeviceRead(BaseModel):
     id: uuid.UUID
-    name: str
+    type_human: str
     type: DeviceTypeOption
     coord_x: Optional[Decimal]
     coord_y: Optional[Decimal]
@@ -64,7 +64,6 @@ class DxfFileWithDevices(BaseModel):
 class DeviceTypeWithCoords(BaseModel):
     id: uuid.UUID
     type: DeviceTypeOption
-    name: str
     coord_x: float
     coord_y: float
     coord_z: float
@@ -118,7 +117,7 @@ class ProjectSewerVariant(BaseModel):
 
 
 class ProjectWithResults(ProjectExtendedWithNames):
-    results: list[ProjectSewerVariant]
+    results: Optional[list[ProjectSewerVariant]]
 
 
 class ExportFileType(str, enum.Enum):
