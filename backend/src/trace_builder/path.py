@@ -17,11 +17,15 @@ from src.trace_builder.manipulate_3d import (build_knee_fitting,
                                              build_riser_otvod,
                                              build_riser_to_otvod_pipe,
                                              build_stuff_mesh_45,
-                                             build_stuff_mesh_87,
-                                             build_toilet_mesh)
+                                             build_toilet_mesh,
+                                             build_knee_fitting_45,
+                                             build_pipe_arrows,
+                                             draw_bath_arrows)
+from src.trace_builder.mesh_3d.stuff_30_15 import build_stuff_mesh_30_15
+from src.trace_builder.mesh_3d.stuff_87 import build_stuff_mesh_87
 from src.trace_builder.meterial_graph import build_material_graph
 from src.trace_builder.model import Point, Segment
-from src.trace_builder.wall import Pipe, Wall
+from src.trace_builder.models import Pipe, Wall
 from stl import mesh
 
 
@@ -136,10 +140,7 @@ def get_nearest_wall_to_point(point, wall_src, walls):
             best_dist = dist
     return walls[best_wall], best_dist
 
-
-def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
-    start, end = None, wall.start_pipe_point
-    count_sutff = len(wall.stuff_point)
+def _define_start(wall):
     is_last_stuff_is_edged = True
     if is_parallel_Y(wall):
         if wall.start_pipe_point.y > wall.stuff_point[0].projection.y:
@@ -173,6 +174,12 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
             wall.stuff_point = sorted(
                 wall.stuff_point, key=lambda x: x.projection.x, reverse=True
             )
+    return start, is_last_stuff_is_edged
+
+
+def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
+    start, end = None, wall.start_pipe_point
+    start, is_last_stuff_is_edged = _define_start(wall)
     if len(wall.stuff_point) == 1:
         # TODO FIX Pipe in wrong direction if not neigbouri with riser
         start_end_pipes = [
@@ -183,6 +190,7 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                 is_end=True,
                 is_start=True,
                 stuff=wall.stuff_point[0],
+                is_wall_start=True
             )
         ]
     else:
@@ -207,13 +215,14 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                 stuff=wall.stuff_point[-1],
             )
         )
-        # start_end_pipes = start_end_pipes[1:] # ¯\_(ツ)_/¯
         if is_last_stuff_is_edged:
             start_end_pipes[-1].is_end = True
             start_end_pipes[0].is_start = True
+            start_end_pipes[0].is_wall_start = True
         else:
             start_end_pipes[0].is_end = True
             start_end_pipes[-1].is_start = True
+            start_end_pipes[-1].is_wall_start = True
     min_height = estimate_min_height(wall, riser_projections)
     point = wall.start if wall.start != wall.start_pipe_point else wall.end
     end_wall, end_wall_dist = get_nearest_wall_to_point(point, wall, walls)
@@ -223,22 +232,24 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
         if is_last_stuff_is_edged:
             start_end_pipes.append(
                 Pipe(
-                    coordinates=Segment(start_end_pipes[-1].coordinates.start, point),
+                    coordinates=Segment(point, start_end_pipes[-1].coordinates.start),
                     is_toilet=False,
                     with_riser=False,
                     stuff=None,
                     is_end=True,
+                    is_wall_end=True,
                 )
             )
             start_end_pipes[-2].is_end = False
         else:
             start_end_pipes = [
                 Pipe(
-                    coordinates=Segment(start_end_pipes[-1].coordinates.start, point),
+                    coordinates=Segment(point, start_end_pipes[-1].coordinates.start),
                     is_toilet=False,
                     with_riser=False,
                     stuff=None,
                     is_end=True,
+                    is_wall_end=True,
                 )
             ] + start_end_pipes
             start_end_pipes[1].is_end = False
@@ -270,11 +281,62 @@ def wall_with_riser(wall_riser, riser_projections):
     start_end_pipes.append(Segment(start, end))
     return start_end_pipes
 
+def is_riser_otvod_both_side(walls: List[Wall], riser_projections: Point) -> bool:
+    left, right, down, up = False, False, False, False
+    for wall in walls:
+        if wall.with_riser:
+            for stuff in wall.stuff_point:
+                if is_parallel_X(wall.coordinates):
+                    if stuff.projection.x < riser_projections.x:
+                        left = True
+                    else:
+                        right = True
+                if is_parallel_Y(wall.coordinates):
+                    if stuff.projection.y > riser_projections.y:
+                        up = True
+                    else:
+                        down = True
+        else:
+            if is_parallel_X(wall.coordinates):
+                if len(wall.path2wall_with_riser) == 1:
+                    if wall.start_pipe_point.y < riser_projections.y:
+                        down = True
+                    else:
+                        up = True
+                else:
+                    if wall.start_pipe_point.x <= riser_projections.x:
+                        left = True
+                    else:
+                        right = True
+            else:
+                if len(wall.path2wall_with_riser) == 1:
+                    if wall.start_pipe_point.x < riser_projections.x:
+                        left = True
+                    else:
+                        right = True
+                else:
+                    if wall.start_pipe_point.y <= riser_projections.y:
+                        down = True
+                    else:
+                        up = True
+    return (left and right) or (up and down)
 
-# %%
-def build_path(
-    walls, riser_projections, riser_coordinates, scrennshot_name, scenario="87"
-):
+
+def process_artifacts(mesh_data, material_graph, scrennshot_name, walls):
+    all_figures = mesh.Mesh(np.concatenate(mesh_data))
+    grap_df = build_material_graph(material_graph)
+    figure = vpl.gcf()
+    plotted_mesh = vpl.mesh_plot(all_figures)
+    draw_bath_arrows(walls, 50)
+    vpl.view(camera_direction=(0.1, 0.6, -0.8))
+    vpl.save_fig(scrennshot_name, pixels=(1920, 1080))
+    if os.getenv("LOCAL_ALGO"):
+        vpl.show()
+    figure -= plotted_mesh
+    figure.close()
+    return all_figures, grap_df
+
+def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name, scenario="87"):
     material_graph = PipeGraph()
     mesh_data = []
     # riser_coordinates.y -= 200
@@ -289,14 +351,16 @@ def build_path(
     riser_obj, node = build_riser(riser_coordinates_test, riser_projections_test, walls)
     mesh_data.append(riser_obj.data.copy())
     material_graph.add_node(node)
+    # print("Both", is_riser_otvod_both_side(walls, riser_projections))
     riser_obj_p, node = build_riser_to_otvod_pipe(
         riser_coordinates_test, riser_projections_test
     )
     if riser_obj_p:
         mesh_data.append(riser_obj_p.data.copy())
         material_graph.add_node(node)
+    is_both_side = is_riser_otvod_both_side(walls, riser_projections)
     pipe_turn, node = build_riser_otvod(
-        riser_coordinates_test, riser_projections_test, walls
+        riser_coordinates_test, riser_projections_test, walls, is_both_side
     )
     mesh_data.append(pipe_turn.data.copy())
     material_graph.add_node(node)
@@ -308,9 +372,11 @@ def build_path(
                 wall, walls, riser_projections
             )
             for idx, pipe in enumerate(pipes):
+                if os.getenv("LOCAL_ALGO"):
+                    build_pipe_arrows(pipe)
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
                 mesh_obj, node = build_pipe_mesh(
-                    obj, pipe.coordinates, riser_projections
+                    obj, pipe, scenario
                 )
                 mesh_data.append(mesh_obj.data.copy())
                 material_graph.add_node(node)
@@ -323,13 +389,17 @@ def build_path(
                             stuff_object = build_stuff_mesh_87(pipe, material_graph)
                         elif scenario == "45":
                             stuff_object = build_stuff_mesh_45(pipe, material_graph)
+                        elif scenario == "30_15":
+                            stuff_object = build_stuff_mesh_30_15(pipe, material_graph)
                         mesh_data.extend(
                             [objects.data.copy() for objects in stuff_object]
                         )
                 if pipe.is_start:
-                    knee_obj, node = build_knee_fitting(pipe, riser_projections)
-                    mesh_data.append(knee_obj.data.copy())
-                    material_graph.add_node(node)
+                    if scenario == "87" or wall.has_toilet:
+                        stuff_object = build_knee_fitting(pipe, riser_projections, material_graph)
+                    elif scenario in ["45", "30_15"]:
+                        stuff_object = build_knee_fitting_45(pipe, riser_projections, material_graph)
+                    mesh_data.extend(obj.data.copy() for obj in stuff_object)
         elif wall.with_riser:
             if not wall.has_toilet:
                 riser_obj_p, node = build_otvod_to_knee_pipe(
@@ -361,9 +431,11 @@ def build_path(
                 )
             # pipes wall
             for idx, pipe in enumerate(pipes):
+                if os.getenv("LOCAL_ALGO"):
+                    build_pipe_arrows(pipe)
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
                 mesh_obj, node = build_pipe_mesh(
-                    obj, pipe.coordinates, riser_projections
+                    obj, pipe, scenario
                 )
                 mesh_data.append(mesh_obj.data.copy())
                 material_graph.add_node(node)
@@ -376,6 +448,8 @@ def build_path(
                             stuff_object = build_stuff_mesh_87(pipe, material_graph)
                         elif scenario == "45":
                             stuff_object = build_stuff_mesh_45(pipe, material_graph)
+                        elif scenario == "30_15":
+                            stuff_object = build_stuff_mesh_30_15(pipe, material_graph)
                         mesh_data.extend(
                             [objects.data.copy() for objects in stuff_object]
                         )
@@ -388,22 +462,27 @@ def build_path(
                     < l1_distance(wall.end, riser_projections)
                     else Segment(wall.start, wall.end)
                 )
-                pipe = Pipe(pipe_coordinates, is_start=True, is_end=True)
+                pipe = Pipe(pipe_coordinates, is_start=True, is_end=True, is_wall_end=True, is_wall_start=True)
                 pipe_obj, node = build_pipe_mesh(
-                    obj, pipe.coordinates, riser_projections
+                    obj, pipe, scenario
                 )
                 material_graph.add_node(node)
-                knee_obj, node = build_knee_fitting(pipe, riser_projections)
-                material_graph.add_node(node)
-                mesh_data.extend([pipe_obj.data.copy(), knee_obj.data.copy()])
-    all_figures = mesh.Mesh(np.concatenate(mesh_data))
-    grap_df = build_material_graph(material_graph)
-    figure = vpl.gcf()
-    plotted_mesh = vpl.mesh_plot(all_figures)
-    vpl.view(camera_direction=(0.1, 0.6, -0.8))
-    vpl.save_fig(scrennshot_name, pixels=(1920, 1080))
-    if os.getenv("LOCAL_ALGO"):
-        vpl.show()
-    figure -= plotted_mesh
-    figure.close()
+                if os.getenv("LOCAL_ALGO"):
+                    build_pipe_arrows(pipe)
+
+                if scenario == "87" or wall.has_toilet:
+                    stuff_object = build_knee_fitting(pipe, riser_projections, material_graph)
+                elif scenario in ["45", "30_15"]:
+                    stuff_object = build_knee_fitting_45(pipe, riser_projections, material_graph)
+                mesh_data.extend(obj.data.copy() for obj in stuff_object)
+                objs = [pipe_obj] + stuff_object
+                mesh_data.extend([obj.data.copy() for obj in objs])
+    return mesh_data, material_graph
+
+
+def build_path(
+    walls, riser_projections, riser_coordinates, scrennshot_name, scenario="87"
+):
+    mesh_data, material_graph = build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name, scenario)
+    all_figures, grap_df = process_artifacts(mesh_data, material_graph, scrennshot_name, walls)
     return all_figures, grap_df
