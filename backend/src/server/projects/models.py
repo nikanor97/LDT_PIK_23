@@ -1,6 +1,7 @@
 import enum
 import uuid
 from _decimal import Decimal
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -26,12 +27,14 @@ class ProjectExtendedWithIds(ProjectBase):
     id: uuid.UUID
     author_id: uuid.UUID
     worker_id: uuid.UUID
+    created_at: datetime
 
 
 class ProjectExtendedWithNames(ProjectBase):
     id: uuid.UUID
     author_name: str
     worker_name: str
+    created_at: datetime
 
 
 class FittingRead(BaseModel):

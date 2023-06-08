@@ -263,9 +263,13 @@ class ProjectsEndpoints:
                 dxf_file_created = await self._main_db_manager.projects.create_dxf_file(
                     session, dxf_file
                 )
-                await self._main_db_manager.projects.update_project_status(
-                    session, project_id, ProjectStatusOption.in_progress
-                )
+                # Project should get status "in_progress" when pipe building is launched. Currently an algo works fast
+                # so I immediately switch status to "ready" after pipe building. Status "in_progress" should be used
+                # if we decide to use algo that works significantly longer.
+
+                # await self._main_db_manager.projects.update_project_status(
+                #     session, project_id, ProjectStatusOption.in_progress
+                # )
         except NoResultFound as e:
             raise HTTPException(status_code=404, detail=exc_to_str(e))
 
@@ -462,70 +466,6 @@ class ProjectsEndpoints:
 
         project_with_results = await self._get_project_with_results(project_id)
 
-        # df = pd.read_csv(csv_path)
-        #
-        # with open(png_path, "rb") as img:
-        #     img_str = base64.b64encode(img.read()).decode("utf-8")
-
-        # async with self._main_db_manager.users.make_autobegin_session() as session:
-        #     users = await self._main_db_manager.users.get_all_users(session)
-        # user_by_id: dict[uuid.UUID, User] = dict()
-        # for user in users:
-        #     user_by_id[user.id] = user
-        #
-        # async with self._main_db_manager.projects.make_autobegin_session() as session:
-        #     project = await self._main_db_manager.projects.get_project(
-        #         session, devices_configs.project_id
-        #     )
-        #     proj = ProjectExtendedWithNames(
-        #         author_name=user_by_id[project.author_id].name,
-        #         worker_name=user_by_id[project.worker_id].name,
-        #         **project.dict(),
-        #     )
-        #
-        # p = ProjectWithResults(
-        #     id=proj.id,
-        #     author_name=proj.author_name,
-        #     worker_name=proj.worker_name,
-        #     name=proj.name,
-        #     description=proj.description,
-        #     status=proj.status,
-        #     type=proj.type,
-        #     bathroom_type=proj.bathroom_type,
-        #     is_deleted=proj.is_deleted,
-        #     result=ProjectResult(
-        #         connection_points=ProjectResultConnectionPoints(
-        #             tab_name="Точки подключения",
-        #             table=[
-        #                 ConnectionPoint(
-        #                     id=uuid.uuid4(),
-        #                     order="direct",
-        #                     type=device.type,
-        #                     diameter=1,
-        #                     coord_x=device.coord_x,
-        #                     coord_y=device.coord_y,
-        #                     coord_z=device.coord_z,
-        #                 )
-        #                 for device in devices
-        #             ],
-        #             image=img_str,
-        #         ),
-        #         graph=ProjectResultGraph(
-        #             tab_name="Граф подключения",
-        #             table=[
-        #                 GraphVertex(
-        #                     id=uuid.uuid4(),
-        #                     graph=row["Граф"],
-        #                     material=row["Материал"],
-        #                     probability=0.9,
-        #                 )
-        #                 for id, row in df.iterrows()
-        #             ],
-        #             image=img_str,
-        #         ),
-        #     ),
-        # )
-
         async with self._main_db_manager.projects.make_autobegin_session() as session:
             await self._main_db_manager.projects.update_project_status(
                 session, project_id, ProjectStatusOption.ready
@@ -575,32 +515,6 @@ class ProjectsEndpoints:
             headers=headers,
             status_code=200,
         )
-
-    # async def _get_filename(
-    #     self,
-    #     project_id: uuid.UUID,
-    #     file_types: list[ExportFileType],
-    #     variant_num: int = 1,
-    # ) -> tuple[str, str]:
-    #     async with self._main_db_manager.projects.make_autobegin_session() as session:
-    #         dxf_file = await self._main_db_manager.projects.get_latest_dxf_file(
-    #             session, project_id=project_id
-    #         )
-    #
-    #     files_dir = settings.MEDIA_DIR / "builder_outputs"
-    #     filenames_all = [f for f in os.listdir(files_dir) if isfile(join(files_dir, f))]
-    #     if file_type == ExportFileType.csv:
-    #         filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.csv")]
-    #     elif file_type == ExportFileType.stl:
-    #         filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.stl")]
-    #     elif file_type == ExportFileType.png:
-    #         filenames = [f for f in filenames_all if f.endswith(f"{dxf_file.id}.png")]
-    #     else:
-    #         raise ValueError(f"Unsupported file_type {file_type}")
-    #
-    #     assert len(filenames) == 1, f"Several files were found, but only one should exist"
-    #     needed_filename = filenames[0]
-    #     return needed_filename, files_dir / needed_filename
 
     async def _get_user_or_error(self, user_id: uuid.UUID) -> User | NoResultFound:
         """

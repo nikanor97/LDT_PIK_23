@@ -115,7 +115,7 @@ class ProjectsDbManager(BaseDbManager):
         stmt = select(Project).where(Project.is_deleted == False)
         projects = (await session.execute(stmt)).scalars().all()
 
-        result = []
+        result: list[ProjectExtendedWithIds] = []
         for project in projects:
             proj = ProjectExtendedWithIds(
                 author_id=author_id_by_project_id[project.id],
@@ -123,6 +123,7 @@ class ProjectsDbManager(BaseDbManager):
                 **project.dict(),
             )
             result.append(proj)
+        result = sorted(result, key=lambda x: x.created_at)
 
         return result
 
