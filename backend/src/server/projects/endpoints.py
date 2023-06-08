@@ -47,8 +47,11 @@ from src.server.projects.models import (
     ExportFileType,
     ProjectsDelete,
     ProjectSewerVariant,
+    FittingStat,
+    ProjectResultFittingsStat,
 )
 from src.trace_builder.run import run_algo
+from src.trace_builder.utils import convert_dxf2img
 
 
 class ProjectsEndpoints:
@@ -258,6 +261,11 @@ class ProjectsEndpoints:
 
         dxf_file = DxfFile(project_id=project_id, source_url=file_name)
 
+        dxf_file_screenshot_path = str(file_path)[:-3] + "png"
+        convert_dxf2img(doc, dxf_file_screenshot_path)
+        with open(dxf_file_screenshot_path, "rb") as img:
+            dxf_file_screenshot = base64.b64encode(img.read()).decode("utf-8")
+
         try:
             async with self._main_db_manager.projects.make_autobegin_session() as session:
                 dxf_file_created = await self._main_db_manager.projects.create_dxf_file(
@@ -300,6 +308,7 @@ class ProjectsEndpoints:
             id=dxf_file_created.id,
             project_id=project_id,
             devices=devices_created,
+            image=dxf_file_screenshot,
             type="Кабина",
         )
         return res
@@ -332,15 +341,38 @@ class ProjectsEndpoints:
             variants = await self._main_db_manager.projects.get_sewer_variants(
                 session, project_id
             )
+            fittings = await self._main_db_manager.projects.get_all_fittings(session)
 
-        dfs: dict[int, pd.DataFrame] = dict()
+        fitting_material_to_object: dict[str, Fitting] = dict()
+        for fitting in fittings:
+            if fitting.material_id is not None:
+                fitting_material_to_object[fitting.material_id] = fitting
+
+        graph_dfs: dict[int, pd.DataFrame] = dict()
         imgs: dict[int, str] = dict()
+        fittings_stat: defaultdict[int, list[FittingStat]] = defaultdict(list)
         for idx, variant in enumerate(variants):
-            dfs[variant.variant_num] = pd.read_csv(variant.excel_source_url)
+            graph_dfs[variant.variant_num] = pd.read_csv(variant.excel_source_url)
 
             with open(variant.png_source_url, "rb") as img:
                 img_str = base64.b64encode(img.read()).decode("utf-8")
                 imgs[variant.variant_num] = img_str
+
+            material_id_to_count: defaultdict[str, int] = defaultdict(int)
+            for _, row in graph_dfs[variant.variant_num].iterrows():
+                material_id_to_count[str(row["Материал"])] += 1
+
+            for material_id, n_items in material_id_to_count.items():
+                if material_id in fitting_material_to_object:
+                    # TODO: It should be True allways, but on 08.06.23 we don't have
+                    #  straight pipes in "fittings" table in the DB
+                    stat = FittingStat(
+                        name=fitting_material_to_object[str(material_id)].name,
+                        material_id=str(material_id),
+                        n_items=n_items,
+                        total_length=None,
+                    )
+                    fittings_stat[variant.variant_num].append(stat)
 
         async with self._main_db_manager.users.make_autobegin_session() as session:
             users = await self._main_db_manager.users.get_all_users(session)
@@ -376,14 +408,19 @@ class ProjectsEndpoints:
                     n_fittings=variant.n_fittings,
                     sewer_length=variant.sewer_length,
                     result=ProjectResult(
+                        fittings_stat=ProjectResultFittingsStat(
+                            tab_name="Используемые фитинги",
+                            table=fittings_stat[variant.variant_num],
+                        ),
                         connection_points=ProjectResultConnectionPoints(
                             tab_name="Точки подключения",
                             table=[
                                 ConnectionPoint(
                                     id=uuid.uuid4(),
-                                    order="direct",
-                                    type=device.type,
-                                    diameter=1,
+                                    type=device.type_human,
+                                    diameter=110
+                                    if device.type == DeviceTypeOption.toilet
+                                    else 50,
                                     coord_x=device.coord_x,
                                     coord_y=device.coord_y,
                                     coord_z=device.coord_z,
@@ -401,7 +438,7 @@ class ProjectsEndpoints:
                                     material=row["Материал"],
                                     probability=0.9,
                                 )
-                                for id, row in dfs[variant.variant_num].iterrows()
+                                for id, row in graph_dfs[variant.variant_num].iterrows()
                             ],
                             image=img_str,
                         ),

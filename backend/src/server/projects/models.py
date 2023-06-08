@@ -62,6 +62,7 @@ class DxfFileWithDevices(BaseModel):
     project_id: uuid.UUID
     type: str
     devices: list[DeviceRead]
+    image: str
 
 
 class DeviceTypeWithCoords(BaseModel):
@@ -80,7 +81,7 @@ class DevicesWithHeights(BaseModel):
 
 class ConnectionPoint(BaseModel):
     id: uuid.UUID
-    order: str
+    # order: str
     type: str
     diameter: Decimal
     coord_x: Decimal
@@ -107,7 +108,20 @@ class ProjectResultGraph(BaseModel):
     image: str
 
 
+class FittingStat(BaseModel):
+    name: str
+    material_id: str
+    n_items: int
+    total_length: Optional[int]
+
+
+class ProjectResultFittingsStat(BaseModel):
+    tab_name: str
+    table: list[FittingStat]
+
+
 class ProjectResult(BaseModel):
+    fittings_stat: ProjectResultFittingsStat
     connection_points: ProjectResultConnectionPoints
     graph: ProjectResultGraph
 

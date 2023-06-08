@@ -41,7 +41,10 @@ class ProjectsDbManager(BaseDbManager):
                 img_str = base64.b64encode(img.read()).decode("utf-8")
             objects.append(
                 Fitting(
-                    name=fitting.name, groupname=fitting.groupname, image_b64=img_str
+                    name=fitting.name,
+                    groupname=fitting.groupname,
+                    image_b64=img_str,
+                    material_id=fitting.material_id,
                 )
             )
         session.add_all(objects)

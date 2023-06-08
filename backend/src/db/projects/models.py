@@ -119,6 +119,7 @@ class FittingBase(ProjectsSQLModel):
     name: str
     groupname: str
     image_b64: str
+    material_id: Optional[str]
 
 
 class Fitting(FittingBase, TimeStampWithIdMixin, table=True):

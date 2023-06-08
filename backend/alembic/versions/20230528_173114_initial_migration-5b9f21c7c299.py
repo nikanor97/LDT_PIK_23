@@ -93,6 +93,7 @@ def upgrade_projects() -> None:
         sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column('groupname', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column('image_b64', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column('material_id', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint('id')
