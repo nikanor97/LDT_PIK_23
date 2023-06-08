@@ -337,8 +337,6 @@ class ProjectsEndpoints:
         imgs: dict[int, str] = dict()
         for idx, variant in enumerate(variants):
             dfs[variant.variant_num] = pd.read_csv(variant.excel_source_url)
-            variants[idx].n_fittings = idx  # TODO: CHANGE ME !!!!!!!
-            variants[idx].sewer_length = idx
 
             with open(variant.png_source_url, "rb") as img:
                 img_str = base64.b64encode(img.read()).decode("utf-8")
