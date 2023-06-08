@@ -1,8 +1,12 @@
 import math
-from typing import List, Any
-from src.trace_builder.geometry import is_parallel_X
-from src.trace_builder.models import Pipe
+from typing import Any, List
+
+import numpy as np
+import vtkplotlib as vpl
 from src.trace_builder.constants import REDUCTION_SHIFT
+from src.trace_builder.geometry import is_parallel_X, l1_distance
+from src.trace_builder.models import Pipe
+
 
 def shift_stuff(stuffs, pipe, bias=90):
     bias = bias
@@ -22,7 +26,8 @@ def shift_stuff(stuffs, pipe, bias=90):
                 stuff.y += bias
     return stuffs
 
-def shift_stuff_after_reduction(stuffs: List[Any], pipe: Pipe, diameter = 110):
+
+def shift_stuff_after_reduction(stuffs: List[Any], pipe: Pipe, diameter=110):
     if pipe.after_reduction and diameter != 110:
         if isinstance(stuffs, list):
             for stuff in stuffs:
@@ -66,3 +71,30 @@ def rotate_otvod_87_upper(obj, pipe, cum_z, bias=90, bias_3=90):
 
     obj.z += cum_z
     return obj
+
+
+def shift_pipe_for_slope(objs: List[Any], pipe: Pipe):
+    if isinstance(objs, List):
+        for obj in objs:
+            obj.z += pipe.cumm_slope_shift
+    else:
+        objs.z += pipe.cumm_slope_shift
+
+
+def shift_knee_for_slope(objs: List[Any], pipe: Pipe):
+    shift = (
+        pipe.cumm_slope_shift
+        - l1_distance(pipe.coordinates.start, pipe.coordinates.end) * 0.02
+    )
+    if isinstance(objs, List):
+        for obj in objs:
+            obj.z += shift
+    else:
+        objs.z += shift
+
+
+def draw_letter(x, y, z, id):
+    shift = 100
+    letter = chr(ord("A") + id)
+    x = np.array([x + shift, y - shift, z])
+    vpl.text3d(letter, x, scale=60, color="k")

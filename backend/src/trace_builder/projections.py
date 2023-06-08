@@ -1,28 +1,38 @@
 # %%
 import re
-from typing import List
 from random import randint
+from typing import List
 
+import ezdxf
 import matplotlib.pyplot as plt
+
 # import networkx as nx
 import numpy as np
-import ezdxf
-from src.trace_builder.coordinate_converter import (coordinate2point,
-                                                    point2coordinate,
-                                                    segment2coordinates)
-from src.trace_builder.geometry import (is_dot_inside_segment, is_parallel_X,
-                                        is_parallel_Y, is_point_near_wall,
-                                        is_points_nighbour, is_wall_nighbour,
-                                        l1_distance, l2_distance)
-from src.trace_builder.model import Point, Segment, DXFStuff
+from src.trace_builder.coordinate_converter import (
+    coordinate2point,
+    coordinates2segments,
+    point2coordinate,
+    segment2coordinates,
+)
+from src.trace_builder.geometry import (
+    is_dot_inside_segment,
+    is_parallel_X,
+    is_parallel_Y,
+    is_point_near_wall,
+    is_points_nighbour,
+    is_wall_nighbour,
+    l1_distance,
+    l2_distance,
+)
 from src.trace_builder.merge_segments import merge_segments
-from src.trace_builder.utils import dict2stuff
+from src.trace_builder.model import DXFStuff, Point, Segment
+from src.trace_builder.models import Stuff, Wall
 from src.trace_builder.path import (
     build_path_from_riser_wall_to_sutff_wall,
     detect_walls_with_stuff,
+    get_neighbour_wall,
 )
-from src.trace_builder.coordinate_converter import coordinates2segments
-from src.trace_builder.models import Stuff, Wall
+from src.trace_builder.utils import dict2stuff
 
 # %%
 
@@ -132,6 +142,7 @@ def clear_sutff_duplicate(stuffs):
     for key in keys_to_delete:
         stuffs.pop(key, None)
     return stuffs
+
 
 def stuff_with_coordinates(msp):
     group = msp.groupby(dxfattrib="layer")
@@ -343,6 +354,7 @@ def calculate_max_riser_height(stuffs):
         best_min_dist = min(best_min_dist, min_dist)
     return best_min_dist
 
+
 def get_top3_segmets(segments, topk=3):
     for segment in segments:
         segment.length = l1_distance(segment.start, segment.end)
@@ -413,16 +425,18 @@ def check_wall_coordinates(walls):
         out_walls = walls
     return out_walls
 
+
 def get_toilet_stuff(stuffs: List[Stuff]) -> Stuff:
     for stuff in stuffs:
         if stuff.is_toilet:
             return stuff
 
-def detect_walls_after_toilet(walls: List[Wall], riser_projeciton: Point, toilet_projection: Point):
-    wall_with_toilet = None
+
+def detect_walls_after_toilet(
+    walls: List[Wall], riser_projeciton: Point, toilet_projection: Point
+):
     for wall in walls:
         if wall.has_toilet:
-            wall_with_toilet = wall
             wall.after_toilet = True
     for wall in walls:
         if wall.has_toilet:
@@ -432,44 +446,105 @@ def detect_walls_after_toilet(walls: List[Wall], riser_projeciton: Point, toilet
                 if toilet_projection.projection.y < riser_projeciton.y:
                     wall.after_toilet = True
                 elif toilet_projection.projection.y == riser_projeciton.y:
-                    if wall.path2wall_with_riser[0].coordinates.start.x < toilet_projection.projection.x < riser_projeciton.x:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.x
+                        < toilet_projection.projection.x
+                        < riser_projeciton.x
+                    ):
                         wall.after_toilet = True
-                    if wall.path2wall_with_riser[0].coordinates.start.x > toilet_projection.projection.x > riser_projeciton.x:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.x
+                        > toilet_projection.projection.x
+                        > riser_projeciton.x
+                    ):
                         wall.after_toilet = True
             elif wall.coordinates.start.y > toilet_projection.projection.y:
                 if toilet_projection.projection.y > riser_projeciton.y:
                     wall.after_toilet = True
                 elif toilet_projection.projection.y == riser_projeciton.y:
-                    if wall.path2wall_with_riser[0].coordinates.start.x < toilet_projection.projection.x < riser_projeciton.x:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.x
+                        < toilet_projection.projection.x
+                        < riser_projeciton.x
+                    ):
                         wall.after_toilet = True
-                    if wall.path2wall_with_riser[0].coordinates.start.x > toilet_projection.projection.x > riser_projeciton.x:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.x
+                        > toilet_projection.projection.x
+                        > riser_projeciton.x
+                    ):
                         wall.after_toilet = True
             else:
                 if toilet_projection.projection.y != riser_projeciton.y:
                     wall.after_toilet = True
         else:
-            if wall.coordinates.start.y < toilet_projection.projection.y and toilet_projection.projection.y < riser_projeciton.y:
+            if (
+                wall.coordinates.start.y < toilet_projection.projection.y
+                and toilet_projection.projection.y < riser_projeciton.y
+            ):
                 wall.after_toilet = True
             if wall.coordinates.start.x > toilet_projection.projection.x:
                 if toilet_projection.projection.x > riser_projeciton.x:
                     wall.after_toilet = True
                 elif toilet_projection.projection.x == riser_projeciton.x:
-                    if wall.path2wall_with_riser[0].coordinates.start.y > toilet_projection.projection.y > riser_projeciton.y:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.y
+                        > toilet_projection.projection.y
+                        > riser_projeciton.y
+                    ):
                         wall.after_toilet = True
-                    if wall.path2wall_with_riser[0].coordinates.start.y < toilet_projection.projection.y < riser_projeciton.y:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.y
+                        < toilet_projection.projection.y
+                        < riser_projeciton.y
+                    ):
                         wall.after_toilet = True
             elif wall.coordinates.start.x < toilet_projection.projection.x:
                 if toilet_projection.projection.x < riser_projeciton.x:
                     wall.after_toilet = True
                 elif toilet_projection.projection.x == riser_projeciton.x:
-                    if wall.path2wall_with_riser[0].coordinates.start.y > toilet_projection.projection.y > riser_projeciton.y:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.y
+                        > toilet_projection.projection.y
+                        > riser_projeciton.y
+                    ):
                         wall.after_toilet = True
-                    if wall.path2wall_with_riser[0].coordinates.start.y < toilet_projection.projection.y < riser_projeciton.y:
+                    if (
+                        wall.path2wall_with_riser[0].coordinates.start.y
+                        < toilet_projection.projection.y
+                        < riser_projeciton.y
+                    ):
                         wall.after_toilet = True
             else:
                 if toilet_projection.projection.x != riser_projeciton.x:
                     wall.after_toilet = True
 
+
+def get_length_from_riser_projection(
+    wall_src: Wall, will_with_riser: Wall, riser_projection: Point
+):
+    wall_riser_point = get_neighbour_wall(will_with_riser, wall_src)
+    return l1_distance(wall_riser_point, riser_projection)
+
+
+def calculate_wall_slope_shift(walls: List[Wall], riser_projection: Point):
+    for wall in walls:
+        if not wall.with_riser:
+            cumm_lenght = 0
+            walls_paths = wall.path2wall_with_riser
+            for wall_path in walls_paths:
+                if wall_path.with_riser:
+                    src_wall = (
+                        wall
+                        if len(wall.path2wall_with_riser) == 1
+                        else wall.path2wall_with_riser[-2]
+                    )
+                    cumm_lenght += get_length_from_riser_projection(
+                        src_wall, wall_path, riser_projection
+                    )
+                else:
+                    cumm_lenght += wall_path.length
+            wall.cumm_slope_shift = cumm_lenght * 0.02
 
 
 def process_file_geometry(dxf_path, heighs):
@@ -537,4 +612,5 @@ def process_file_geometry(dxf_path, heighs):
 
     toilet = get_toilet_stuff(stuffs_objects)
     detect_walls_after_toilet(walls, riser_projections, toilet)
+    calculate_wall_slope_shift(walls, riser_projections)
     return walls, riser_projections, riser_coordinates, max_riser_height

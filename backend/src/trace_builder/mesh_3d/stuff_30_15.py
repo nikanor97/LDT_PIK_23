@@ -1,10 +1,24 @@
 import math
-from src.trace_builder.geometry import is_parallel_X, is_parallel_Y
-from src.trace_builder.manipulate_3d import rotate_troinik_toilet, load_obj, cutout_pipe, l1_distance, center_pipe, rotate_otvod_45_low, shift_straight_pipe_45
-from src.trace_builder.mesh_3d.common import rotate_otvod_87_upper, shift_stuff, shift_stuff_after_reduction
-from src.trace_builder.models import Pipe
-from src.trace_builder.graph_models import PipeGraph, Node
+
 from src.trace_builder.constants import FITTINGS
+from src.trace_builder.geometry import is_parallel_X, is_parallel_Y
+from src.trace_builder.graph_models import Node, PipeGraph
+from src.trace_builder.manipulate_3d import (
+    center_pipe,
+    cutout_pipe,
+    l1_distance,
+    load_obj,
+    rotate_otvod_45_low,
+    rotate_troinik_toilet,
+    shift_straight_pipe_45,
+)
+from src.trace_builder.mesh_3d.common import (
+    rotate_otvod_87_upper,
+    shift_pipe_for_slope,
+    shift_stuff,
+    shift_stuff_after_reduction,
+)
+from src.trace_builder.models import Pipe
 
 
 def rotate_otvod_30_lower_first(obj, pipe, cum_z, bias=90):
@@ -31,6 +45,7 @@ def rotate_otvod_30_lower_first(obj, pipe, cum_z, bias=90):
             obj.z += bias_z
     return obj
 
+
 def rotate_otvod_15_lower_second(obj, pipe, cum_z, bias=90):
     bias_1, bias_z = bias, 170 + cum_z
     if is_parallel_X(pipe.coordinates):
@@ -49,6 +64,7 @@ def rotate_otvod_15_lower_second(obj, pipe, cum_z, bias=90):
             obj.y -= bias_1
     obj.z += bias_z
     return obj
+
 
 def build_stuff_mesh_30_15(pipe: Pipe, material_graph: PipeGraph):
     meshes = []
@@ -78,7 +94,9 @@ def build_stuff_mesh_30_15(pipe: Pipe, material_graph: PipeGraph):
 
     fitting_name = "otvod_50x30"
     otvod_lower_firts = load_obj(FITTINGS[fitting_name])
-    otvod_lower_firts = rotate_otvod_30_lower_first(otvod_lower_firts, pipe, cum_z, bias=bias_1)
+    otvod_lower_firts = rotate_otvod_30_lower_first(
+        otvod_lower_firts, pipe, cum_z, bias=bias_1
+    )
     nodes.append(
         Node(
             FITTINGS[fitting_name]["name"],
@@ -92,7 +110,9 @@ def build_stuff_mesh_30_15(pipe: Pipe, material_graph: PipeGraph):
 
     fitting_name = "otvod_50x15"
     otvod_lower_second = load_obj(FITTINGS[fitting_name])
-    otvod_lower_second = rotate_otvod_15_lower_second(otvod_lower_second, pipe, cum_z, bias=bias_1)
+    otvod_lower_second = rotate_otvod_15_lower_second(
+        otvod_lower_second, pipe, cum_z, bias=bias_1
+    )
     nodes.append(
         Node(
             FITTINGS[fitting_name]["name"],
@@ -111,17 +131,26 @@ def build_stuff_mesh_30_15(pipe: Pipe, material_graph: PipeGraph):
         straight_obj = center_pipe(straight_obj, "z")
         straight_obj_len = pipe.stuff.height - 40
         straight_obj = cutout_pipe(straight_obj, straight_obj_len)
-        straight_obj = shift_straight_pipe_45(straight_obj, pipe, cum_z+30, bias=bias_1)
+        straight_obj = shift_straight_pipe_45(
+            straight_obj, pipe, cum_z + 30, bias=bias_1
+        )
         straight_obj.x += pipe.coordinates.start.x
         straight_obj.y += pipe.coordinates.start.y
         straight_obj.z += pipe.stuff.height
         nodes.append(
-            Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"], length=straight_obj_len, is_inside_troinik=True)
+            Node(
+                FITTINGS[fitting_name]["name"],
+                FITTINGS[fitting_name]["id"],
+                length=straight_obj_len,
+                is_inside_troinik=True,
+            )
         )
 
     fitting_name = "otvod_50x87"
     otvod_upper_firts = load_obj(FITTINGS[fitting_name])
-    otvod_upper_firts = rotate_otvod_87_upper(otvod_upper_firts, pipe, 200+cum_z, bias_1, 130)
+    otvod_upper_firts = rotate_otvod_87_upper(
+        otvod_upper_firts, pipe, 200 + cum_z, bias_1, 130
+    )
     nodes.append(
         Node(
             FITTINGS[fitting_name]["name"],
@@ -142,5 +171,6 @@ def build_stuff_mesh_30_15(pipe: Pipe, material_graph: PipeGraph):
 
     meshes = [low_fitting] + stuffs
     meshes = shift_stuff_after_reduction(meshes, pipe, diameter=50)
+    shift_pipe_for_slope(meshes, pipe)
     material_graph.add_node(nodes, end=True)
     return meshes
