@@ -633,13 +633,14 @@ def build_stuff_mesh_45(pipe: Pipe, material_graph: PipeGraph):
     fitting_name = "d50"
     straight_obj = load_obj(FITTINGS[fitting_name])
     straight_obj = center_pipe(straight_obj, "z")
+    straight_obj_len = pipe.stuff.height
     straight_obj = cutout_pipe(straight_obj, pipe.stuff.height)
     straight_obj = shift_straight_pipe_45(straight_obj, pipe, cum_z+30, bias=bias_1)
     straight_obj.x += pipe.coordinates.start.x
     straight_obj.y += pipe.coordinates.start.y
     straight_obj.z += pipe.stuff.height
     nodes.append(
-        Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"], length=l1_distance(pipe.coordinates.start, pipe.coordinates.end), is_inside_troinik=True)
+        Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"], length=straight_obj_len, is_inside_troinik=True)
     )
 
     fitting_name = "otvod_50x45"

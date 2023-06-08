@@ -37,19 +37,21 @@ def build_stuff_mesh_87(pipe: Pipe, material_graph: PipeGraph):
     cum_z, bias_1 = 0, 10
     is_troinik = False
     if pipe.is_end:
-        troinik = load_obj(FITTINGS["otvod_50x87"])
+        fitting_name = "otvod_50x87"
+        troinik = load_obj(FITTINGS[fitting_name])
         troinik = rotate_otvod_87_low(troinik, pipe, cum_z, 10)
         nodes.append(
-            Node(FITTINGS["otvod_50x87"]["name"], FITTINGS["otvod_50x87"]["id"])
+            Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"])
         )
     else:
         is_troinik = True
-        troinik = load_obj(FITTINGS["troinik_50_50x87"])
+        fitting_name = "troinik_50_50x87"
+        troinik = load_obj(FITTINGS[fitting_name])
         troinik = rotate_troinik_toilet(troinik, pipe)
         nodes.append(
             Node(
-                FITTINGS["troinik_50_50x87"]["name"],
-                FITTINGS["troinik_50_50x87"]["id"],
+                FITTINGS[fitting_name]["name"],
+                FITTINGS[fitting_name]["id"],
                 is_troinik=True,
             )
         )
@@ -60,22 +62,24 @@ def build_stuff_mesh_87(pipe: Pipe, material_graph: PipeGraph):
     fitting_name = "d50"
     straight_obj = load_obj(FITTINGS[fitting_name])
     straight_obj = center_pipe(straight_obj, "z")
-    straight_obj = cutout_pipe(straight_obj, pipe.stuff.height - 10)
+    straight_obj_len = pipe.stuff.height - 10
+    straight_obj = cutout_pipe(straight_obj, straight_obj_len)
     straight_obj = shift_straight_pipe_45(straight_obj, pipe, cum_z, bias=bias_1)
     straight_obj.x += pipe.coordinates.start.x
     straight_obj.y += pipe.coordinates.start.y
     straight_obj.z += pipe.stuff.height
     nodes.append(
-        Node(FITTINGS["d50"]["name"], FITTINGS["d50"]["id"], is_inside_troinik=True)
+        Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"], is_inside_troinik=True, length=straight_obj_len)
     )
 
-    otvod_upper = load_obj(FITTINGS["otvod_50x87"])
+    fitting_name = "otvod_50x87"
+    otvod_upper = load_obj(FITTINGS[fitting_name])
     up_otovd =  cum_z + pipe.stuff.height + 60
     otvod_upper = rotate_otvod_87_upper(otvod_upper, pipe, up_otovd, bias_1, 90)
     nodes.append(
         Node(
-            FITTINGS["otvod_50x87"]["name"],
-            FITTINGS["d50"]["id"],
+            FITTINGS[fitting_name]["name"],
+            FITTINGS[fitting_name]["id"],
             is_inside_troinik=True,
             is_end=True,
         )

@@ -6,6 +6,7 @@ import settings
 from src.trace_builder.path import build_path
 from src.trace_builder.projections import process_file_geometry
 from src.db.projects.models import SewerVariantBase
+from src.trace_builder.utils import calculate_statistic
 
 
 def run_algo(dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = "") -> list[SewerVariantBase]:
@@ -15,25 +16,36 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = ""
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     timestamp = int(time())
-    output_files = f"{save_path}/{timestamp}{file_suffix}"
-    mesh, material_graph = build_path(
-        walls,
-        riser_projections,
-        riser_coordinates,
-        f"{output_files}.png",
-        scenario="30_15",
-    )
-    mesh.save(f"{output_files}.stl")
-    material_graph.to_csv(f"{output_files}.csv", index=True)
+    scenarios = [
+        {"scenario": "45", "priority": 1},
+        {"scenario": "30_15", "priority": 2},
+        {"scenario": "87", "priority": 3},
+    ]
+    output = []
+    for scenario in scenarios:
+        output_files = f"{save_path}/{timestamp}-{scenario['scenario']}{file_suffix}"
+        mesh, material_graph = build_path(
+            walls,
+            riser_projections,
+            riser_coordinates,
+            f"{output_files}.png",
+            scenario=scenario["scenario"],
+        )
+        fitting_count, length = calculate_statistic(material_graph)
+        mesh.save(f"{output_files}.stl")
+        material_graph.to_csv(f"{output_files}.csv", index=True)
 
-    sewer_variant = SewerVariantBase(
-        excel_source_url=f"{output_files}.csv",
-        stl_source_url=f"{output_files}.stl",
-        png_source_url=f"{output_files}.png",
-        variant_num=1,
-    )
+        output.append(SewerVariantBase(
+            excel_source_url=f"{output_files}.csv",
+            stl_source_url=f"{output_files}.stl",
+            png_source_url=f"{output_files}.png",
+            variant_num=scenario["priority"],
+            n_fittings=fitting_count,
+            sewer_length=length
+            )
+        )
 
-    return [sewer_variant]
+    return output
 
 
 if __name__ == "__main__":

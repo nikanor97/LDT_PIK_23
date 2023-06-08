@@ -11,6 +11,7 @@ from src.trace_builder.coordinate_converter import (coordinate2point,
                                                     segment2coordinates,
                                                     segments2coordinates)
 from src.trace_builder.models import Stuff
+import pandas as pd
 
 
 def save_data(
@@ -105,3 +106,16 @@ def convert_dxf2img(doc, img_name, img_res=1440):
     out = MatplotlibBackend(ax)
     Frontend(ctx, out).draw_layout(msp, finalize=True)
     fig.savefig(img_name, dpi=img_res)
+
+def fittings_count(graph):
+    fitting_count = 0
+    materials = graph["Материал"].values
+    for material in materials:
+        if material not in [501, 500]:
+            fitting_count += 1
+    return fitting_count
+
+def calculate_statistic(graph: pd.DataFrame):
+    fitting_counts = fittings_count(graph)
+    length = graph[(graph["Материал"] == 500) | (graph["Материал"] == 501)]["Длина"].values.sum()
+    return fitting_counts, length
