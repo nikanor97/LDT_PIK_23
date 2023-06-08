@@ -1,6 +1,7 @@
 import enum
 import uuid
 from _decimal import Decimal
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -26,12 +27,14 @@ class ProjectExtendedWithIds(ProjectBase):
     id: uuid.UUID
     author_id: uuid.UUID
     worker_id: uuid.UUID
+    created_at: datetime
 
 
 class ProjectExtendedWithNames(ProjectBase):
     id: uuid.UUID
     author_name: str
     worker_name: str
+    created_at: datetime
 
 
 class FittingRead(BaseModel):
@@ -46,7 +49,8 @@ class FittingGroupRead(BaseModel):
 
 
 class DeviceRead(BaseModel):
-    name: str
+    id: uuid.UUID
+    type_human: str
     type: DeviceTypeOption
     coord_x: Optional[Decimal]
     coord_y: Optional[Decimal]
@@ -61,6 +65,7 @@ class DxfFileWithDevices(BaseModel):
 
 
 class DeviceTypeWithCoords(BaseModel):
+    id: uuid.UUID
     type: DeviceTypeOption
     coord_x: float
     coord_y: float
@@ -107,10 +112,22 @@ class ProjectResult(BaseModel):
     graph: ProjectResultGraph
 
 
-class ProjectWithResults(ProjectExtendedWithNames):
+class ProjectSewerVariant(BaseModel):
+    variant_num: int
     result: ProjectResult
+    n_fittings: int
+    sewer_length: Decimal
+
+
+class ProjectWithResults(ProjectExtendedWithNames):
+    results: Optional[list[ProjectSewerVariant]]
 
 
 class ExportFileType(str, enum.Enum):
     csv = "csv"
     stl = "stl"
+    png = "png"
+
+
+class ProjectsDelete(BaseModel):
+    project_ids: list[uuid.UUID]

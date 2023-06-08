@@ -55,16 +55,60 @@
             padding: 16px 24px 32px 24px;
             &Option {
                 padding: 12px;
-                height: 68px;
                 background: #FFFFFF;
                 border: 1px solid #E4E7EC;
                 border-radius: 8px;
-                &Title {
-                    font-style: normal;
-                    font-weight: 600;
-                    font-size: 14px;
-                    line-height: 20px;
-                    color: #000000;
+                &:hover {
+                    background: #F9FAFB;
+                    cursor: pointer;
+                }
+                &Top {
+                    margin-bottom: 18px;
+                    display: flex;
+                    &Icon {
+                        width: 24px;
+                        height: 24px;
+                        background: #FC4C02;
+                        border-radius: 6px;
+                        font-style: normal;
+                        font-weight: 600;
+                        font-size: 16px;
+                        line-height: 24px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #FFFFFF;
+                        margin-right: 16px;
+                    }
+                    &Title {
+                        font-style: normal;
+                        font-style: normal;
+                        font-weight: 600;
+                        font-size: 16px;
+                        line-height: 24px;
+                        color: #000000;
+                    }
+                }
+
+                &Info {
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 8px;
+                    &Desc {
+                        font-style: normal;
+                        font-weight: 400;
+                        font-size: 14px;
+                        line-height: 16px;
+                        color: #667085; 
+                    }
+                    &Num {
+                        font-style: normal;
+                        font-weight: 600;
+                        font-size: 14px;
+                        line-height: 20px;
+                        color: #000000;
+                    }
                 }
             }
         }

@@ -44,12 +44,19 @@ export declare namespace iApi {
             name: string,
             bathroom_type: string,
             author_name: string,
-            status: 100 | 200 | 400 | 300,
+            status: 0 | 100 | 200 | 400 | 300,
             worker_name: string,
             type: "dxf" | "manual"
         }
         type ItemDetail = Item & {
-            result?: Result
+            results?: Results[]
+        }
+
+        type Results = {
+            n_fittings: number;
+            sewer_length: number;
+            variant_num: number;
+            result: Result;
         }
 
         type Result = {
@@ -99,6 +106,8 @@ export declare namespace iApi {
             devices: {
                 name: string,
                 type: string,
+                type_human: string,
+                id: string,
                 coord_x: number,
                 coord_y: number,
             }[]

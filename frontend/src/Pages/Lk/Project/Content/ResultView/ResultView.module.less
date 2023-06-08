@@ -1,8 +1,19 @@
 .wrapper {
-    padding: 12px 80px 24px 80px;
+    padding: 12px 120px 24px 120px;
     height: 100%;
 
     overflow-y: scroll;
+    :global {
+        .ant-tabs {
+            height: 90%;
+        }
+        .ant-tabs-content {
+            height: 100%;
+        }
+        .ant-tabs-tabpane {
+            height: 100%;
+        }
+    }
 }
 
 .header {
@@ -15,6 +26,15 @@
     }
 }
 
+.divider {
+    border-right: 1px solid rgba(133, 133, 133);
+    height: 24px;
+    padding: 0;
+    margin: 0;
+    width: 1px;
+    min-width: 1px
+}
+
 
 
 .title {
@@ -24,4 +44,15 @@
     line-height: 24px;
     color: #101828;
     margin-left: 16px;
+    margin-right: 16px;
 }
+
+.subTitle {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 24px;
+    color: var(--text-secondary);
+    margin-left: 16px;
+}
+

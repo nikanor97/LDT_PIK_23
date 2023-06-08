@@ -9,14 +9,16 @@ type iState = {
     createFetching: boolean;
     getSelectedProject: boolean;
     getFetching: boolean;
-    selectedProjects: null | iApi.Projects.Item[];
+    selectedProjects: null | React.Key[];
     fittingsGroups: iApi.Projects.FittingGroup[] | null;
     getFittings: boolean,
-    selectedOption: number | null,
+    selectedOption: iApi.Projects.Results | null,
     parseDXFStatus: "loading" | "success" | "error" | null;
     DXFdata: iApi.Projects.DXFParsedData | null,
     startCalcStatus: "loading" | "success" | "error" | null;
     loadingDownload: boolean;
+    file: File | null;
+    loadFile: boolean,
 }
 
 const initialState:iState  = {
@@ -33,7 +35,9 @@ const initialState:iState  = {
     parseDXFStatus: null,
     DXFdata: null,
     startCalcStatus: null,
-    loadingDownload: false
+    loadingDownload: false,
+    file: null,
+    loadFile: false,
 };
 
 const Slice = createSlice({
@@ -129,7 +133,28 @@ const Slice = createSlice({
         },
         _downloadResultError: (state) => {
             state.loadingDownload = false;
-        }
+        },
+        downloadFile: (state, action: PayloadAction<iActions.downloadResult>) => {
+            state.loadFile = true;
+        },
+        _downloadFileSuccess: (state, action: PayloadAction<iActions._downloadFileSuccess>) => {
+            state.file = action.payload;
+            state.loadFile = false;
+        },
+        _downloadFileError: (state) => {
+            state.loadFile = false;
+        },
+        eraseFile: (state) => {
+            state.file = null;
+        },
+        deleteProjects: (state, action: PayloadAction<iActions.deleteProjects>) => {
+            return state;
+        },
+        _deleteProjectsSuccess: (state, action: PayloadAction<iActions._deleteProjectsSuccess>) => {
+            if (state.projects) {
+                state.projects = state.projects.filter((item: iApi.Projects.Item) => !action.payload.includes(item.id));
+            }
+        },
     }
 });
 

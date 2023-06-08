@@ -93,7 +93,7 @@ module.exports = {
             proxy: [
                 {
                     context: ["/api/"],
-                    target: proxyLocal ? "http://backend:8000/" : "http://91.77.164.236:8095/",
+                    target: proxyLocal ? "http://backend:8000/" : "http://91.77.164.236:7037/",
                     changeOrigin: true,
                     logLevel: proxyLog,
                 },

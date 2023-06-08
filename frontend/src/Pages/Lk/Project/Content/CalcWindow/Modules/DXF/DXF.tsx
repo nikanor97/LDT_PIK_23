@@ -102,22 +102,22 @@ const DXF = () => {
                                 {DXFData.devices.map((item, index) => (
                                     <div key={index}>
                                         <Title variant="h3" className={styles.configTitle}>
-                                            {item.name} 
+                                            {item.type_human}
                                         </Title>
                                         <div className={styles.inputs}>
-                                            <FormItem name={`${item.type}X`} initialValue={item.coord_x} label={"X"}>
+                                            <FormItem name={`${item.type}/${item.id}/${item.name}/X`} initialValue={item.coord_x} label={"X"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}
                                                     disabled/>
                                             </FormItem>
-                                            <FormItem name={`${item.type}Y`} initialValue={item.coord_y} label={"Y"}>
+                                            <FormItem name={`${item.type}/${item.id}/${item.name}/Y`} initialValue={item.coord_y} label={"Y"}>
                                                 <InputNumber
                                                     required
                                                     controls={false}
                                                     disabled/>
                                             </FormItem>
-                                            <FormItem name={`${item.type}Z`} label={"Z"} required>
+                                            <FormItem name={`${item.type}/${item.id}/${item.name}/Z`} label={"Z"} required>
                                                 <InputNumber required controls={false}/>
                                             </FormItem>
                                         </div>

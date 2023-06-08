@@ -53,7 +53,7 @@ class ProjectsRouter:
         self.router.add_api_route(
             path="/project",
             endpoint=self._projects_endpoints.get_project,
-            response_model=ProjectExtendedWithNames,
+            response_model=ProjectWithResults,
             methods=[METHOD.GET],
             dependencies=[Depends(Auth(main_db_manager))],
         )
@@ -63,6 +63,14 @@ class ProjectsRouter:
             endpoint=self._projects_endpoints.get_all_projects,
             response_model=list[ProjectExtendedWithNames],
             methods=[METHOD.GET],
+            dependencies=[Depends(Auth(main_db_manager))],
+        )
+
+        self.router.add_api_route(
+            path="/delete",
+            endpoint=self._projects_endpoints.delete_projects,
+            response_model=list[Project],
+            methods=[METHOD.POST],
             dependencies=[Depends(Auth(main_db_manager))],
         )
 

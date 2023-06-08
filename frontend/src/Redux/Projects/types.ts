@@ -16,9 +16,9 @@ export declare namespace iActions {
     type setSelectedProject = iApi.Projects.ItemDetail | null;
     type getSelectedProject =  Pick<iApi.Projects.Item, "id">;
     type _getSelectedProjectSuccess = iApi.Projects.ItemDetail;
-    type setSelectedProjects = iApi.Projects.Item[];
+    type setSelectedProjects = React.Key[];
     type _getFittingSuccess = iApi.Projects.FittingGroup[];
-    type setSelectedOption = number | null;
+    type setSelectedOption = iApi.Projects.Results | null;
     type parseDXF = {
         dxf: RcFile,
         project_id: string
@@ -41,4 +41,8 @@ export declare namespace iActions {
         variant_num: number,
         file_type: "csv" | "stl"
     }
+    type _downloadFileSuccess = File;
+    type deleteProjects = React.Key[];
+    type _deleteProjectsSuccess = React.Key[];
+
 }

@@ -60,10 +60,10 @@
             .ant-table-filter-column {
                 justify-content: flex-start;
                 .ant-table-column-sorter {
-                    color: #384049;
+                    color: #667085;
                 }
                 .ant-table-filter-trigger {
-                    color: #384049;
+                    color: #667085;
                 }
             }
             .ant-table-filter-trigger {
@@ -86,10 +86,7 @@
                 tr {
                     
                     th {
-                        padding: 18px 15px 16px 0;
-                        &:first-child {
-                            padding-left: 14px;
-                        }
+                        padding: 30px 15px 16px 0;
                         background: transparent;
                         color: var(--text-primary);
                         font-weight: 600;
@@ -301,4 +298,17 @@
             }
         }
     }
+
+.paginationTotal {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
     
+.deleteButton {
+    margin-right: 32px;
+    .button {
+        height: 20px;
+    }
+}

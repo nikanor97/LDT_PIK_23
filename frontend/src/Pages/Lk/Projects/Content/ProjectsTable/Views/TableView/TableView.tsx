@@ -1,9 +1,10 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import useColumns from "../../Hooks/useColumns";
 import  {
     useGetValidNoun,
     useAppDispatch,
-    useAppSelector
+    useAppSelector,
+    useNotification
 } from "@root/Hooks";
 import Actions from "@actions";
 import {Table} from "antd";
@@ -12,10 +13,8 @@ import routes from "@routes";
 import {useHistory} from "react-router-dom";
 import {iApi} from "@root/types";
 import EmptyDocuments from "@root/Assets/Icons/EmptyDocuments/EmptyDocuments";
-import useNotification from "@root/Hooks/useNotification/useNotification";
 
 const TableView = () => {
-
     const projects = useAppSelector((state) => state.Projects.projects);
     const columns = useColumns();
     const history = useHistory();
@@ -29,7 +28,7 @@ const TableView = () => {
 
     const rowSelection = {
         onChange: (selectedRowKeys: React.Key[], selectedRows: iApi.Projects.Item[]) => {
-            dispatch(Actions.Projects.setSelectedProjects(selectedRows));
+            dispatch(Actions.Projects.setSelectedProjects(selectedRowKeys));
         },
         getCheckboxProps: (record: iApi.Projects.Item) => ({
             name: record.name,
@@ -46,13 +45,25 @@ const TableView = () => {
 
     return (
         <Table
-            // rowSelection={rowSelection}
+            rowSelection={rowSelection}
             onRow={(record) => {
-                return {
-                    onClick: () => {
-                        history.push(routes.lk.project.root(record.id.toString()));
-                    },
-                };
+                if (record.status === 100) {
+                    return {
+                        onClick: () => {
+                            notification({
+                                type: "info",
+                                message: "Подождите, еще происходит расчёт"
+                            });
+                        },
+                    };
+                } else {
+                    return {
+                        onClick: () => {
+                            history.push(routes.lk.project.root(record.id.toString()));
+                        },
+                    };
+                }
+
             }}
             className={styles.table}
             dataSource={projects}
@@ -63,10 +74,13 @@ const TableView = () => {
                 showSizeChanger: true,
                 locale: {items_per_page: ""},
                 showTotal: (total) =>
-                    `Всего ${total} ${useGetValidNoun({
-                        nounTypes,
-                        number: total,
-                    })}`,
+                    <div className={styles.paginationTotal}>
+                            Всего {total} {useGetValidNoun({
+                            nounTypes,
+                            number: total,
+                        })}
+                    </div>
+                ,
                 selectPrefixCls: styles.test,
             }}
             scroll={{
@@ -76,8 +90,7 @@ const TableView = () => {
             rowKey="id"
             size="small"
             locale={{emptyText: (<EmptyDocuments />)}}
-            
-        />
+        />        
     );
 };
 

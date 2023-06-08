@@ -20,18 +20,23 @@ const ContentController = () => {
         );
     }
     if (selectedProject) {
-        if (selectedProject.result) {
-            // if (selectedOption !== null) {
-                
-            return <ResultView />;
-            // } else {
-            //     return (<ResultList />);
-            // }
-
-        } else {
+        if (selectedProject.status === 0 || selectedProject.status === 400) {
             return (
                 <CalcWindow />
             );
+        } else {
+            if (selectedOption !== null) {
+                return <ResultView />;
+            } else {
+                if (!selectedProject.results) return <Empty
+                    imageStyle={{height: "200px",
+                        width: "200px",
+                        margin: "auto"}}
+                    image={<EmptyDocuments />}
+                    style={{margin: "auto"}}
+                    description="Информация о проекте не загрузилась. Вернитесь назад и попробуйте еще раз"/>;
+                return (<ResultList />);
+            }
         }
     }
     if (!selectedProject) return (

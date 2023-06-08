@@ -16,6 +16,7 @@ const Project = () => {
 
     useEffect(() => {
         dispatch(Actions.Projects.getSelectedProject({id: projectID}));
+
     }, []);
 
     return (
