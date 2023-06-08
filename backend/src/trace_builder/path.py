@@ -7,20 +7,27 @@ from typing import List, Tuple
 import numpy as np
 import vtkplotlib as vpl
 from src.trace_builder.constants import FITTINGS, GLOBAL_INIT_MIN
-from src.trace_builder.geometry import (is_dot_inside_segment, is_parallel_X,
-                                        is_parallel_Y, is_wall_nighbour,
-                                        l1_distance)
+from src.trace_builder.geometry import (
+    is_dot_inside_segment,
+    is_parallel_X,
+    is_parallel_Y,
+    is_wall_nighbour,
+    l1_distance,
+)
 from src.trace_builder.graph_models import Node, PipeGraph
-from src.trace_builder.manipulate_3d import (build_knee_fitting,
-                                             build_otvod_to_knee_pipe,
-                                             build_pipe_mesh, build_riser,
-                                             build_riser_otvod,
-                                             build_riser_to_otvod_pipe,
-                                             build_stuff_mesh_45,
-                                             build_toilet_mesh,
-                                             build_knee_fitting_45,
-                                             build_pipe_arrows,
-                                             draw_bath_arrows)
+from src.trace_builder.manipulate_3d import (
+    build_knee_fitting,
+    build_knee_fitting_45,
+    build_otvod_to_knee_pipe,
+    build_pipe_arrows,
+    build_pipe_mesh,
+    build_riser,
+    build_riser_otvod,
+    build_riser_to_otvod_pipe,
+    build_stuff_mesh_45,
+    build_toilet_mesh,
+    draw_bath_arrows,
+)
 from src.trace_builder.mesh_3d.stuff_30_15 import build_stuff_mesh_30_15
 from src.trace_builder.mesh_3d.stuff_87 import build_stuff_mesh_87
 from src.trace_builder.meterial_graph import build_material_graph
@@ -143,6 +150,16 @@ def get_nearest_wall_to_point(point, wall_src, walls):
             best_dist = dist
     return walls[best_wall], best_dist
 
+
+def _calculate_pipe_cumm_height(start: Point, wall: Wall, riser_projection: Point):
+    pipe_cumm_slope_shift = wall.cumm_slope_shift
+    if not wall.with_riser:
+        pipe_cumm_slope_shift += 0.02 * l1_distance(wall.start_pipe_point, start)
+    else:
+        pipe_cumm_slope_shift += 0.02 * l1_distance(riser_projection, start)
+    return pipe_cumm_slope_shift
+
+
 def _define_start(wall):
     is_last_stuff_is_edged = True
     if is_parallel_Y(wall):
@@ -194,7 +211,10 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                 is_start=True,
                 stuff=wall.stuff_point[0],
                 is_wall_start=True,
-                after_reduction=wall.after_toilet
+                after_reduction=wall.after_toilet,
+                cumm_slope_shift=_calculate_pipe_cumm_height(
+                    start, wall, riser_projections
+                ),
             )
         ]
     else:
@@ -208,7 +228,10 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                     is_toilet=stuff.is_toilet,
                     with_riser=wall.with_riser,
                     stuff=stuff,
-                    after_reduction=wall.after_toilet
+                    after_reduction=wall.after_toilet,
+                    cumm_slope_shift=_calculate_pipe_cumm_height(
+                        start, wall, riser_projections
+                    ),
                 )
             )
             start = wall.stuff_point[idx_stuff + 1].projection
@@ -218,7 +241,10 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                 is_toilet=wall.stuff_point[-1].is_toilet,
                 with_riser=wall.with_riser,
                 stuff=wall.stuff_point[-1],
-                after_reduction=wall.after_toilet
+                after_reduction=wall.after_toilet,
+                cumm_slope_shift=_calculate_pipe_cumm_height(
+                    start, wall, riser_projections
+                ),
             )
         )
         if is_last_stuff_is_edged:
@@ -244,20 +270,26 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                     stuff=None,
                     is_end=True,
                     is_wall_end=True,
-                    after_reduction=wall.after_toilet
+                    after_reduction=wall.after_toilet,
+                    cumm_slope_shift=_calculate_pipe_cumm_height(
+                        point, wall, riser_projections
+                    ),
                 )
             )
             start_end_pipes[-2].is_end = False
         else:
             start_end_pipes = [
                 Pipe(
-                    coordinates=Segment(point, start_end_pipes[-1].coordinates.start),
+                    coordinates=Segment(point, start_end_pipes[0].coordinates.start),
                     is_toilet=False,
                     with_riser=False,
                     stuff=None,
                     is_end=True,
                     is_wall_end=True,
-                    after_reduction=wall.after_toilet
+                    after_reduction=wall.after_toilet,
+                    cumm_slope_shift=_calculate_pipe_cumm_height(
+                        point, wall, riser_projections
+                    ),
                 )
             ] + start_end_pipes
             start_end_pipes[1].is_end = False
@@ -288,6 +320,7 @@ def wall_with_riser(wall_riser, riser_projections):
     end = wall_riser.end
     start_end_pipes.append(Segment(start, end))
     return start_end_pipes
+
 
 def is_riser_otvod_both_side(walls: List[Wall], riser_projections: Point) -> bool:
     left, right, down, up = False, False, False, False
@@ -344,7 +377,10 @@ def process_artifacts(mesh_data, material_graph, scrennshot_name, walls):
     figure.close()
     return all_figures, grap_df
 
-def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name, scenario="87"):
+
+def build_mesh_path(
+    walls, riser_projections, riser_coordinates, scrennshot_name, scenario="87"
+):
     material_graph = PipeGraph()
     mesh_data = []
     # riser_coordinates.y -= 200
@@ -383,9 +419,7 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
                 if os.getenv("LOCAL_ALGO"):
                     build_pipe_arrows(pipe)
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
-                mesh_obj, node = build_pipe_mesh(
-                    obj, pipe, scenario
-                )
+                mesh_obj, node = build_pipe_mesh(obj, pipe, scenario)
                 mesh_data.append(mesh_obj.data.copy())
                 material_graph.add_node(node)
                 if pipe.is_toilet:
@@ -404,9 +438,13 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
                         )
                 if pipe.is_start:
                     if scenario == "87" or wall.has_toilet:
-                        stuff_object = build_knee_fitting(pipe, riser_projections, material_graph)
+                        stuff_object = build_knee_fitting(
+                            pipe, riser_projections, material_graph
+                        )
                     elif scenario in ["45", "30_15"]:
-                        stuff_object = build_knee_fitting_45(pipe, riser_projections, material_graph)
+                        stuff_object = build_knee_fitting_45(
+                            pipe, riser_projections, material_graph
+                        )
                     mesh_data.extend(obj.data.copy() for obj in stuff_object)
         elif wall.with_riser:
             if not wall.has_toilet:
@@ -431,7 +469,10 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
                         is_start=True,
                         is_end=True,
                         with_riser=True,
-                        after_reduction=wall.after_toilet
+                        after_reduction=wall.after_toilet,
+                        cumm_slope_shift=_calculate_pipe_cumm_height(
+                            wall.start_pipe_point, wall, riser_projections
+                        ),
                     )
                 ]
             else:
@@ -443,9 +484,7 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
                 if os.getenv("LOCAL_ALGO"):
                     build_pipe_arrows(pipe)
                 obj = FITTINGS["d110"] if pipe.is_toilet else FITTINGS["d50"]
-                mesh_obj, node = build_pipe_mesh(
-                    obj, pipe, scenario
-                )
+                mesh_obj, node = build_pipe_mesh(obj, pipe, scenario)
                 mesh_data.append(mesh_obj.data.copy())
                 material_graph.add_node(node)
                 if pipe.is_toilet:
@@ -471,18 +510,30 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
                     < l1_distance(wall.end, riser_projections)
                     else Segment(wall.start, wall.end)
                 )
-                pipe = Pipe(pipe_coordinates, is_start=True, is_end=True, is_wall_end=True, is_wall_start=True, after_reduction=wall.after_toilet)
-                pipe_obj, node = build_pipe_mesh(
-                    obj, pipe, scenario
+                pipe = Pipe(
+                    pipe_coordinates,
+                    is_start=True,
+                    is_end=True,
+                    is_wall_end=True,
+                    is_wall_start=True,
+                    after_reduction=wall.after_toilet,
+                    cumm_slope_shift=_calculate_pipe_cumm_height(
+                        pipe_coordinates.start, wall, riser_projections
+                    ),
                 )
+                pipe_obj, node = build_pipe_mesh(obj, pipe, scenario)
                 material_graph.add_node(node)
                 if os.getenv("LOCAL_ALGO"):
                     build_pipe_arrows(pipe)
 
                 if scenario == "87" or wall.has_toilet:
-                    stuff_object = build_knee_fitting(pipe, riser_projections, material_graph)
+                    stuff_object = build_knee_fitting(
+                        pipe, riser_projections, material_graph
+                    )
                 elif scenario in ["45", "30_15"]:
-                    stuff_object = build_knee_fitting_45(pipe, riser_projections, material_graph)
+                    stuff_object = build_knee_fitting_45(
+                        pipe, riser_projections, material_graph
+                    )
                 mesh_data.extend(obj.data.copy() for obj in stuff_object)
                 objs = [pipe_obj] + stuff_object
                 mesh_data.extend([obj.data.copy() for obj in objs])
@@ -492,6 +543,10 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
 def build_path(
     walls, riser_projections, riser_coordinates, scrennshot_name, scenario="87"
 ):
-    mesh_data, material_graph = build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name, scenario)
-    all_figures, grap_df = process_artifacts(mesh_data, material_graph, scrennshot_name, walls)
+    mesh_data, material_graph = build_mesh_path(
+        walls, riser_projections, riser_coordinates, scrennshot_name, scenario
+    )
+    all_figures, grap_df = process_artifacts(
+        mesh_data, material_graph, scrennshot_name, walls
+    )
     return all_figures, grap_df

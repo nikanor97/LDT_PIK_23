@@ -1,11 +1,24 @@
 import math
-from src.trace_builder.geometry import is_parallel_X, is_parallel_Y
-from src.trace_builder.manipulate_3d import rotate_troinik_toilet, load_obj, cutout_pipe, l1_distance, center_pipe, rotate_otvod_45_low, shift_straight_pipe_45
-from src.trace_builder.mesh_3d.common import rotate_otvod_87_upper, shift_stuff, shift_stuff_after_reduction
-from src.trace_builder.models import Pipe
-from src.trace_builder.graph_models import PipeGraph, Node
-from src.trace_builder.constants import FITTINGS
 
+from src.trace_builder.constants import FITTINGS
+from src.trace_builder.geometry import is_parallel_X, is_parallel_Y
+from src.trace_builder.graph_models import Node, PipeGraph
+from src.trace_builder.manipulate_3d import (
+    center_pipe,
+    cutout_pipe,
+    l1_distance,
+    load_obj,
+    rotate_otvod_45_low,
+    rotate_troinik_toilet,
+    shift_straight_pipe_45,
+)
+from src.trace_builder.mesh_3d.common import (
+    rotate_otvod_87_upper,
+    shift_pipe_for_slope,
+    shift_stuff,
+    shift_stuff_after_reduction,
+)
+from src.trace_builder.models import Pipe
 
 
 def rotate_otvod_87_low(obj, pipe, cum_z, bias=90):
@@ -40,9 +53,7 @@ def build_stuff_mesh_87(pipe: Pipe, material_graph: PipeGraph):
         fitting_name = "otvod_50x87"
         troinik = load_obj(FITTINGS[fitting_name])
         troinik = rotate_otvod_87_low(troinik, pipe, cum_z, 10)
-        nodes.append(
-            Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"])
-        )
+        nodes.append(Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"]))
     else:
         is_troinik = True
         fitting_name = "troinik_50_50x87"
@@ -69,12 +80,17 @@ def build_stuff_mesh_87(pipe: Pipe, material_graph: PipeGraph):
     straight_obj.y += pipe.coordinates.start.y
     straight_obj.z += pipe.stuff.height
     nodes.append(
-        Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"], is_inside_troinik=True, length=straight_obj_len)
+        Node(
+            FITTINGS[fitting_name]["name"],
+            FITTINGS[fitting_name]["id"],
+            is_inside_troinik=True,
+            length=straight_obj_len,
+        )
     )
 
     fitting_name = "otvod_50x87"
     otvod_upper = load_obj(FITTINGS[fitting_name])
-    up_otovd =  cum_z + pipe.stuff.height + 60
+    up_otovd = cum_z + pipe.stuff.height + 60
     otvod_upper = rotate_otvod_87_upper(otvod_upper, pipe, up_otovd, bias_1, 90)
     nodes.append(
         Node(
@@ -87,11 +103,11 @@ def build_stuff_mesh_87(pipe: Pipe, material_graph: PipeGraph):
     otvod_upper.x += pipe.coordinates.start.x
     otvod_upper.y += pipe.coordinates.start.y
 
-
     stuffs = [straight_obj, otvod_upper]
     stuffs = shift_stuff(stuffs, pipe, bias=40) if is_troinik else stuffs
 
     meshes = stuffs + [troinik]
     meshes = shift_stuff_after_reduction(meshes, pipe, diameter=50)
+    shift_pipe_for_slope(meshes, pipe)
     material_graph.add_node(nodes, end=True)
     return meshes

@@ -1,16 +1,20 @@
 import math
 from typing import Any
+
 import numpy as np
+import vtkplotlib as vpl
 from src.trace_builder.constants import FITTINGS, REDUCTION_SHIFT
-from src.trace_builder.geometry import (is_parallel_X, is_parallel_Y,
-                                        l1_distance)
+from src.trace_builder.geometry import is_parallel_X, is_parallel_Y, l1_distance
 from src.trace_builder.graph_models import Node, PipeGraph
+from src.trace_builder.mesh_3d.common import (
+    draw_letter,
+    shift_knee_for_slope,
+    shift_pipe_for_slope,
+    shift_stuff_after_reduction,
+)
 from src.trace_builder.model import Point, Segment
 from src.trace_builder.models import Pipe, Wall
-from src.trace_builder.mesh_3d.common import shift_stuff_after_reduction
 from stl import mesh
-import vtkplotlib as vpl
-
 
 
 def cutout_pipe(pipe, length=10):
@@ -59,6 +63,7 @@ def move_pipe(pipe, value, axis="z"):
         centered_pipe[i] = cutted[:, i, :]
     pipe.vectors = centered_pipe
     return pipe
+
 
 def cutout_pipe_end(pipe, how_much_cutoff=10):
     x, y, z = pipe.vectors.reshape((-1, 3)).T
@@ -179,7 +184,10 @@ def transform_mesh(
 
 def cutout_pipe_obj_v2(obj: Any, obj_meta: dict, pipe: Pipe, scenario: str):
     if pipe.is_wall_start and not pipe.with_riser:
-        cutout_pipe_end(obj, 80)
+        if scenario in ["45", "30_15"]:
+            cutout_pipe_end(obj, 80)
+        else:
+            cutout_pipe_end(obj, 30)
     if pipe.is_wall_end:
         move_pipe(obj, -80, "z")
         cutout_pipe_end(obj, 80)
@@ -192,14 +200,19 @@ def cutout_pipe_obj_v2(obj: Any, obj_meta: dict, pipe: Pipe, scenario: str):
     return obj
 
 
-def build_pipe_mesh(obj, pipe, scenario="87", cut_lenght=0,):
+def build_pipe_mesh(
+    obj,
+    pipe,
+    scenario="87",
+    cut_lenght=0,
+):
     shift_start = 30
     bottleneck_bias = 37
     mesh_obj = load_obj(obj)
     pipe_segment = pipe.coordinates
     pipe_length = l1_distance(pipe_segment.start, pipe_segment.end)
     mesh_obj = center_pipe(mesh_obj, "z")
-    cutout_pipe(mesh_obj, pipe_length+bottleneck_bias)
+    cutout_pipe(mesh_obj, pipe_length + bottleneck_bias)
     if obj["diameter"] == 110:
         mesh_obj = cutout_pipe(mesh_obj, pipe_length - cut_lenght)
     else:
@@ -209,21 +222,26 @@ def build_pipe_mesh(obj, pipe, scenario="87", cut_lenght=0,):
         # if is_pipe_projection_on_right(pipe, riser_projections):
         if pipe_segment.start.x < pipe_segment.end.x:
             mesh_obj.rotate([0, 1, 0], math.radians(90))
+            mesh_obj.rotate([0, 1, 0], math.radians(-1.14))
             mesh_obj.x += min(pipe_segment.start.x, pipe_segment.end.x)
         else:
             mesh_obj.rotate([0, 1, 0], math.radians(-90))
+            mesh_obj.rotate([0, 1, 0], math.radians(1.14))
             mesh_obj.x += max(pipe_segment.start.x, pipe_segment.end.x)
         mesh_obj.y += pipe_segment.start.y
     else:
         if pipe_segment.start.y < pipe_segment.end.y:
             mesh_obj.rotate([1, 0, 0], math.radians(-90))
+            mesh_obj.rotate([1, 0, 0], math.radians(1.14))
             mesh_obj.y += min(pipe_segment.start.y, pipe_segment.end.y)
         else:
             mesh_obj.rotate([1, 0, 0], math.radians(90))
+            mesh_obj.rotate([1, 0, 0], math.radians(-1.14))
             mesh_obj.y += max(pipe_segment.start.y, pipe_segment.end.y)
         mesh_obj.x += pipe_segment.start.x
         # mesh_obj.y += min(pipe_segment.start.y, pipe_segment.end.y)
     shift_stuff_after_reduction(mesh_obj, pipe, obj["diameter"])
+    shift_pipe_for_slope(mesh_obj, pipe)
     node = Node(obj["name"], obj["id"], pipe_length)
     return mesh_obj, node
 
@@ -281,19 +299,23 @@ def rotate_reduction(obj, pipe):
         if pipe.coordinates.start.x < pipe.coordinates.end.x:
             obj.rotate([1, 0, 0], math.radians(-90))
             obj.rotate([0, 0, 1], math.radians(90))
+            obj.rotate([1, 0, 0], math.radians(-1.14))
             obj.y -= 0
             obj.x -= 250
         else:
             obj.rotate([1, 0, 0], math.radians(-90))
             obj.rotate([0, 1, 0], math.radians(-90))
+            obj.rotate([1, 0, 0], math.radians(1.14))
             obj.y += 250
     else:
         if pipe.coordinates.start.y > pipe.coordinates.end.y:
             obj.rotate([1, 0, 0], math.radians(-90))
             obj.rotate([0, 1, 0], math.radians(180))
+            obj.rotate([1, 0, 0], math.radians(-1.14))
             obj.y += 250
         else:
             obj.rotate([1, 0, 0], math.radians(-90))
+            obj.rotate([1, 0, 0], math.radians(1.14))
             obj.y -= 250
     return obj
 
@@ -437,6 +459,7 @@ def build_toilet_mesh(pipe: Pipe, material_graph: PipeGraph):
         obj.x -= 125
 
     mesh_objs.append(obj)
+    shift_pipe_for_slope(mesh_objs, pipe)
     material_graph.add_node(nodes, end=True)
     return mesh_objs
 
@@ -559,11 +582,11 @@ def rotate_otvod_45_upper_second(obj, pipe, cum_z, bias=90):
         obj.rotate([0, 1, 0], math.radians(90))
         if pipe.coordinates.start.x > pipe.stuff.coordinates.x:
             obj.x -= bias_2
-            obj.y -= 3*bias_1
+            obj.y -= 3 * bias_1
         else:
             obj.rotate([0, 0, 1], math.radians(180))
             obj.x += bias_2
-            obj.y -= 3*bias_1
+            obj.y -= 3 * bias_1
 
         if pipe.coordinates.start.y > pipe.coordinates.end.y:
             obj.y -= bias_2
@@ -622,7 +645,9 @@ def build_stuff_mesh_45(pipe: Pipe, material_graph: PipeGraph):
 
     fitting_name = "otvod_50x45"
     otvod_lower_firts = load_obj(FITTINGS[fitting_name])
-    otvod_lower_firts = rotate_otvod_45_lower_first(otvod_lower_firts, pipe, cum_z, bias=bias_1)
+    otvod_lower_firts = rotate_otvod_45_lower_first(
+        otvod_lower_firts, pipe, cum_z, bias=bias_1
+    )
     nodes.append(
         Node(
             FITTINGS[fitting_name]["name"],
@@ -639,17 +664,24 @@ def build_stuff_mesh_45(pipe: Pipe, material_graph: PipeGraph):
     straight_obj = center_pipe(straight_obj, "z")
     straight_obj_len = pipe.stuff.height
     straight_obj = cutout_pipe(straight_obj, pipe.stuff.height)
-    straight_obj = shift_straight_pipe_45(straight_obj, pipe, cum_z+30, bias=bias_1)
+    straight_obj = shift_straight_pipe_45(straight_obj, pipe, cum_z + 30, bias=bias_1)
     straight_obj.x += pipe.coordinates.start.x
     straight_obj.y += pipe.coordinates.start.y
     straight_obj.z += pipe.stuff.height
     nodes.append(
-        Node(FITTINGS[fitting_name]["name"], FITTINGS[fitting_name]["id"], length=straight_obj_len, is_inside_troinik=True)
+        Node(
+            FITTINGS[fitting_name]["name"],
+            FITTINGS[fitting_name]["id"],
+            length=straight_obj_len,
+            is_inside_troinik=True,
+        )
     )
 
     fitting_name = "otvod_50x45"
     otvod_upper_firts = load_obj(FITTINGS[fitting_name])
-    otvod_upper_firts = rotate_otvod_45_upper_first(otvod_upper_firts, pipe, cum_z, bias=bias_1)
+    otvod_upper_firts = rotate_otvod_45_upper_first(
+        otvod_upper_firts, pipe, cum_z, bias=bias_1
+    )
     nodes.append(
         Node(
             FITTINGS[fitting_name]["name"],
@@ -664,7 +696,9 @@ def build_stuff_mesh_45(pipe: Pipe, material_graph: PipeGraph):
 
     fitting_name = "otvod_50x45"
     otvod_upper_second = load_obj(FITTINGS[fitting_name])
-    otvod_upper_second = rotate_otvod_45_upper_second(otvod_upper_second, pipe, cum_z, bias=bias_1)
+    otvod_upper_second = rotate_otvod_45_upper_second(
+        otvod_upper_second, pipe, cum_z, bias=bias_1
+    )
     nodes.append(
         Node(
             FITTINGS[fitting_name]["name"],
@@ -682,6 +716,7 @@ def build_stuff_mesh_45(pipe: Pipe, material_graph: PipeGraph):
 
     meshes = [low_fitting] + stuffs
     shift_stuff_after_reduction(meshes, pipe, diameter=50)
+    shift_pipe_for_slope(meshes, pipe)
     material_graph.add_node(nodes, end=True)
     return meshes
 
@@ -807,6 +842,7 @@ def build_knee_fitting(pipe, riser_projections, material_graph: PipeGraph):
     obj.x += pipe.coordinates.end.x
     obj.y += pipe.coordinates.end.y
     shift_stuff_after_reduction(obj, pipe, diameter)
+    shift_knee_for_slope(obj, pipe)
     node = Node(fitting_meta["name"], fitting_meta["id"])
     material_graph.add_node(node)
     return [obj]
@@ -901,22 +937,30 @@ def rotate_otvod_link_knee_45(obj, pipe, riser_projections, first=True):
     return obj
 
 
-def build_knee_fitting_45(pipe: Pipe, riser_projections: Point, material_graph: PipeGraph):
+def build_knee_fitting_45(
+    pipe: Pipe, riser_projections: Point, material_graph: PipeGraph
+):
     nodes = []
     fitting_meta = FITTINGS["otvod_50x45"]
     obj_first = load_obj(fitting_meta)
-    obj_first = rotate_otvod_link_knee_45(obj_first, pipe, riser_projections, first=True)
+    obj_first = rotate_otvod_link_knee_45(
+        obj_first, pipe, riser_projections, first=True
+    )
     obj_second = load_obj(fitting_meta)
-    obj_second = rotate_otvod_link_knee_45(obj_second, pipe, riser_projections, first=False)
+    obj_second = rotate_otvod_link_knee_45(
+        obj_second, pipe, riser_projections, first=False
+    )
     obj_first.x += pipe.coordinates.end.x
     obj_first.y += pipe.coordinates.end.y
     obj_second.x += pipe.coordinates.end.x
     obj_second.y += pipe.coordinates.end.y
     stuffs = [obj_first, obj_second]
     shift_stuff_after_reduction(stuffs, pipe, diameter=50)
-    nodes = [Node(fitting_meta["name"], fitting_meta["id"])]*2
+    shift_knee_for_slope(stuffs, pipe)
+    nodes = [Node(fitting_meta["name"], fitting_meta["id"])] * 2
     material_graph.add_node(nodes)
     return stuffs
+
 
 def build_riser(riser_coordinates, riser_projections, walls):
     fitting_meta = FITTINGS["troinik_110_110x87"]
@@ -945,11 +989,13 @@ def rotate_riser(obj, riser_coordinates, riser_projections, walls):
     return obj
 
 
-def build_riser_otvod(riser_coordinates, riser_projections, walls, both_side = True):
+def build_riser_otvod(riser_coordinates, riser_projections, walls, both_side=True):
     toilet_coordinates = get_toilet_coordinates_form_wall(walls)
     pipe = "right"
     # fitting_meta = FITTINGS["otvod_110x87"]
-    fitting_meta = FITTINGS["otvod_110_50_87_back"] if both_side else FITTINGS["otvod_110x87"]
+    fitting_meta = (
+        FITTINGS["otvod_110_50_87_back"] if both_side else FITTINGS["otvod_110x87"]
+    )
     obj = load_obj(fitting_meta)
     fix_legnt, common_bias = 100, 10
     y_bias = 120
@@ -1182,16 +1228,20 @@ def build_otvod_to_knee_pipe(riser_projections, walls, riser_wall):
     obj.y += bias_y
     return obj, node
 
+
 def build_pipe_arrows(pipe: Pipe, start_height=100):
     length_arrow = 200
-    for x_arr_start, y_arr_start in [(pipe.coordinates.start.x, pipe.coordinates.start.y),
-                                 (pipe.coordinates.end.x, pipe.coordinates.end.y)]:
-        x = np.array([length_arrow+x_arr_start, y_arr_start, start_height])
-        y = np.array([x_arr_start, length_arrow+y_arr_start, start_height])
-        z = np.array([x_arr_start, y_arr_start, length_arrow+start_height])
-        vpl.arrow([x_arr_start, y_arr_start, start_height], x, color='white')
-        vpl.arrow([x_arr_start, y_arr_start, start_height], y, color='white')
-        vpl.arrow([x_arr_start, y_arr_start, start_height], z, color='white')
+    for x_arr_start, y_arr_start in [
+        (pipe.coordinates.start.x, pipe.coordinates.start.y),
+        (pipe.coordinates.end.x, pipe.coordinates.end.y),
+    ]:
+        x = np.array([length_arrow + x_arr_start, y_arr_start, start_height])
+        y = np.array([x_arr_start, length_arrow + y_arr_start, start_height])
+        z = np.array([x_arr_start, y_arr_start, length_arrow + start_height])
+        vpl.arrow([x_arr_start, y_arr_start, start_height], x, color="white")
+        vpl.arrow([x_arr_start, y_arr_start, start_height], y, color="white")
+        vpl.arrow([x_arr_start, y_arr_start, start_height], z, color="white")
+
 
 def draw_bath_arrows(walls: Wall, start_height=100):
     x_max, y_min = [], []
@@ -1203,12 +1253,12 @@ def draw_bath_arrows(walls: Wall, start_height=100):
     length_arrow = 300
     x_max += 200
     y_min -= 200
-    x = np.array([length_arrow+x_max, y_min, start_height])
-    y = np.array([x_max, length_arrow+y_min, start_height])
-    z = np.array([x_max, y_min, length_arrow+start_height])
-    vpl.arrow([x_max, y_min, start_height], x, color='black')
-    vpl.arrow([x_max, y_min, start_height], y, color='black')
-    vpl.arrow([x_max, y_min, start_height], z, color='black')
+    x = np.array([length_arrow + x_max, y_min, start_height])
+    y = np.array([x_max, length_arrow + y_min, start_height])
+    z = np.array([x_max, y_min, length_arrow + start_height])
+    vpl.arrow([x_max, y_min, start_height], x, color="black")
+    vpl.arrow([x_max, y_min, start_height], y, color="black")
+    vpl.arrow([x_max, y_min, start_height], z, color="black")
 
     vpl.text3d("X", x, scale=60, color="k")
     vpl.text3d("Y", y, scale=60, color="k")

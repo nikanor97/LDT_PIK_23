@@ -1,17 +1,18 @@
 import json
 
-from ezdxf.addons.drawing import RenderContext, Frontend
-from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
 import matplotlib.pyplot as plt
-
-from src.trace_builder.coordinate_converter import (coordinate2point,
-                                                    coordinates2segment,
-                                                    coordinates2segments,
-                                                    point2coordinate,
-                                                    segment2coordinates,
-                                                    segments2coordinates)
-from src.trace_builder.models import Stuff
 import pandas as pd
+from ezdxf.addons.drawing import Frontend, RenderContext
+from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+from src.trace_builder.coordinate_converter import (
+    coordinate2point,
+    coordinates2segment,
+    coordinates2segments,
+    point2coordinate,
+    segment2coordinates,
+    segments2coordinates,
+)
+from src.trace_builder.models import Stuff
 
 
 def save_data(
@@ -107,6 +108,7 @@ def convert_dxf2img(doc, img_name, img_res=1440):
     Frontend(ctx, out).draw_layout(msp, finalize=True)
     fig.savefig(img_name, dpi=img_res)
 
+
 def fittings_count(graph):
     fitting_count = 0
     materials = graph["Материал"].values
@@ -115,7 +117,10 @@ def fittings_count(graph):
             fitting_count += 1
     return fitting_count
 
+
 def calculate_statistic(graph: pd.DataFrame):
     fitting_counts = fittings_count(graph)
-    length = graph[(graph["Материал"] == 500) | (graph["Материал"] == 501)]["Длина"].values.sum()
+    length = graph[(graph["Материал"] == 500) | (graph["Материал"] == 501)][
+        "Длина"
+    ].values.sum()
     return fitting_counts, length

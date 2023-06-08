@@ -1,10 +1,12 @@
 from typing import List
 
 import numpy as np
-from src.trace_builder.coordinate_converter import (coordinates2segment,
-                                                    point2coordinate,
-                                                    segment2coordinates,
-                                                    segments2coordinates)
+from src.trace_builder.coordinate_converter import (
+    coordinates2segment,
+    point2coordinate,
+    segment2coordinates,
+    segments2coordinates,
+)
 from src.trace_builder.model import Point, Segment
 
 

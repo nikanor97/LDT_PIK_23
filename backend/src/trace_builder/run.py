@@ -3,15 +3,21 @@ from pathlib import Path
 from time import time
 
 import settings
+from src.db.projects.models import SewerVariantBase
 from src.trace_builder.path import build_path
 from src.trace_builder.projections import process_file_geometry
-from src.db.projects.models import SewerVariantBase
 from src.trace_builder.utils import calculate_statistic
 
 
-def run_algo(dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = "") -> list[SewerVariantBase]:
-
-    walls, riser_projections, riser_coordinates, max_riser_height = process_file_geometry(dxf_path, heighs)
+def run_algo(
+    dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = ""
+) -> list[SewerVariantBase]:
+    (
+        walls,
+        riser_projections,
+        riser_coordinates,
+        max_riser_height,
+    ) = process_file_geometry(dxf_path, heighs)
 
     if not os.path.exists(save_path):
         os.makedirs(save_path)
@@ -35,13 +41,14 @@ def run_algo(dxf_path: str, heighs: dict, save_path: Path, file_suffix: str = ""
         mesh.save(f"{output_files}.stl")
         material_graph.to_csv(f"{output_files}.csv", index=True)
 
-        output.append(SewerVariantBase(
-            excel_source_url=f"{output_files}.csv",
-            stl_source_url=f"{output_files}.stl",
-            png_source_url=f"{output_files}.png",
-            variant_num=scenario["priority"],
-            n_fittings=fitting_count,
-            sewer_length=length
+        output.append(
+            SewerVariantBase(
+                excel_source_url=f"{output_files}.csv",
+                stl_source_url=f"{output_files}.stl",
+                png_source_url=f"{output_files}.png",
+                variant_num=scenario["priority"],
+                n_fittings=fitting_count,
+                sewer_length=length,
             )
         )
 
