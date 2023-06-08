@@ -371,6 +371,7 @@ class ProjectsEndpoints:
             bathroom_type=proj.bathroom_type,
             is_deleted=proj.is_deleted,
             dxf_file_id=proj.dxf_file_id,
+            created_at=proj.created_at,
             results=[
                 ProjectSewerVariant(
                     variant_num=variant.variant_num,
