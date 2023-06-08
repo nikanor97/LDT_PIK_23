@@ -14,6 +14,9 @@ const ResultList = () => {
     const dispatch = useAppDispatch();
     const history = useHistory();
 
+    console.log(selectedProject);
+    console.log(resultOptions);
+
     if (!selectedProject) return null;
     if (!resultOptions) return null;
 

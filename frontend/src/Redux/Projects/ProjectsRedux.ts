@@ -19,6 +19,10 @@ type iState = {
     loadingDownload: boolean;
     file: File | null;
     loadFile: boolean,
+    tableConfig: {
+        currentPage: number;
+        defaultPageSize: number;
+    } | null
 }
 
 const initialState:iState  = {
@@ -38,6 +42,7 @@ const initialState:iState  = {
     loadingDownload: false,
     file: null,
     loadFile: false,
+    tableConfig: null,
 };
 
 const Slice = createSlice({
@@ -155,6 +160,13 @@ const Slice = createSlice({
                 state.projects = state.projects.filter((item: iApi.Projects.Item) => !action.payload.includes(item.id));
             }
         },
+        setTableConfig: (state, action: PayloadAction<iActions.setTableConfig>) => {
+            state.tableConfig = action.payload.config;
+        },
+        eraseTaskConfig: (state) => {
+            state.tableConfig = null;
+        }
+        
     }
 });
 

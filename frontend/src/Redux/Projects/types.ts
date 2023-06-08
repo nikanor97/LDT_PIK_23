@@ -44,5 +44,10 @@ export declare namespace iActions {
     type _downloadFileSuccess = File;
     type deleteProjects = React.Key[];
     type _deleteProjectsSuccess = React.Key[];
-
+    type setTableConfig = {
+        config: {
+            currentPage: number;
+            defaultPageSize: number;
+        }
+    }
 }

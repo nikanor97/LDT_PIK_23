@@ -16,6 +16,7 @@ import EmptyDocuments from "@root/Assets/Icons/EmptyDocuments/EmptyDocuments";
 
 const TableView = () => {
     const projects = useAppSelector((state) => state.Projects.projects);
+    const tableConfig = useAppSelector((state) => state.Projects.tableConfig);
     const columns = useColumns();
     const history = useHistory();
     const dispatch = useAppDispatch();
@@ -69,7 +70,8 @@ const TableView = () => {
             dataSource={projects}
             columns={columns}
             pagination={{
-                defaultPageSize: 10,
+                current: tableConfig ? tableConfig.currentPage : 1,
+                defaultPageSize: tableConfig ? tableConfig.defaultPageSize : 10,
                 pageSizeOptions: ["10", "20", "50"],
                 showSizeChanger: true,
                 locale: {items_per_page: ""},
@@ -82,6 +84,15 @@ const TableView = () => {
                     </div>
                 ,
                 selectPrefixCls: styles.test,
+            }}
+            onChange={(config) => {
+                if (!config.current || !config.pageSize) return; 
+                dispatch(Actions.Projects.setTableConfig({
+                    config: {
+                        currentPage: config.current,
+                        defaultPageSize: config.pageSize
+                    },
+                }));
             }}
             scroll={{
                 y: "calc(100vh - 350px)",
