@@ -122,5 +122,21 @@ FITTINGS = {
         "angle": 87,
         "path": f"{_path_pattern}/otvod-110_50х87_back.stl",
     },
+    "otvod_50x15": {
+        "id": 308,
+        "name": "отвод 50/15",
+        "diameter": 50,
+        "out": 1,
+        "andel": 15,
+        "path": f"{_path_pattern}/otvod-50x15.stl",
+    },
+    "otvod_50x30": {
+        "id": 307,
+        "name": "отвод 50/30",
+        "diameter": 50,
+        "out": 1,
+        "angle": 30,
+        "path": f"{_path_pattern}/otvod-50x30.stl",
+    },
 }
 GLOBAL_INIT_MIN = 80

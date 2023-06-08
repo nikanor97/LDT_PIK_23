@@ -1,12 +1,17 @@
 import json
 
+from ezdxf.addons.drawing import RenderContext, Frontend
+from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+import matplotlib.pyplot as plt
+
 from src.trace_builder.coordinate_converter import (coordinate2point,
                                                     coordinates2segment,
                                                     coordinates2segments,
                                                     point2coordinate,
                                                     segment2coordinates,
                                                     segments2coordinates)
-from src.trace_builder.wall import Stuff
+from src.trace_builder.models import Stuff
+import pandas as pd
 
 
 def save_data(
@@ -84,3 +89,33 @@ def dict2stuff(stuffs):
         )
         stuffs_classes.append(stuff_object)
     return stuffs_classes
+
+
+def convert_dxf2img(doc, img_name, img_res=1440):
+    msp = doc.modelspace()
+    # Recommended: audit & repair DXF document before rendering
+    auditor = doc.audit()
+    # The auditor.errors attribute stores severe errors,
+    # which *may* raise exceptions when rendering.
+    if len(auditor.errors) != 0:
+        raise Exception("The DXF document is damaged and can't be converted!")
+    fig = plt.figure()
+    ax = fig.add_axes([0, 0, 1, 1])
+    ctx = RenderContext(doc)
+    ctx.set_current_layout(msp)
+    out = MatplotlibBackend(ax)
+    Frontend(ctx, out).draw_layout(msp, finalize=True)
+    fig.savefig(img_name, dpi=img_res)
+
+def fittings_count(graph):
+    fitting_count = 0
+    materials = graph["Материал"].values
+    for material in materials:
+        if material not in [501, 500]:
+            fitting_count += 1
+    return fitting_count
+
+def calculate_statistic(graph: pd.DataFrame):
+    fitting_counts = fittings_count(graph)
+    length = graph[(graph["Материал"] == 500) | (graph["Материал"] == 501)]["Длина"].values.sum()
+    return fitting_counts, length

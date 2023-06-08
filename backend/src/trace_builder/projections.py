@@ -1,10 +1,12 @@
 # %%
 import re
 from typing import List
+from random import randint
 
 import matplotlib.pyplot as plt
 # import networkx as nx
 import numpy as np
+import ezdxf
 from src.trace_builder.coordinate_converter import (coordinate2point,
                                                     point2coordinate,
                                                     segment2coordinates)
@@ -12,7 +14,15 @@ from src.trace_builder.geometry import (is_dot_inside_segment, is_parallel_X,
                                         is_parallel_Y, is_point_near_wall,
                                         is_points_nighbour, is_wall_nighbour,
                                         l1_distance, l2_distance)
-from src.trace_builder.model import Point, Segment
+from src.trace_builder.model import Point, Segment, DXFStuff
+from src.trace_builder.merge_segments import merge_segments
+from src.trace_builder.utils import dict2stuff
+from src.trace_builder.path import (
+    build_path_from_riser_wall_to_sutff_wall,
+    detect_walls_with_stuff,
+)
+from src.trace_builder.coordinate_converter import coordinates2segments
+from src.trace_builder.models import Stuff, Wall
 
 # %%
 
@@ -107,6 +117,39 @@ def entities_with_coordinates(msp):
                     tuple(entity.dxf.insert.vec2)
                 )
     return sanitizing_stuff
+
+
+def clear_sutff_duplicate(stuffs):
+    keys_to_delete = []
+    first = True
+    for key in stuffs.keys():
+        if re.search(".*[Вв]анн.*", key):
+            if not first:
+                keys_to_delete.append(key)
+            else:
+                first = False
+
+    for key in keys_to_delete:
+        stuffs.pop(key, None)
+    return stuffs
+
+def stuff_with_coordinates(msp):
+    group = msp.groupby(dxfattrib="layer")
+    stuffs = []
+    id = 0
+    first_occour_bath = True
+    for layer, entities in group.items():
+        if layer == "P-SANR-FIXT":
+            for entity in entities:
+                entity_name = entity.dxf.name
+                coordinates = coordinate2point(tuple(entity.dxf.insert.vec2))
+                if re.search(".*[Вв]анн.*", entity_name):
+                    if not first_occour_bath:
+                        continue
+                    first_occour_bath = False
+                stuffs.append(DXFStuff(id, entity_name, coordinates))
+                id += 1
+    return stuffs
 
 
 def extract_riser_coordinates(doc):
@@ -300,22 +343,6 @@ def calculate_max_riser_height(stuffs):
         best_min_dist = min(best_min_dist, min_dist)
     return best_min_dist
 
-
-def clear_sutff_duplicate(stuffs):
-    keys_to_delete = []
-    first = True
-    for key in stuffs.keys():
-        if re.search(".*[Вв]анн.*", key):
-            if not first:
-                keys_to_delete.append(key)
-            else:
-                first = False
-
-    for key in keys_to_delete:
-        stuffs.pop(key, None)
-    return stuffs
-
-
 def get_top3_segmets(segments, topk=3):
     for segment in segments:
         segment.length = l1_distance(segment.start, segment.end)
@@ -386,109 +413,94 @@ def check_wall_coordinates(walls):
         out_walls = walls
     return out_walls
 
+def get_toilet_stuff(stuffs: List[Stuff]) -> Stuff:
+    for stuff in stuffs:
+        if stuff.is_toilet:
+            return stuff
 
-# %% Extract rectange coordinates
-
-# doc = ezdxf.readfile(
-#     "/Users/valentin/Projects/pik/experiments/data/cabin_examples/СТМ8-1П-Б-2.dxf"
-# )
-# modelspace = doc.modelspace()
-# msp = modelspace
-
-
-# riser_coordinates = extract_riser_coordinates(doc)
-# print(riser_coordinates)
-# coordinates = extract_rectange_points(msp)
-# # pprint(coordinates)
-# rectangle_coordinates = [
-#     find_rect_corners(coordinate, 0.5) for coordinate in coordinates
-# ]
-# mid_points = [find_middle_points(coordinate) for coordinate in rectangle_coordinates]
-# mid_points_ = coordinates2segments(mid_points)
-
-
-# # print(mid_points)
-# # line_coeffs = [lin_equ(*points) for points in mid_points]
-
-# stuffs = entities_with_coordinates(msp)
-# for segment in mid_points_:
-#     # x = point[0][0], point[1][0]
-#     # y = point[0][1], point[1][1]
-#     x = segment.start.x, segment.end.x
-#     y = segment.start.y, segment.end.y
-#     plt.plot(x, y)
-# for name, point in stuffs.items():
-#     plt.scatter(point.x, point.y)
-# plt.show()
-
-# mid_points_merged = merge_segments(mid_points_, 100)
-# mid_points_merged = merge_segments(mid_points_merged, 100)
-# mid_point_filtered = [
-#     segment for segment in mid_points_merged if filter_wall_by_distance(segment, 100)
-# ]
-# pprint(mid_point_filtered)
+def detect_walls_after_toilet(walls: List[Wall], riser_projeciton: Point, toilet_projection: Point):
+    wall_with_toilet = None
+    for wall in walls:
+        if wall.has_toilet:
+            wall_with_toilet = wall
+            wall.after_toilet = True
+    for wall in walls:
+        if wall.has_toilet:
+            continue
+        if is_parallel_X(wall):
+            if wall.coordinates.start.y < toilet_projection.projection.y and toilet_projection.projection.y < riser_projeciton.y:
+                wall.after_toilet = True
+            elif wall.coordinates.start.y > toilet_projection.projection.y and toilet_projection.projection.y > riser_projeciton.y:
+                wall.after_toilet = True
+        else:
+            if wall.coordinates.start.y < toilet_projection.projection.y and toilet_projection.projection.y < riser_projeciton.y:
+                wall.after_toilet = True
 
 
-# for segment in mid_point_filtered:
-#     x = segment.start.x, segment.end.x
-#     y = segment.start.y, segment.end.y
-#     plt.plot(x, y)
-# for name, point in stuffs.items():
-#     plt.scatter(point.x, point.y)
-# plt.scatter(riser_coordinates.x, riser_coordinates.y)
-# plt.legend()
-# plt.grid()
-# plt.show()
 
-# segments_with_wall_flag = detect_wall_with_door(mid_point_filtered)
+def process_file_geometry(dxf_path, heighs):
+    doc = ezdxf.readfile(dxf_path)
+    modelspace = doc.modelspace()
+    msp = modelspace
 
-# # point = stuffs["АИ_2D_Ванна 1685х700 - 2D_Ванна 1700х700-16267569-Битца 8_ТИПИЗАЦИЯ"]
-# # line = mid_point_filtered[6]
-# # for line in mid_point_filtered:
-# #     print("Point", point, "Line", line, "Projection", projection(point, line))
+    # from src.trace_builder.utils import convert_dxf2img
+    # convert_dxf2img(doc, settings.MEDIA_DIR / "builder_outputs" / "test.png")
+    riser_coordinates = extract_riser_coordinates(doc)
+    coordinates = extract_rectange_points(msp)
+    rectangle_coordinates = [
+        find_rect_corners(coordinate, 0.5) for coordinate in coordinates
+    ]
+    mid_points = [
+        find_middle_points(coordinate) for coordinate in rectangle_coordinates
+    ]
+    mid_points_ = coordinates2segments(mid_points)
 
-# stuff_projections = get_stuff_projcetions(stuffs, segments_with_wall_flag, True)
+    stuffs = entities_with_coordinates(msp)
+    # stuffs = stuff_with_coordinates(msp)
 
-# riser_projection_distances = build_riser_projections(riser_coordinates, mid_point_filtered)
+    mid_points_merged = merge_segments(mid_points_, 100)
+    mid_points_merged = merge_segments(mid_points_merged, 100)
+    mid_point_filtered = [
+        segment
+        for segment in mid_points_merged
+        if filter_wall_by_distance(segment, 100)
+    ]
+    mid_point_filtered = get_top3_segmets(mid_point_filtered)
+    mid_point_filtered = check_wall_coordinates(mid_point_filtered)
+    # segments_with_wall_flag = detect_wall_with_door(mid_point_filtered)
 
-# optimal_segment = find_optimal_riser_projection(
-#     riser_projection_distances, stuff_projections
-# )
-# riser_projection = projection(riser_coordinates, mid_point_filtered[optimal_segment])
-# plot_projcetions(
-#     riser_coordinates, riser_projection_distances, stuff_projections, optimal_segment
-# )
+    stuff_projections = get_stuff_projcetions(stuffs, mid_point_filtered)
 
-# distance_from_riser_to_stuff(riser_projection, stuff_projections)
+    riser_projection_distances = build_riser_projections(
+        riser_coordinates, mid_point_filtered
+    )
 
-# hieghts = {
-#     "SND_2D_Раковина1 - 550х400-16253994-Битца 8_ТИПИЗАЦИЯ": 100,
-#     "SEQ_2D_Стиральная машина - 600x600-V57-Битца 8_ТИПИЗАЦИЯ": 200,
-#     "АИ_2D_Ванна 1685х700 - 2D_Ванна 1700х700-16267569-Битца 8_ТИПИЗАЦИЯ": 300,
-#     "АИ_2D_Кран настенный для ванны с душем1 - 2D_Кран настенный для ванны с душем 2-16267571-Битца 8_ТИПИЗАЦИЯ": 300,
-#     "SND_2D_Эскиз_Мойка_Кухня - SND_2D_Эскиз_Мойка_Кухня-16115635-Битца 8_ТИПИЗАЦИЯ": 150,
-#     "Унитаз_3D_С бачком_Рен - 2D_Унитаз_Бачок-V58-Битца 8_ТИПИЗАЦИЯ": 100,
-# }
+    optimal_segment = find_optimal_riser_projection(
+        riser_projection_distances, stuff_projections
+    )
+    riser_projection = projection(
+        riser_coordinates, mid_point_filtered[optimal_segment]
+    )
+    # if os.getenv("LOCAL_ALGO"):
+    #     plot_projcetions(riser_coordinates, riser_projection_distances, stuff_projections, optimal_segment)
 
-# for key in stuff_projections.keys():
-#     stuff_projections[key]["height"] = hieghts[key]
+    distance_from_riser_to_stuff(riser_projection, stuff_projections)
 
+    for key in stuff_projections.keys():
+        stuff_projections[key]["height"] = heighs.get(key, randint(150, 350))
 
-# max_riser_height = calculate_max_riser_height(stuff_projections)
-# # %%
-# clear_sutff_duplicate(stuff_projections)
+    max_riser_height = calculate_max_riser_height(stuff_projections)
 
-# # %%
-# save_data(
-#     stuffs=stuff_projections,
-#     walls=mid_point_filtered,
-#     max_riser_height=max_riser_height,
-#     optimal_segment=optimal_segment,
-#     riser_coordinates=riser_coordinates,
-#     riser_projection=riser_projection
-# )
+    clear_sutff_duplicate(stuff_projections)
+    stuffs = stuff_projections
+    walls_segments = mid_point_filtered
+    riser_projections = riser_projection
+    stuffs_objects = dict2stuff(stuffs)
 
-# # %%
-# stuff_projections, mid_point_filtered, max_riser_height, optimal_segment = load_data(
-#     "geometry.json"
-# )
+    walls = detect_walls_with_stuff(stuffs_objects, walls_segments, riser_projections)
+    walls = sorted(walls, key=lambda x: x.length, reverse=True)[:3]
+    walls = build_path_from_riser_wall_to_sutff_wall(walls)
+
+    toilet = get_toilet_stuff(stuffs_objects)
+    detect_walls_after_toilet(walls, riser_projections, toilet)
+    return walls, riser_projections, riser_coordinates, max_riser_height
