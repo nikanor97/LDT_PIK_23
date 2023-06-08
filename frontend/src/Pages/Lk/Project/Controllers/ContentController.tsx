@@ -12,8 +12,6 @@ const ContentController = () => {
     const getSelectedProject = useAppSelector((state) => state.Projects.getSelectedProject);
     const selectedOption = useAppSelector((state) => state.Projects.selectedOption);
 
-    console.log("tut");
-
     if (getSelectedProject) {
         return (
             <Loading>

@@ -31,8 +31,6 @@ const ConnectPointsTab = (props: ConnectPointsTabProps) => {
     const {data} = props;
     const columns = useColumns();
 
-    console.log(stl);
-
     return (
         <Row gutter={24} className={styles.row}>
             <Col span={12} className={styles.col}>
