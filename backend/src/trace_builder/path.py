@@ -86,29 +86,32 @@ def get_neighbour_wall(wall_src, wall_dist, threshold=90):
 
 
 def build_path_from_riser_wall_to_sutff_wall(walls: List[Wall]):
-    walls_new = []
+    # walls_new = []
     for idx, wall in enumerate(walls):
         if wall.with_riser:
-            walls_new.append(wall)
+            # walls_new.append(wall)
             continue
+        visited = False
         for idx2, wall2 in enumerate(walls):
             if wall == wall2:
                 continue
             if is_wall_nighbour(wall, wall2):
                 if wall2.with_riser:
+                    visited = True
                     wall.path2wall_with_riser = [wall2]
                     wall.start_pipe_point = get_neighbour_wall(wall, wall2)
                 else:
-                    riser_idx = set([0, 1, 2])
-                    riser_idx.remove(idx)
-                    riser_idx.remove(idx2)
-                    riser_idx = list(riser_idx)[0]
-                    path = [wall2, walls[riser_idx]]
-                    wall.path2wall_with_riser = path
+                    if not visited:
+                        riser_idx = set([0, 1, 2])
+                        riser_idx.remove(idx)
+                        riser_idx.remove(idx2)
+                        riser_idx = list(riser_idx)[0]
+                        path = [wall2, walls[riser_idx]]
+                        wall.path2wall_with_riser = path
                 if not wall.start_pipe_point:
                     wall.start_pipe_point = get_neighbour_wall(wall, wall2)
-                walls_new.append(wall)
-    return walls_new
+                # walls_new.append(wall)
+    return walls
 
 
 def estimate_min_height(wall, riser_projections):
@@ -190,7 +193,8 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                 is_end=True,
                 is_start=True,
                 stuff=wall.stuff_point[0],
-                is_wall_start=True
+                is_wall_start=True,
+                after_reduction=wall.after_toilet
             )
         ]
     else:
@@ -204,6 +208,7 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                     is_toilet=stuff.is_toilet,
                     with_riser=wall.with_riser,
                     stuff=stuff,
+                    after_reduction=wall.after_toilet
                 )
             )
             start = wall.stuff_point[idx_stuff + 1].projection
@@ -213,6 +218,7 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                 is_toilet=wall.stuff_point[-1].is_toilet,
                 with_riser=wall.with_riser,
                 stuff=wall.stuff_point[-1],
+                after_reduction=wall.after_toilet
             )
         )
         if is_last_stuff_is_edged:
@@ -238,6 +244,7 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                     stuff=None,
                     is_end=True,
                     is_wall_end=True,
+                    after_reduction=wall.after_toilet
                 )
             )
             start_end_pipes[-2].is_end = False
@@ -250,6 +257,7 @@ def count_pipes_for_wall_with_stuff(wall, walls, riser_projections):
                     stuff=None,
                     is_end=True,
                     is_wall_end=True,
+                    after_reduction=wall.after_toilet
                 )
             ] + start_end_pipes
             start_end_pipes[1].is_end = False
@@ -423,6 +431,7 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
                         is_start=True,
                         is_end=True,
                         with_riser=True,
+                        after_reduction=wall.after_toilet
                     )
                 ]
             else:
@@ -462,7 +471,7 @@ def build_mesh_path(walls, riser_projections, riser_coordinates, scrennshot_name
                     < l1_distance(wall.end, riser_projections)
                     else Segment(wall.start, wall.end)
                 )
-                pipe = Pipe(pipe_coordinates, is_start=True, is_end=True, is_wall_end=True, is_wall_start=True)
+                pipe = Pipe(pipe_coordinates, is_start=True, is_end=True, is_wall_end=True, is_wall_start=True, after_reduction=wall.after_toilet)
                 pipe_obj, node = build_pipe_mesh(
                     obj, pipe, scenario
                 )

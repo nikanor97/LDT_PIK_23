@@ -1,6 +1,9 @@
 import settings
 
 _path_pattern = settings.BASE_DIR / "data" / "fittings_3d"
+
+REDUCTION_SHIFT = 30
+
 FITTINGS = {
     "d50": {
         "id": 501,

@@ -1,7 +1,7 @@
 import math
 from src.trace_builder.geometry import is_parallel_X, is_parallel_Y
 from src.trace_builder.manipulate_3d import rotate_troinik_toilet, load_obj, cutout_pipe, l1_distance, center_pipe, rotate_otvod_45_low, shift_straight_pipe_45
-from src.trace_builder.mesh_3d.common import rotate_otvod_87_upper, shift_stuff
+from src.trace_builder.mesh_3d.common import rotate_otvod_87_upper, shift_stuff, shift_stuff_after_reduction
 from src.trace_builder.models import Pipe
 from src.trace_builder.graph_models import PipeGraph, Node
 from src.trace_builder.constants import FITTINGS
@@ -141,5 +141,6 @@ def build_stuff_mesh_30_15(pipe: Pipe, material_graph: PipeGraph):
     stuffs = shift_stuff(stuffs, pipe, bias=30) if is_troinik else stuffs
 
     meshes = [low_fitting] + stuffs
+    meshes = shift_stuff_after_reduction(meshes, pipe, diameter=50)
     material_graph.add_node(nodes, end=True)
     return meshes

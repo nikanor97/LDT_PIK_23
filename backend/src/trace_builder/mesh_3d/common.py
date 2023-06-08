@@ -1,5 +1,8 @@
 import math
+from typing import List, Any
 from src.trace_builder.geometry import is_parallel_X
+from src.trace_builder.models import Pipe
+from src.trace_builder.constants import REDUCTION_SHIFT
 
 def shift_stuff(stuffs, pipe, bias=90):
     bias = bias
@@ -17,6 +20,15 @@ def shift_stuff(stuffs, pipe, bias=90):
         else:
             for stuff in stuffs:
                 stuff.y += bias
+    return stuffs
+
+def shift_stuff_after_reduction(stuffs: List[Any], pipe: Pipe, diameter = 110):
+    if pipe.after_reduction and diameter != 110:
+        if isinstance(stuffs, list):
+            for stuff in stuffs:
+                stuff.z -= REDUCTION_SHIFT
+        else:
+            stuffs.z -= REDUCTION_SHIFT
     return stuffs
 
 

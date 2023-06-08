@@ -428,13 +428,47 @@ def detect_walls_after_toilet(walls: List[Wall], riser_projeciton: Point, toilet
         if wall.has_toilet:
             continue
         if is_parallel_X(wall):
-            if wall.coordinates.start.y < toilet_projection.projection.y and toilet_projection.projection.y < riser_projeciton.y:
-                wall.after_toilet = True
-            elif wall.coordinates.start.y > toilet_projection.projection.y and toilet_projection.projection.y > riser_projeciton.y:
-                wall.after_toilet = True
+            if wall.coordinates.start.y < toilet_projection.projection.y:
+                if toilet_projection.projection.y < riser_projeciton.y:
+                    wall.after_toilet = True
+                elif toilet_projection.projection.y == riser_projeciton.y:
+                    if wall.path2wall_with_riser[0].coordinates.start.x < toilet_projection.projection.x < riser_projeciton.x:
+                        wall.after_toilet = True
+                    if wall.path2wall_with_riser[0].coordinates.start.x > toilet_projection.projection.x > riser_projeciton.x:
+                        wall.after_toilet = True
+            elif wall.coordinates.start.y > toilet_projection.projection.y:
+                if toilet_projection.projection.y > riser_projeciton.y:
+                    wall.after_toilet = True
+                elif toilet_projection.projection.y == riser_projeciton.y:
+                    if wall.path2wall_with_riser[0].coordinates.start.x < toilet_projection.projection.x < riser_projeciton.x:
+                        wall.after_toilet = True
+                    if wall.path2wall_with_riser[0].coordinates.start.x > toilet_projection.projection.x > riser_projeciton.x:
+                        wall.after_toilet = True
+            else:
+                if toilet_projection.projection.y != riser_projeciton.y:
+                    wall.after_toilet = True
         else:
             if wall.coordinates.start.y < toilet_projection.projection.y and toilet_projection.projection.y < riser_projeciton.y:
                 wall.after_toilet = True
+            if wall.coordinates.start.x > toilet_projection.projection.x:
+                if toilet_projection.projection.x > riser_projeciton.x:
+                    wall.after_toilet = True
+                elif toilet_projection.projection.x == riser_projeciton.x:
+                    if wall.path2wall_with_riser[0].coordinates.start.y > toilet_projection.projection.y > riser_projeciton.y:
+                        wall.after_toilet = True
+                    if wall.path2wall_with_riser[0].coordinates.start.y < toilet_projection.projection.y < riser_projeciton.y:
+                        wall.after_toilet = True
+            elif wall.coordinates.start.x < toilet_projection.projection.x:
+                if toilet_projection.projection.x < riser_projeciton.x:
+                    wall.after_toilet = True
+                elif toilet_projection.projection.x == riser_projeciton.x:
+                    if wall.path2wall_with_riser[0].coordinates.start.y > toilet_projection.projection.y > riser_projeciton.y:
+                        wall.after_toilet = True
+                    if wall.path2wall_with_riser[0].coordinates.start.y < toilet_projection.projection.y < riser_projeciton.y:
+                        wall.after_toilet = True
+            else:
+                if toilet_projection.projection.x != riser_projeciton.x:
+                    wall.after_toilet = True
 
 
 

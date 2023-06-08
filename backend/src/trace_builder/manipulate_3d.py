@@ -1,14 +1,16 @@
 import math
 from typing import Any
 import numpy as np
-from src.trace_builder.constants import FITTINGS
+from src.trace_builder.constants import FITTINGS, REDUCTION_SHIFT
 from src.trace_builder.geometry import (is_parallel_X, is_parallel_Y,
                                         l1_distance)
 from src.trace_builder.graph_models import Node, PipeGraph
 from src.trace_builder.model import Point, Segment
 from src.trace_builder.models import Pipe, Wall
+from src.trace_builder.mesh_3d.common import shift_stuff_after_reduction
 from stl import mesh
 import vtkplotlib as vpl
+
 
 
 def cutout_pipe(pipe, length=10):
@@ -221,6 +223,7 @@ def build_pipe_mesh(obj, pipe, scenario="87", cut_lenght=0,):
             mesh_obj.y += max(pipe_segment.start.y, pipe_segment.end.y)
         mesh_obj.x += pipe_segment.start.x
         # mesh_obj.y += min(pipe_segment.start.y, pipe_segment.end.y)
+    shift_stuff_after_reduction(mesh_obj, pipe, obj["diameter"])
     node = Node(obj["name"], obj["id"], pipe_length)
     return mesh_obj, node
 
@@ -393,6 +396,7 @@ def build_toilet_mesh(pipe: Pipe, material_graph: PipeGraph):
         obj_reduction = rotate_reduction(obj_reduction, pipe)
         obj_reduction.x += pipe.coordinates.start.x
         obj_reduction.y += pipe.coordinates.start.y
+        obj_reduction.z -= REDUCTION_SHIFT
         obj = rotate_troinik_toilet(obj, pipe, is_low=True)
         mesh_objs.append(obj_reduction)
         nodes.append(
@@ -677,6 +681,7 @@ def build_stuff_mesh_45(pipe: Pipe, material_graph: PipeGraph):
     stuffs = shift_stuff_45(stuffs, pipe, bias=30) if is_troinik else stuffs
 
     meshes = [low_fitting] + stuffs
+    shift_stuff_after_reduction(meshes, pipe, diameter=50)
     material_graph.add_node(nodes, end=True)
     return meshes
 
@@ -801,6 +806,7 @@ def build_knee_fitting(pipe, riser_projections, material_graph: PipeGraph):
     obj = rotate_otvod_link_knee(obj, pipe, riser_projections, diameter)
     obj.x += pipe.coordinates.end.x
     obj.y += pipe.coordinates.end.y
+    shift_stuff_after_reduction(obj, pipe, diameter)
     node = Node(fitting_meta["name"], fitting_meta["id"])
     material_graph.add_node(node)
     return [obj]
@@ -906,15 +912,11 @@ def build_knee_fitting_45(pipe: Pipe, riser_projections: Point, material_graph: 
     obj_first.y += pipe.coordinates.end.y
     obj_second.x += pipe.coordinates.end.x
     obj_second.y += pipe.coordinates.end.y
-    node = Node(fitting_meta["name"], fitting_meta["id"])
-    nodes.append(
-        Node(
-            FITTINGS["otvod_50x45"]["name"],
-            FITTINGS["otvod_50x45"]["id"],
-        )
-    )
-    material_graph.add_node(nodes, end=True)
-    return [obj_first, obj_second]
+    stuffs = [obj_first, obj_second]
+    shift_stuff_after_reduction(stuffs, pipe, diameter=50)
+    nodes = [Node(fitting_meta["name"], fitting_meta["id"])]*2
+    material_graph.add_node(nodes)
+    return stuffs
 
 def build_riser(riser_coordinates, riser_projections, walls):
     fitting_meta = FITTINGS["troinik_110_110x87"]
