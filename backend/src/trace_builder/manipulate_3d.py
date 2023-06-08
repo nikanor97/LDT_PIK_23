@@ -215,6 +215,8 @@ def build_pipe_mesh(
     cutout_pipe(mesh_obj, pipe_length + bottleneck_bias)
     if obj["diameter"] == 110:
         mesh_obj = cutout_pipe(mesh_obj, pipe_length - cut_lenght)
+        move_pipe(mesh_obj, -20, "z")
+        cutout_pipe_end(mesh_obj, 20)
     else:
         # mesh_obj = cutout_pipe_obj(mesh_obj, obj, pipe, scenario, shift_start, shift_end)
         mesh_obj = cutout_pipe_obj_v2(mesh_obj, obj, pipe, scenario)
@@ -409,6 +411,7 @@ def build_toilet_mesh(pipe: Pipe, material_graph: PipeGraph):
         obj = rotate_otvod_low(obj, pipe, low=True)
         obj = shift_rotate_low(obj, pipe, 110)
         obj.x -= 85
+        obj.z += 20
         nodes.append(
             Node(FITTINGS["otvod_110x87"]["name"], FITTINGS["otvod_110x87"]["id"])
         )
