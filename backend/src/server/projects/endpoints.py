@@ -464,13 +464,11 @@ class ProjectsEndpoints:
             devices = await self._main_db_manager.projects.update_devices_z_coord(
                 session, devices_z_coords
             )
-
-        project_with_results = await self._get_project_with_results(project_id)
-
-        async with self._main_db_manager.projects.make_autobegin_session() as session:
             await self._main_db_manager.projects.update_project_status(
                 session, project_id, ProjectStatusOption.ready
             )
+
+        project_with_results = await self._get_project_with_results(project_id)
 
         return project_with_results
 
