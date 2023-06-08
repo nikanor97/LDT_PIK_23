@@ -1,5 +1,4 @@
 # %%
-import math
 import os
 import re
 from typing import List, Tuple
@@ -14,7 +13,7 @@ from src.trace_builder.geometry import (
     is_wall_nighbour,
     l1_distance,
 )
-from src.trace_builder.graph_models import Node, PipeGraph
+from src.trace_builder.graph_models import PipeGraph
 from src.trace_builder.manipulate_3d import (
     build_knee_fitting,
     build_knee_fitting_45,
@@ -370,7 +369,7 @@ def process_artifacts(mesh_data, material_graph, scrennshot_name, walls):
     plotted_mesh = vpl.mesh_plot(all_figures)
     draw_bath_arrows(walls, 50)
     vpl.view(camera_direction=(0.1, 0.6, -0.8))
-    vpl.save_fig(scrennshot_name, pixels=(1920, 1080))
+    vpl.save_fig(scrennshot_name, pixels=(1920, 1080), off_screen=True)
     if os.getenv("LOCAL_ALGO"):
         vpl.show()
     figure -= plotted_mesh
