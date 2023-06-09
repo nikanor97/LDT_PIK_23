@@ -106,7 +106,8 @@ class ProjectsEndpoints:
 
         if project.worker_id == user_id:
             raise HTTPException(
-                status_code=400, detail="Author and Worker can not be the same person"
+                status_code=400,
+                detail="Автор и Исполнитель не может быть одним человеком",
             )
 
         if len(project.fittings_ids) == 0:
