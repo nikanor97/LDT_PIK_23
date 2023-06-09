@@ -423,6 +423,7 @@ class ProjectsEndpoints:
                         fittings_stat=ProjectResultFittingsStat(
                             tab_name="Используемые фитинги",
                             table=stats_table[variant.variant_num],
+                            image=imgs[variant.variant_num],
                         ),
                         connection_points=ProjectResultConnectionPoints(
                             tab_name="Точки подключения",

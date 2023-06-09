@@ -118,6 +118,7 @@ class FittingStat(BaseModel):
 class ProjectResultFittingsStat(BaseModel):
     tab_name: str
     table: list[FittingStat]
+    image: str
 
 
 class ProjectResult(BaseModel):
