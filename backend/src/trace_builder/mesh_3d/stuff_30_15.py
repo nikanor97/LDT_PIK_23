@@ -149,7 +149,7 @@ def build_stuff_mesh_30_15(pipe: Pipe, material_graph: PipeGraph):
     fitting_name = "otvod_50x87"
     otvod_upper_firts = load_obj(FITTINGS[fitting_name])
     otvod_upper_firts = rotate_otvod_87_upper(
-        otvod_upper_firts, pipe, 200 + cum_z, bias_1, 130
+        otvod_upper_firts, pipe, 200 + cum_z, bias_1, 145
     )
     nodes.append(
         Node(

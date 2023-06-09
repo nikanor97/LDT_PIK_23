@@ -577,9 +577,9 @@ def rotate_otvod_45_upper_second(obj, pipe, cum_z, bias=90):
             obj.y += bias_2
 
         if pipe.coordinates.start.x > pipe.coordinates.end.x:
-            obj.x += bias_1
+            obj.x += bias_1 + 5
         else:
-            obj.x -= bias_1
+            obj.x -= bias_1 - 5
     else:
         obj.rotate([0, 0, 1], math.radians(-90))
         obj.rotate([0, 1, 0], math.radians(90))
@@ -592,9 +592,9 @@ def rotate_otvod_45_upper_second(obj, pipe, cum_z, bias=90):
             obj.y -= 3 * bias_1
 
         if pipe.coordinates.start.y > pipe.coordinates.end.y:
-            obj.y -= bias_2
+            obj.y -= bias_2 - 5
         else:
-            obj.y += bias_2
+            obj.y += bias_2 + 5
 
     obj.z += 120 + cum_z
     return obj
@@ -700,7 +700,7 @@ def build_stuff_mesh_45(pipe: Pipe, material_graph: PipeGraph):
     fitting_name = "otvod_50x45"
     otvod_upper_second = load_obj(FITTINGS[fitting_name])
     otvod_upper_second = rotate_otvod_45_upper_second(
-        otvod_upper_second, pipe, cum_z, bias=bias_1
+        otvod_upper_second, pipe, cum_z, bias=bias_1+5
     )
     nodes.append(
         Node(
@@ -828,6 +828,7 @@ def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
             if pipe.coordinates.start.y < pipe.coordinates.end.y:  # up
                 obj.rotate([1, 0, 0], math.radians(-90))
                 obj.rotate([0, 1, 0], math.radians(90))
+                # obj.y -= 160
                 obj.y -= 120
             else:
                 obj.rotate([0, 0, 1], math.radians(-90))
