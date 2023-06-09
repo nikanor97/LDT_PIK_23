@@ -53,6 +53,7 @@ from src.server.projects.models import (
     ProjectsStats,
     DeviceStats,
 )
+from src.trace_builder.projections import clear_sutff_duplicate
 from src.trace_builder.run import run_algo
 from src.trace_builder.utils import convert_dxf2img
 
@@ -261,11 +262,12 @@ class ProjectsEndpoints:
         doc = ezdxf.readfile(file_path)
         modelspace = doc.modelspace()
         stuffs = entities_with_coordinates(modelspace)
+        stuffs = clear_sutff_duplicate(stuffs)
 
         dxf_file = DxfFile(project_id=project_id, source_url=file_name)
 
         dxf_file_screenshot_path = str(file_path)[:-3] + "png"
-        convert_dxf2img(doc, dxf_file_screenshot_path)
+        convert_dxf2img(doc, dxf_file_screenshot_path, img_res=200)
         with open(dxf_file_screenshot_path, "rb") as img:
             dxf_file_screenshot = base64.b64encode(img.read()).decode("utf-8")
 
@@ -471,6 +473,7 @@ class ProjectsEndpoints:
         doc = ezdxf.readfile(file_path)
         modelspace = doc.modelspace()
         stuffs = entities_with_coordinates(modelspace)
+        stuffs = clear_sutff_duplicate(stuffs)
 
         names_to_coord_z = dict()
         for stuff_name, coords in stuffs.items():
