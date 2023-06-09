@@ -72,7 +72,7 @@ const DonutStat = (props: DonutStatProps) => {
                                 fontWeight: 700,
                             }}
                             flyoutStyle={{
-                                stroke: "var(--donut-tooltip-border)",
+                                stroke: "#E4E7EC",
                                 fill: "var(--donut-tooltip-bg)"
                             }}
                         />}
