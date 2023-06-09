@@ -126,7 +126,7 @@ class ProjectsDbManager(BaseDbManager):
                 **project.dict(),
             )
             result.append(proj)
-        result = sorted(result, key=lambda x: x.created_at)
+        result = sorted(result, key=lambda x: x.created_at, reverse=True)
 
         return result
 
