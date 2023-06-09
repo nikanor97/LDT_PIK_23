@@ -46,5 +46,9 @@ export default {
                 project_ids: params
             }
         );
-    }
+    },
+    getProjectStatistic: () => {
+        const url =  Endpoints.getStats;
+        return Request.get(url);
+    },
 };

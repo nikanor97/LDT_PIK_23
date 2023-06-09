@@ -34,7 +34,8 @@ const useColumns = () => {
         if (value === "Данные отсутствуют" || value === "-") {
             return value;
         } else {
-            return moment(value).format(momentFormat);
+            return moment(value).add(3, "hours")
+                .format(momentFormat);
         }
     };
 
@@ -53,6 +54,7 @@ const useColumns = () => {
     const bathroomTypeFD = useMemo(() => getDataForFilters((item) => (item.bathroom_type ? item.bathroom_type : "-")), [projects]);
     const authorFD = useMemo(() => getDataForFilters((item) => item.author_name), [projects]);
     const performerFD = useMemo(() => getDataForFilters((item) => item.worker_name), [projects]);
+    const createDateFD = useMemo(() => getDataForFilters((item) => checkDate(item.created_at)), [projects]);
     const statusFD = ["Готово", "В процессе", "Ошибка"];
 
     return [
@@ -113,6 +115,26 @@ const useColumns = () => {
             ellipsis: true,
         },
         {
+            title: "Дата создания",
+            dataIndex: "created_at",
+            key: "created_at",
+            filters: createDateFD.map(dataFilterMapper),
+            sorter: (first: ProjectListItem, second: ProjectListItem) =>
+                first.created_at.localeCompare(second.created_at),
+            showSorterTooltip: false,
+            render: (created_at: ProjectListItem["created_at"]) => (
+                <div style={{minWidth: useGetMinColumnWidthForTable("Дата создания")}}>
+                    {checkDate(created_at)}
+                </div>
+            ),
+            filterDropdown: (props: FilterDropdownProps) => {
+                return <TableFilters {...props} />;
+            },
+            onFilter: (value: string | number | boolean, record: iApi.Projects.Item) =>
+                checkDate(record.created_at) === value,
+            ellipsis: true,
+        },
+        {
             title: "Статус",
             dataIndex: "status",
             key: "status",
@@ -157,32 +179,32 @@ const useColumns = () => {
             onFilter: (value: string | number | boolean, record: iApi.Projects.Item) => checkStatus(record.status) === value,
             ellipsis: true,
         },
-        {
-            title: "Тип Санузла",
-            dataIndex: "bathroom_type",
-            key: "bathroom_type",
-            filters: bathroomTypeFD.map(dataFilterMapper),
-            sorter: (first: ProjectListItem, second: ProjectListItem) =>
-                first.bathroom_type.localeCompare(
-                    second.bathroom_type
-                ),
-            showSorterTooltip: false,
-            render: (bathroom_type: ProjectListItem["bathroom_type"]) => {
-                return (
-                    <div style={{minWidth: useGetMinColumnWidthForTable("Тип Санузла")}}>
-                        {bathroom_type ? bathroom_type : "-"}
-                    </div>
-                );
-            },
-            filterDropdown: (props: FilterDropdownProps) => {
-                return <TableFilters {...props} />;
-            },
-            onFilter: (
-                value: string | number | boolean,
-                record: iApi.Projects.Item
-            ) => (record.bathroom_type ? record.bathroom_type : "-") === value,
-            ellipsis: true,
-        },
+        // {
+        //     title: "Тип Санузла",
+        //     dataIndex: "bathroom_type",
+        //     key: "bathroom_type",
+        //     filters: bathroomTypeFD.map(dataFilterMapper),
+        //     sorter: (first: ProjectListItem, second: ProjectListItem) =>
+        //         first.bathroom_type.localeCompare(
+        //             second.bathroom_type
+        //         ),
+        //     showSorterTooltip: false,
+        //     render: (bathroom_type: ProjectListItem["bathroom_type"]) => {
+        //         return (
+        //             <div style={{minWidth: useGetMinColumnWidthForTable("Тип Санузла")}}>
+        //                 {bathroom_type ? bathroom_type : "-"}
+        //             </div>
+        //         );
+        //     },
+        //     filterDropdown: (props: FilterDropdownProps) => {
+        //         return <TableFilters {...props} />;
+        //     },
+        //     onFilter: (
+        //         value: string | number | boolean,
+        //         record: iApi.Projects.Item
+        //     ) => (record.bathroom_type ? record.bathroom_type : "-") === value,
+        //     ellipsis: true,
+        // },
         {
             title: "Исполнитель",
             dataIndex: "worker_name",

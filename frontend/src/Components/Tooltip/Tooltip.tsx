@@ -13,6 +13,7 @@ const Tooltip = (props: TooltipProps) => {
         <AntTooltip 
             {...props}
             placement={position}
+            overlayStyle={{maxWidth: "600px"}}
             overlayClassName={classNames(
                 styles.defaultToolTip,
                 props.className,

@@ -11,18 +11,18 @@ const ProjectsTableController = () => {
     const getProjectsFetching = useAppSelector((state) => state.Projects.getFetching);
 
     if (getProjectsFetching) return <Loading />;
-    if (projects && projects.length > 0) return (<TableView />);
-    if (!projects) return <EmptyItem />;
-    if (!projects || projects.length === 0) return (
-        <Empty
-            imageStyle={{height: "200px",
-                width: "200px",
-                margin: "auto",
-                marginTop: "32px"}}
-            image={<EmptyDocuments />} 
-            description="Отсутствуют созданные проекты"
-        />
-    );
+    if (!getProjectsFetching) return (<TableView />);
+    // if (!projects) return <EmptyItem />;
+    // if (!projects || projects.length === 0) return (
+    //     <Empty
+    //         imageStyle={{height: "200px",
+    //             width: "200px",
+    //             margin: "auto",
+    //             marginTop: "32px"}}
+    //         image={<EmptyDocuments />} 
+    //         description="Отсутствуют созданные проекты"
+    //     />
+    // );
     return null;
 };
 

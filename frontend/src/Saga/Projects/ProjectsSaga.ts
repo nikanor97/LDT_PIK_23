@@ -8,6 +8,7 @@ import StartCalcSaga from "./StartCalcSaga";
 import DownloadResultSaga from "./DownloadResultSaga";
 import DownloadFileSaga from "./DownloadFileSaga";
 import DeleteProjectsSaga from "./DeleteProjectsSaga";
+import GetStatistics from "./GetStatistics";
 
 export default function* rootSaga() {
     yield rootSagaCreator([
@@ -19,6 +20,7 @@ export default function* rootSaga() {
         StartCalcSaga,
         DownloadResultSaga,
         DownloadFileSaga,
-        DeleteProjectsSaga
+        DeleteProjectsSaga,
+        GetStatistics
     ], "PROJECTS");
 }

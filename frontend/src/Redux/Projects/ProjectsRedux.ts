@@ -22,7 +22,10 @@ type iState = {
     tableConfig: {
         currentPage: number;
         defaultPageSize: number;
-    } | null
+    } | null,
+    statistics: iApi.Statistic.Item | null;
+    statisticsFetching: boolean;
+    statisticsError: boolean;
 }
 
 const initialState:iState  = {
@@ -43,6 +46,13 @@ const initialState:iState  = {
     file: null,
     loadFile: false,
     tableConfig: null,
+    statistics: {
+        avg_n_fittings: 0,
+        avg_sewer_length: 0,
+        devices: []
+    },
+    statisticsFetching: false,
+    statisticsError: false,
 };
 
 const Slice = createSlice({
@@ -165,7 +175,19 @@ const Slice = createSlice({
         },
         eraseTaskConfig: (state) => {
             state.tableConfig = null;
-        }
+        },
+        getStatistics: (state) => {
+            state.statisticsFetching = true;
+        },
+        _getStatisticsSuccess: (state, action: PayloadAction<iActions._getStatisticsSuccess>) => {
+            state.statistics = action.payload;
+            state.statisticsError = false;
+            state.statisticsFetching = false;
+        },
+        _getStatisticsError: (state) => {
+            state.statisticsError = true;
+            state.statisticsFetching = false;
+        },
         
     }
 });

@@ -62,7 +62,7 @@ const ResultList = () => {
                                     Общая длина канализации:
                                 </div>
                                 <div className={styles.blockContentOptionInfoNum}>
-                                    {item.sewer_length}
+                                    {(item.sewer_length / 1000).toFixed(2)} м
                                 </div>
                             </div>
                         </div>

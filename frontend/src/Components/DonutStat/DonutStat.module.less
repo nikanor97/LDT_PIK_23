@@ -1,0 +1,45 @@
+.pieStat {
+    padding: 14px 24px;
+    gap: 8px;background: var(--component-bg);
+    border: 1px solid var(--component-bg);
+    border-radius: 16px;
+    height: 196px;
+    border: 1px solid #E4E7EC;
+    width: 50%;
+    .title {
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 24px;
+        color: #667085;
+    }
+    .pie {
+        display: flex;
+        height: 88%;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    .pieInfo {
+        width: 100%;
+        &EmptyText {
+            font-style: normal;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 18px;
+
+            margin-left: 20px;
+            color: #667085;
+        }
+    }
+    .subInfo {
+        display: flex;
+        justify-content: space-between;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        // line-height: 16px;
+        color: rgba(8, 8, 8, 0.9);
+        .count {
+            font-weight: 600;
+        }
+    }
+}

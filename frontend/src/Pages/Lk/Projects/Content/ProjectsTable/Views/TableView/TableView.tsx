@@ -42,6 +42,10 @@ const TableView = () => {
         };
     }, []);
 
+    // useEffect(() => {
+    //     dispatch(Actions.Projects.getStatistics());
+    // }, [projects]);
+
     if (!projects) return null;
 
     return (
@@ -95,7 +99,7 @@ const TableView = () => {
                 }));
             }}
             scroll={{
-                y: "calc(100vh - 350px)",
+                y: "calc(100vh - 555px)",
                 x: true,
             }}
             rowKey="id"

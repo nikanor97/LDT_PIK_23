@@ -50,6 +50,7 @@ const CreateProjectModal = () => {
 
     const onSuccess = () => {
         form.resetFields();
+        setSelectedIds([]);
     };
 
     const onCreate = () => {

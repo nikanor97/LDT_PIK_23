@@ -5,11 +5,19 @@
     }
     .title {
         margin-bottom: 8px;
-        font-style: normal;
-        font-weight: 700;
-        font-size: 14px;
-        line-height: 16px;
-        color: #32324D;
+
+        .titleText {
+            display: flex;
+            p {
+                font-style: normal;
+                font-weight: 700;
+                font-size: 14px;
+                line-height: 16px;
+                color: #32324D;
+                margin-right: 10px;
+            }
+
+        }
     }
     .formTitle {
         margin-bottom: 8px;
@@ -28,23 +36,33 @@
         line-height: 16px;
         color: #32324D;
         margin-bottom: 16px;
-    }
-    .dragger {
-        width: 50%;
-        height: 50px;
-        border-radius: 8px;
-        &Desc {
-            font-style: normal;
-            font-weight: 400;
-            font-size: 12px;
-            line-height: 16px;
-            color: #475467;
+        &Req {
+            margin-top: 8px;
         }
     }
+    .draggerImage {
+        display: flex;
+        justify-content: space-between;
+        .dragger {
+            // width: 50%;
+            height: 70px;
+            border-radius: 8px;
+            &Desc {
+                font-style: normal;
+                font-weight: 400;
+                font-size: 14px;
+                line-height: 16px;
+                padding: 8px;
+                color: #475467;
+            }
+        }
+        .image {
+            // width: 200px;
+            height: 100px;
+        }
+    }
+
     :global {
-        .ant-upload-list {
-            width: 50%;
-        }
         .ant-form-item {
             display: flex;
             flex-direction: column;
@@ -115,4 +133,22 @@
 .button {
     display: flex;
     justify-content: flex-end;
+}
+
+.hintTitle {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 16px;
+    margin-bottom: 4px;
+}
+
+.hintText {
+    // width: 413px;
+    padding-left: 24px;
+    line-height: 16px;
+}
+
+.loading {
+    margin-top: 24px;
 }

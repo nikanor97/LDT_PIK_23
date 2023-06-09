@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import styles from "./DXF.module.less";
 import Title from "@root/Components/Title/Title";
-import {Form, Input, Upload, InputNumber} from "antd";
+import {Form, Input, Upload, InputNumber, Image} from "antd";
 import {Button, FormItem} from "@root/Components/Controls";
 import {UploadOutlined} from "@ant-design/icons";
 import {RcFile} from "antd/lib/upload";
@@ -11,6 +11,7 @@ import {useParams} from "react-router-dom";
 import Loading from "@root/Components/Loading/Loading";
 import ErrorView from "@root/Components/Error/Error";
 import transformData from "./Utils/TransformData";
+import Hint from "@root/Components/Hint/Hint";
 
 const {Dragger} = Upload;
 
@@ -60,34 +61,65 @@ const DXF = () => {
     useEffect(() => {
         return () => {
             dispatch(Actions.Projects.eraseDXFData());
+            setFile([]);
         };
     }, []);
+
+    const hint: React.ReactElement = (
+        <div>
+            <div className={styles.hintTitle}>Требования к загрузке:</div>
+            <ul className={styles.hintText}>
+                <li>приборы должны находиться в слое P-SANR-FIXT</li>
+                <li>стояк должен быть в слое A-DETL</li>
+                <li>стены должны быть заштрихованной областью в слое I-WALL-3</li>
+            </ul>
+        </div>
+    ); 
 
     return (
         <div className={styles.wrapper}>
             <Title variant="h3" className={styles.title}>
-                Загрузите DXF-файл
+                <div className={styles.titleText}>
+                    <p>Загрузите DXF-файл</p>
+                    <Hint title={hint}/>
+                </div>
+
             </Title>
             <div className={styles.description}>
-                Загрузите файл DXF, из него буду извлечены данные и после вам необходимо будет вписать еще некоторые данные и сделать запуск
+                Мы распознаем часть данных из DXF-файла. Некоторые поля необходимо будет заполнить самостоятельно.
             </div>
-            <Dragger
-                accept=".dxf"
-                className={styles.dragger}
-                maxCount={1}
-                disabled={parseDXFStatus === "loading"}
-                multiple={false}
-                fileList={file && file}
-                onRemove={(file) => {
-                    setFile([]);
-                    dispatch(Actions.Projects.eraseDXFData());
-                }}
-                beforeUpload={beforeUpload}>
-                <p className={styles.draggerDesc}>Нажмите или перетяните в эту область файл</p>
-            </Dragger>
+            <div className={styles.draggerImage}>
+                <Dragger
+                    accept=".dxf"
+                    className={styles.dragger}
+                    maxCount={1}
+                    disabled={parseDXFStatus === "loading"}
+                    multiple={false}
+                    fileList={file && file}
+                    onRemove={(file) => {
+                        setFile([]);
+                        dispatch(Actions.Projects.eraseDXFData());
+                    }}
+                    beforeUpload={beforeUpload}>
+                    <p className={styles.draggerDesc}>Нажмите или перетяните файл</p>
+
+                </Dragger>
+                {parseDXFStatus === "success" && DXFData && (
+                    <Image
+                        className={styles.image}
+                        src={`data:image/png;base64,${DXFData.image}`}
+                    />
+                )}
+            </div>
+
             <div>
                 {parseDXFStatus === "loading" && (
-                    <Loading />
+                    <div className={styles.loading}>
+                        <Loading>
+                            Загружаются данные из DXF файла,<br />
+                            пожалуйста подождите...
+                        </Loading>
+                    </div>
                 )}
                 {parseDXFStatus === "success" && (
                     <div>
