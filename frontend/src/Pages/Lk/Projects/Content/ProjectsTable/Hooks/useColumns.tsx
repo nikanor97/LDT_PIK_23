@@ -55,7 +55,7 @@ const useColumns = () => {
     const authorFD = useMemo(() => getDataForFilters((item) => item.author_name), [projects]);
     const performerFD = useMemo(() => getDataForFilters((item) => item.worker_name), [projects]);
     const createDateFD = useMemo(() => getDataForFilters((item) => checkDate(item.created_at)), [projects]);
-    const statusFD = ["Готово", "В процессе", "Ошибка"];
+    const statusFD = ["Готово", "Ошибка", "Создан"];
 
     return [
         {
