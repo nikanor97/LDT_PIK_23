@@ -24,7 +24,7 @@ const StatBar = () => {
             <DonutStat 
                 stat={statistics.device_stat}
                 sum={statistics.device_sum}
-                title="Количество девайсов по типам"
+                title="Количество устройств по типам"
             />
 
         </div>
