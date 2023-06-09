@@ -99,7 +99,7 @@ class GraphVertex(BaseModel):
     id: uuid.UUID
     graph: str
     material: str
-    probability: Decimal
+    # probability: Decimal
 
 
 class ProjectResultGraph(BaseModel):
@@ -138,7 +138,7 @@ class ProjectWithResults(ProjectExtendedWithNames):
 
 
 class ExportFileType(str, enum.Enum):
-    csv = "csv"
+    excel = "excel"
     stl = "stl"
     png = "png"
 

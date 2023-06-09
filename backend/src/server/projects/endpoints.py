@@ -335,44 +335,56 @@ class ProjectsEndpoints:
         self, project_id: uuid.UUID
     ) -> ProjectWithResults:
         async with self._main_db_manager.projects.make_autobegin_session() as session:
-            devices = await self._main_db_manager.projects.get_devices(
-                session, project_id
-            )
             variants = await self._main_db_manager.projects.get_sewer_variants(
                 session, project_id
             )
-            fittings = await self._main_db_manager.projects.get_all_fittings(session)
 
-        fitting_material_to_object: dict[str, Fitting] = dict()
-        for fitting in fittings:
-            if fitting.material_id is not None:
-                fitting_material_to_object[fitting.material_id] = fitting
+        stats_table: defaultdict[str, list[FittingStat]] = defaultdict(list)
+        connection_points_table: defaultdict[str, list[ConnectionPoint]] = defaultdict(
+            list
+        )
+        graph_table: defaultdict[str, list[GraphVertex]] = defaultdict(list)
+        imgs: dict[str, str] = dict()
+        for variant in variants:
+            stats_df = pd.read_excel(variant.excel_source_url, sheet_name="Материалы")
+            connection_points_df = pd.read_excel(
+                variant.excel_source_url, sheet_name="Точки подключения"
+            )
+            graph_df = pd.read_excel(
+                variant.excel_source_url, sheet_name="Граф подключения фитингов"
+            )
 
-        graph_dfs: dict[int, pd.DataFrame] = dict()
-        imgs: dict[int, str] = dict()
-        fittings_stat: defaultdict[int, list[FittingStat]] = defaultdict(list)
-        for idx, variant in enumerate(variants):
-            graph_dfs[variant.variant_num] = pd.read_csv(variant.excel_source_url)
+            for idx, row in stats_df.iterrows():
+                stat = FittingStat(
+                    name=row["Наименование"],
+                    material_id=row["ИД материала"],
+                    n_items=row["Кол-во"],
+                )
+                stats_table[variant.variant_num].append(stat)
+
+            for idx, row in connection_points_df.iterrows():
+                connection_point = ConnectionPoint(
+                    id=uuid.uuid4(),
+                    type=row["Тип"],
+                    diameter=row["Диаметр"],
+                    coord_x=row["X"],
+                    coord_y=row["Y"],
+                    coord_z=row["Z"],
+                )
+                connection_points_table[variant.variant_num].append(connection_point)
+
+            for idx, row in graph_df.iterrows():
+                graph = GraphVertex(
+                    id=uuid.uuid4(),
+                    graph=row["Граф"],
+                    material=row["Материал"],
+                    # probability=0.9,
+                )
+                graph_table[variant.variant_num].append(graph)
 
             with open(variant.png_source_url, "rb") as img:
                 img_str = base64.b64encode(img.read()).decode("utf-8")
                 imgs[variant.variant_num] = img_str
-
-            material_id_to_count: defaultdict[str, int] = defaultdict(int)
-            for _, row in graph_dfs[variant.variant_num].iterrows():
-                material_id_to_count[str(row["Материал"])] += 1
-
-            for material_id, n_items in material_id_to_count.items():
-                if material_id in fitting_material_to_object:
-                    # TODO: It should be True allways, but on 08.06.23 we don't have
-                    #  straight pipes in "fittings" table in the DB
-                    stat = FittingStat(
-                        name=fitting_material_to_object[str(material_id)].name,
-                        material_id=str(material_id),
-                        n_items=n_items,
-                        total_length=None,
-                    )
-                    fittings_stat[variant.variant_num].append(stat)
 
         async with self._main_db_manager.users.make_autobegin_session() as session:
             users = await self._main_db_manager.users.get_all_users(session)
@@ -410,37 +422,17 @@ class ProjectsEndpoints:
                     result=ProjectResult(
                         fittings_stat=ProjectResultFittingsStat(
                             tab_name="Используемые фитинги",
-                            table=fittings_stat[variant.variant_num],
+                            table=stats_table[variant.variant_num],
                         ),
                         connection_points=ProjectResultConnectionPoints(
                             tab_name="Точки подключения",
-                            table=[
-                                ConnectionPoint(
-                                    id=uuid.uuid4(),
-                                    type=device.type_human,
-                                    diameter=110
-                                    if device.type == DeviceTypeOption.toilet
-                                    else 50,
-                                    coord_x=device.coord_x,
-                                    coord_y=device.coord_y,
-                                    coord_z=device.coord_z,
-                                )
-                                for device in devices
-                            ],
-                            image=img_str,
+                            table=connection_points_table[variant.variant_num],
+                            image=imgs[variant.variant_num],
                         ),
                         graph=ProjectResultGraph(
                             tab_name="Граф подключения",
-                            table=[
-                                GraphVertex(
-                                    id=uuid.uuid4(),
-                                    graph=row["Граф"],
-                                    material=row["Материал"],
-                                    probability=0.9,
-                                )
-                                for id, row in graph_dfs[variant.variant_num].iterrows()
-                            ],
-                            image=img_str,
+                            table=graph_table[variant.variant_num],
+                            image=imgs[variant.variant_num],
                         ),
                     ),
                 )
@@ -503,6 +495,8 @@ class ProjectsEndpoints:
                 session, project_id, ProjectStatusOption.ready
             )
 
+        await self._create_excels_for_variants(project_id)
+
         project_with_results = await self._get_project_with_results(project_id)
 
         return project_with_results
@@ -511,7 +505,7 @@ class ProjectsEndpoints:
         self,
         project_id: uuid.UUID,
         variant_num: int = 1,
-        file_type: ExportFileType = ExportFileType.csv,
+        file_type: ExportFileType = ExportFileType.excel,
     ):
         # filename, file_path = await self._get_filename(project_id, variant_num, file_type)
         async with self._main_db_manager.projects.make_autobegin_session() as session:
@@ -529,9 +523,9 @@ class ProjectsEndpoints:
             if sw.variant_num == variant_num:
                 sewer_variant = sw
 
-        if file_type == ExportFileType.csv:
+        if file_type == ExportFileType.excel:
             filename = sewer_variant.excel_source_url
-            media_type = "text/csv"
+            media_type = "application/vnd.ms-excel"
         elif file_type == ExportFileType.stl:
             filename = sewer_variant.stl_source_url
             media_type = "application/wavefront-stl"
@@ -549,6 +543,96 @@ class ProjectsEndpoints:
             headers=headers,
             status_code=200,
         )
+
+    async def _create_excels_for_variants(self, project_id: uuid.UUID) -> None:
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            devices = await self._main_db_manager.projects.get_devices(
+                session, project_id
+            )
+            variants = await self._main_db_manager.projects.get_sewer_variants(
+                session, project_id
+            )
+            fittings = await self._main_db_manager.projects.get_all_fittings(session)
+
+        fitting_material_to_object: dict[str, Fitting] = dict()
+        for fitting in fittings:
+            if fitting.material_id is not None:
+                fitting_material_to_object[fitting.material_id] = fitting
+
+        graph_dfs: dict[int, pd.DataFrame] = dict()
+        imgs: dict[int, str] = dict()
+        fittings_stat: defaultdict[int, list[FittingStat]] = defaultdict(list)
+        for idx, variant in enumerate(variants):
+            graph_dfs[variant.variant_num] = pd.read_csv(variant.excel_source_url)
+
+            with open(variant.png_source_url, "rb") as img:
+                img_str = base64.b64encode(img.read()).decode("utf-8")
+                imgs[variant.variant_num] = img_str
+
+            material_id_to_count: defaultdict[str, int] = defaultdict(int)
+            for _, row in graph_dfs[variant.variant_num].iterrows():
+                material_id_to_count[str(row["Материал"])] += 1
+
+            for material_id, n_items in material_id_to_count.items():
+                if material_id in fitting_material_to_object:
+                    # TODO: It should be True allways, but on 08.06.23 we don't have
+                    #  straight pipes in "fittings" table in the DB
+                    stat = FittingStat(
+                        name=fitting_material_to_object[str(material_id)].name,
+                        material_id=str(material_id),
+                        n_items=n_items,
+                        total_length=None,
+                    )
+                    fittings_stat[variant.variant_num].append(stat)
+
+        for variant in variants:
+            stat_dict = dict()
+            stat_dict["Наименование"] = [
+                fs.name for fs in fittings_stat[variant.variant_num]
+            ]
+            stat_dict["ИД материала"] = [
+                fs.material_id for fs in fittings_stat[variant.variant_num]
+            ]
+            stat_dict["Кол-во"] = [
+                fs.n_items for fs in fittings_stat[variant.variant_num]
+            ]
+            # stat['Наименование'] = [fs.name for fs in fittings_stat[variant.variant_num]]
+
+            connection_points_dict = dict()
+            connection_points_dict["Тип"] = [device.type_human for device in devices]
+            connection_points_dict["Диаметр"] = [
+                110 if device.type == DeviceTypeOption.toilet else 50
+                for device in devices
+            ]
+            connection_points_dict["X"] = [device.coord_x for device in devices]
+            connection_points_dict["Y"] = [device.coord_y for device in devices]
+            connection_points_dict["Z"] = [device.coord_z for device in devices]
+
+            graph_dict = dict()
+            graph_dict["Граф"] = [
+                row["Граф"] for idx, row in graph_dfs[variant.variant_num].iterrows()
+            ]
+            graph_dict["Материал"] = [
+                row["Материал"]
+                for idx, row in graph_dfs[variant.variant_num].iterrows()
+            ]
+
+            file_path = variant.stl_source_url[:-3] + "xlsx"
+            with pd.ExcelWriter(file_path) as writer:
+                pd.DataFrame(stat_dict).to_excel(
+                    writer, sheet_name="Материалы", index=False
+                )
+                pd.DataFrame(connection_points_dict).to_excel(
+                    writer, sheet_name="Точки подключения", index=False
+                )
+                pd.DataFrame(graph_dict).to_excel(
+                    writer, sheet_name="Граф подключения фитингов", index=False
+                )
+
+            async with self._main_db_manager.projects.make_autobegin_session() as session:
+                await self._main_db_manager.projects.update_sewer_variant_excel_source_url(
+                    session, variant.id, file_path
+                )
 
     async def _get_user_or_error(self, user_id: uuid.UUID) -> User | NoResultFound:
         """

@@ -330,6 +330,14 @@ class ProjectsDbManager(BaseDbManager):
         )
         return sewer_variants
 
+    async def update_sewer_variant_excel_source_url(
+        self, session: AsyncSession, sewer_variant_id: uuid.UUID, new_source_url: str
+    ) -> SewerVariant:
+        variant = await SewerVariant.by_id(session, sewer_variant_id)
+        variant.excel_source_url = new_source_url
+        session.add(variant)
+        return variant
+
     async def update_project_status(
         self,
         session: AsyncSession,
