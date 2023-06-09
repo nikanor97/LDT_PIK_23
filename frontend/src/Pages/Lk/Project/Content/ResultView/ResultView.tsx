@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import MaterialTab from "./Tabs/MaterialTab/MaterialTab";
+import FittingTab from "./Tabs/FittingTab/FittingTab";
 import ConnectPointsTab from "./Tabs/ConnectPointsTab/ConnectPointsTab";
 import GraphTab from "./Tabs/GraphTab/GraphTab";
 import {useAppDispatch, useAppSelector} from "@root/Hooks";
@@ -63,10 +63,10 @@ const ResultView = () => {
                     </Button>
                 </Dropdown>
             </div>
-            <Tabs defaultActiveKey="2" >
-                {/* <TabPane tab={option.materials.tabName} key="1">
-                    <MaterialTab tables={option.materials.tables} />
-                </TabPane> */}
+            <Tabs defaultActiveKey="1" >
+                <TabPane tab={option.result.fittings_stat.tab_name} key="1">
+                    <FittingTab data={option.result.fittings_stat} />
+                </TabPane>
                 <TabPane tab={option.result.connection_points.tab_name} key="2">
                     <ConnectPointsTab data={option.result.connection_points} />
                 </TabPane>

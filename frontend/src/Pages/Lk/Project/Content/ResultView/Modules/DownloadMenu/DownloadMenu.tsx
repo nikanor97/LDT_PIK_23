@@ -26,7 +26,7 @@ const MenuModule = (props: DownloadMenuProps) => {
         dispatch(Actions.Projects.downloadResult({
             project_id: project,
             variant_num: variant,
-            file_type: "csv"
+            file_type: "excel"
         }));
     };
     return (
@@ -43,7 +43,7 @@ const MenuModule = (props: DownloadMenuProps) => {
                 className={styles.btn}
                 loading={loading}
                 onClick={onDownloadXls}>
-                CSV
+                Excel
             </Button>
         </div>
     );

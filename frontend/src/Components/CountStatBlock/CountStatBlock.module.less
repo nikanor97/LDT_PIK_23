@@ -1,0 +1,49 @@
+.countStat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 16px 16px 24px;
+    background: var(--component-bg);
+    border: 1px solid var(--component-bg);
+    border-radius: 16px;
+    height: 196px;
+    width: 25%;
+    border: 1px solid #E4E7EC;
+    overflow: hidden;
+    &:not(:last-child) {
+        margin-right: 16px;
+    }
+    .icon {
+        margin-bottom: 8px;
+    }
+    .title {
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 24px;
+        color: #667085;
+        margin-bottom: 8px;
+    }
+    .countEmpty {
+        font-weight: 600;
+        font-size: 40px;
+        line-height: 48px;
+        color: #A3ADBF;
+        margin-bottom: 4px;
+        justify-self: end;
+    }
+    .count {
+        font-weight: 700;
+        font-size: 40px;
+        line-height: 48px;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+        justify-self: end;
+    }
+    .subTitle {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 24px;
+        color: #858585;
+    }
+}

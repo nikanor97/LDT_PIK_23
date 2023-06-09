@@ -36,6 +36,16 @@ export declare namespace iApi {
             name: string
         }
     }
+    namespace Statistic {
+        type Item = {
+            avg_n_fittings: number,
+            avg_sewer_length: number,
+            devices: {
+                type_human: string,
+                n_occur: number
+            }[]
+        };
+    }
 
     namespace Projects {
         // TODO Изменить в соответствии с беком
@@ -46,7 +56,8 @@ export declare namespace iApi {
             author_name: string,
             status: 0 | 100 | 200 | 400 | 300,
             worker_name: string,
-            type: "dxf" | "manual"
+            type: "dxf" | "manual",
+            created_at: string
         }
         type ItemDetail = Item & {
             results?: Results[]
@@ -60,21 +71,16 @@ export declare namespace iApi {
         }
 
         type Result = {
-            // materials: {
-            //     tabName: "Материалы",
-            //     tables: {
-            //         name: string,
-            //         values: {
-            //             id: number,
-            //             name: string,
-            //             diameter1: number,
-            //             diameter2: number,
-            //             diameter3: number,
-            //             angle: number,
-            //             direction: string
-            //         }[]
-            //     }[]
-            // },
+            fittings_stat: {
+                tab_name: "Используемые фитинги",
+                table: {
+                    name: string,
+                    material_id: string,
+                    n_items: number,
+                    total_length: number,
+                }[],
+                image: string
+            },
             connection_points: {
                 tab_name: "Точки подключения",
                 table: {
@@ -103,6 +109,7 @@ export declare namespace iApi {
         type DXFParsedData = {
             type: string,
             id: string,
+            image: string,
             devices: {
                 name: string,
                 type: string,

@@ -8,4 +8,5 @@ export default {
     startCalc: "/v1/projects/result",
     downloadResult: "v1/projects/export",
     deleteProjects: "/v1/projects/delete",
+    getStats: "/v1/projects/stats"
 };

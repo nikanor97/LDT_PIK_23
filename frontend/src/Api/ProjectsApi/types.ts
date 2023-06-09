@@ -35,6 +35,6 @@ export declare namespace Projects {
     type iDownloadResult = {
         project_id: string,
         variant_num: number,
-        file_type: "csv" | "stl"
+        file_type: "excel" | "stl"
     }
 }

@@ -1,33 +1,32 @@
 import React from "react";
-import StatCard from "./Components/StatCard/StatCard";
 import styles from "./StatBar.module.less";
+import useStatisticsData from "./Hooks/useStatisticsData";
+import CountStatBlock from "@root/Components/CountStatBlock/CountStatBlock";
+import DonutStat from "@root/Components/DonutStat/DonutStat";
+import Fittings from "./Icons/Fittings";
+import Sewer from "./Icons/Sewer";
 
 const StatBar = () => {
-    const mockStat = [
-        {
-            title: "Всего фитингов",
-            value: 100
-        },
-        {
-            title: "Средняя длина канализации",
-            value: 356.32
-        },
-        {
-            title: "Среднее количество устройств",
-            value: 210
-        }
-    ];
+    const statistics = useStatisticsData();
+
+    if (!statistics) return null;
 
     return (
         <div className={styles.wrapper}>
-            {mockStat.map((item) => (
-                <StatCard
-                    className={styles.card}
-                    key={item.title}
-                    title={item.title}
-                    value={item.value}
-                />
-            ))}
+            <CountStatBlock
+                icon={<Fittings />}
+                title={"Среднее количество фитингов"}
+                statNumber={statistics.fittings} />
+            <CountStatBlock
+                icon={<Sewer />}
+                title={"Средняя длина канализации"}
+                statNumber={statistics.sewer} />
+            <DonutStat 
+                stat={statistics.device_stat}
+                sum={statistics.device_sum}
+                title="Количество девайсов по типам"
+            />
+
         </div>
     );
 };

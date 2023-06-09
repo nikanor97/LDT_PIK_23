@@ -39,7 +39,7 @@ export declare namespace iActions {
     type downloadResult = {
         project_id: string,
         variant_num: number,
-        file_type: "csv" | "stl"
+        file_type: "excel" | "stl"
     }
     type _downloadFileSuccess = File;
     type deleteProjects = React.Key[];
@@ -50,4 +50,5 @@ export declare namespace iActions {
             defaultPageSize: number;
         }
     }
+    type _getStatisticsSuccess = iApi.Statistic.Item;
 }

@@ -13,12 +13,13 @@ const Projects = () => {
         dispatch(Actions.Projects.getProjects());
         dispatch(Actions.User.getUsersAll());
         dispatch(Actions.Projects.getFittings());
+        dispatch(Actions.Projects.getStatistics());
     }, []);
 
     return (
         <div className={styles.wrapper}>
             <TopBar />
-            {/* <StatBar /> */}
+            <StatBar />
             <ProjectsTable />
         </div>
     );

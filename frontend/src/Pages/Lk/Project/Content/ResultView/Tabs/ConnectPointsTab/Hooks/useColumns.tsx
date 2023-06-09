@@ -14,17 +14,17 @@ type TableData = {
 const useColumns = () => {
 
     return [
-        {
-            title: "Порядок",
-            dataIndex: "order",
-            key: "order",
-            width: 150,
-            render: (order: TableData["order"]) => (
-                <div style={{width: useGetMinColumnWidthForTable("Порядок")}}>
-                    {order}
-                </div>
-            ),
-        },
+        // {
+        //     title: "Порядок",
+        //     dataIndex: "order",
+        //     key: "order",
+        //     width: 150,
+        //     render: (order: TableData["order"]) => (
+        //         <div style={{width: useGetMinColumnWidthForTable("Порядок")}}>
+        //             {order}
+        //         </div>
+        //     ),
+        // },
         {
             title: "Тип",
             dataIndex: "type",

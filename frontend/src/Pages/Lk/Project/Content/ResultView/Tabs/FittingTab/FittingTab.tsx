@@ -1,15 +1,16 @@
 import React from "react";
 import {Table, Image, Row, Col} from "antd";
-import styles from "./Graph.module.less";
+import styles from "./FittingTab.module.less";
+import useColumns from "./Hooks/useColumns";
 import {useAppSelector} from "@root/Hooks";
-import STLViewer from "../../Modules/StlViewer/StlViewer";
 import Loading from "@root/Components/Loading/Loading";
+import STLViewer from "../../Modules/StlViewer/StlViewer";
 
 type TableData = {
-    id: number,
-    graph: string;
-    material: string;
-    probability: number;
+    name: string,
+    material_id: string,
+    n_items: number,
+    total_length: number,
 }
 
 type DataObject = {
@@ -17,36 +18,19 @@ type DataObject = {
     image: string;
 }
 
-type GraphTabProps = {
+type FittingsTabProps = {
     data: DataObject;
 }
 
-const GraphTab = (props: GraphTabProps) => {
+const FittingsTab = (props: FittingsTabProps) => {
     const stl = useAppSelector((state) => state.Projects.file);
     const stlLoading = useAppSelector((state) => state.Projects.loadFile);
     const {data} = props;
-    
-    const columns = [
-        {
-            title: "Граф",
-            dataIndex: "graph",
-            key: "graph",
-        },
-        {
-            title: "Материал",
-            dataIndex: "material",
-            key: "material",
-        },
-        // {
-        //     title: "Вероятность",
-        //     dataIndex: "probability",
-        //     key: "probability",
-        // },
-    ];
+    const columns = useColumns();
 
     return (
         <Row gutter={24} className={styles.row}>
-            <Col span={12}>
+            <Col span={12} className={styles.col}>
                 <Table
                     className={styles.table}
                     dataSource={data.table}
@@ -60,7 +44,7 @@ const GraphTab = (props: GraphTabProps) => {
                     rowKey="id"
                 />
             </Col>
-            <Col span={12}>
+            <Col span={12} className={styles.col}>
                 {
                     stlLoading ? (
                         <Loading>
@@ -77,10 +61,9 @@ const GraphTab = (props: GraphTabProps) => {
                         )
                     )
                 }
-
             </Col>
         </Row>
     );
 };
 
-export default GraphTab;
+export default FittingsTab;
