@@ -146,3 +146,14 @@ class ExportFileType(str, enum.Enum):
 
 class ProjectsDelete(BaseModel):
     project_ids: list[uuid.UUID]
+
+
+class DeviceStats(BaseModel):
+    type_human: str
+    n_occur: int
+
+
+class ProjectsStats(BaseModel):
+    avg_n_fittings: Decimal
+    avg_sewer_length: Decimal
+    devices: list[DeviceStats]

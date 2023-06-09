@@ -1,6 +1,7 @@
 import base64
 import os
 import uuid
+from _decimal import Decimal
 from collections import defaultdict
 from typing import Annotated, Optional
 
@@ -49,6 +50,8 @@ from src.server.projects.models import (
     ProjectSewerVariant,
     FittingStat,
     ProjectResultFittingsStat,
+    ProjectsStats,
+    DeviceStats,
 )
 from src.trace_builder.run import run_algo
 from src.trace_builder.utils import convert_dxf2img
@@ -336,7 +339,7 @@ class ProjectsEndpoints:
     ) -> ProjectWithResults:
         async with self._main_db_manager.projects.make_autobegin_session() as session:
             variants = await self._main_db_manager.projects.get_sewer_variants(
-                session, project_id
+                session, {project_id}
             )
 
         stats_table: defaultdict[str, list[FittingStat]] = defaultdict(list)
@@ -513,7 +516,7 @@ class ProjectsEndpoints:
             try:
                 sewer_variants = (
                     await self._main_db_manager.projects.get_sewer_variants(
-                        session, project_id
+                        session, {project_id}
                     )
                 )
             except NoResultFound as e:
@@ -545,13 +548,42 @@ class ProjectsEndpoints:
             status_code=200,
         )
 
+    async def get_projects_stats(self) -> ProjectsStats:
+        async with self._main_db_manager.projects.make_autobegin_session() as session:
+            projects = await self._main_db_manager.projects.get_all_projects(session)
+            projects_ids = {p.id for p in projects}
+            variants = await self._main_db_manager.projects.get_sewer_variants(
+                session, projects_ids
+            )
+            devices = await self._main_db_manager.projects.get_devices(
+                session, projects_ids
+            )
+        avg_n_fittings = Decimal(sum([v.n_fittings for v in variants]) / len(variants))
+        avg_sewer_length = Decimal(
+            sum([v.sewer_length for v in variants]) / len(variants)
+        )
+
+        devices_stats: defaultdict[str, int] = defaultdict(int)
+        for device in devices:
+            devices_stats[device.type_human] += 1
+
+        projects_stats = ProjectsStats(
+            avg_n_fittings=avg_n_fittings,
+            avg_sewer_length=avg_sewer_length,
+            devices=[
+                DeviceStats(type_human=type_human, n_occur=n_occur)
+                for type_human, n_occur in devices_stats.items()
+            ],
+        )
+        return projects_stats
+
     async def _create_excels_for_variants(self, project_id: uuid.UUID) -> None:
         async with self._main_db_manager.projects.make_autobegin_session() as session:
             devices = await self._main_db_manager.projects.get_devices(
-                session, project_id
+                session, {project_id}
             )
             variants = await self._main_db_manager.projects.get_sewer_variants(
-                session, project_id
+                session, {project_id}
             )
             fittings = await self._main_db_manager.projects.get_all_fittings(session)
 

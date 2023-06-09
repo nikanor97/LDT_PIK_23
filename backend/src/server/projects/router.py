@@ -11,6 +11,7 @@ from src.server.projects.models import (
     FittingGroupRead,
     DxfFileWithDevices,
     ProjectWithResults,
+    ProjectsStats,
 )
 
 
@@ -93,6 +94,14 @@ class ProjectsRouter:
         self.router.add_api_route(
             path="/export",
             endpoint=self._projects_endpoints.export_files,
+            methods=[METHOD.GET],
+            dependencies=[Depends(Auth(main_db_manager))],
+        )
+
+        self.router.add_api_route(
+            path="/stats",
+            endpoint=self._projects_endpoints.get_projects_stats,
+            response_model=ProjectsStats,
             methods=[METHOD.GET],
             dependencies=[Depends(Auth(main_db_manager))],
         )

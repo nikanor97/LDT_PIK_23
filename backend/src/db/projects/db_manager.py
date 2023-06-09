@@ -277,13 +277,29 @@ class ProjectsDbManager(BaseDbManager):
         return updated_devices
 
     async def get_devices(
-        self, session: AsyncSession, project_id: uuid.UUID
+        self, session: AsyncSession, project_ids: set[uuid.UUID]
     ) -> list[Device]:
-        project = await Project.by_id(session, project_id)
+        # project = await Project.by_id(session, project_id)
+        stmt = select(Project).where(col(Project.id).in_(set(project_ids)))
+        projects: list[Project] = (await session.execute(stmt)).scalars().all()
+        projects_ids_from_db = {p.id for p in projects}
+
+        wrong_project_ids = set(project_ids) - set(projects_ids_from_db)
+        if len(wrong_project_ids) > 0:
+            raise NoResultFound(f"Projects with ids {wrong_project_ids} were not found")
+
+        dxf_file_ids = {p.dxf_file_id for p in projects}
+
+        # devices: list[Device] = []
+        # if project.dxf_file_id is None:
+        #     return devices
+        # stmt = select(Device).where(Device.dxf_file_id == project.dxf_file_id)
+        # devices: list[Device] = (await session.execute(stmt)).scalars().all()
+
         devices: list[Device] = []
-        if project.dxf_file_id is None:
+        if len(dxf_file_ids) == 0:
             return devices
-        stmt = select(Device).where(Device.dxf_file_id == project.dxf_file_id)
+        stmt = select(Device).where(col(Device.dxf_file_id).in_(dxf_file_ids))
         devices: list[Device] = (await session.execute(stmt)).scalars().all()
         return devices
 
@@ -305,7 +321,7 @@ class ProjectsDbManager(BaseDbManager):
         sewer_variants: list[SewerVariantBase],
         project_id: uuid.UUID,
     ) -> list[SewerVariant]:
-        old_sewer_variants = await self.get_sewer_variants(session, project_id)
+        old_sewer_variants = await self.get_sewer_variants(session, {project_id})
         for variant in old_sewer_variants:
             await session.delete(variant)
 
@@ -320,11 +336,17 @@ class ProjectsDbManager(BaseDbManager):
         return new_sewer_variants
 
     async def get_sewer_variants(
-        self, session: AsyncSession, project_id: uuid.UUID
+        self, session: AsyncSession, project_ids: set[uuid.UUID]
     ) -> list[SewerVariant]:
-        await Project.by_id(session, project_id)
+        stmt = select(Project).where(col(Project.id).in_(set(project_ids)))
+        projects = (await session.execute(stmt)).scalars().all()
+        projects_ids_from_db = {p.id for p in projects}
 
-        stmt = select(SewerVariant).where(SewerVariant.project_id == project_id)
+        wrong_project_ids = set(project_ids) - set(projects_ids_from_db)
+        if len(wrong_project_ids) > 0:
+            raise NoResultFound(f"Projects with ids {wrong_project_ids} were not found")
+
+        stmt = select(SewerVariant).where(col(SewerVariant.project_id).in_(project_ids))
         sewer_variants: list[SewerVariant] = (
             (await session.execute(stmt)).scalars().all()
         )
