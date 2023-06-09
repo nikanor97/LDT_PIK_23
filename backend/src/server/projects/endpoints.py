@@ -558,23 +558,33 @@ class ProjectsEndpoints:
             devices = await self._main_db_manager.projects.get_devices(
                 session, projects_ids
             )
-        avg_n_fittings = Decimal(sum([v.n_fittings for v in variants]) / len(variants))
-        avg_sewer_length = Decimal(
-            sum([v.sewer_length for v in variants]) / len(variants)
-        )
 
-        devices_stats: defaultdict[str, int] = defaultdict(int)
-        for device in devices:
-            devices_stats[device.type_human] += 1
+        if len(variants) == 0:
+            projects_stats = ProjectsStats(
+                avg_n_fittings=0,
+                avg_sewer_length=0,
+                devices=[],
+            )
+        else:
+            avg_n_fittings = Decimal(
+                sum([v.n_fittings for v in variants]) / len(variants)
+            )
+            avg_sewer_length = Decimal(
+                sum([v.sewer_length for v in variants]) / len(variants)
+            )
 
-        projects_stats = ProjectsStats(
-            avg_n_fittings=avg_n_fittings,
-            avg_sewer_length=avg_sewer_length,
-            devices=[
-                DeviceStats(type_human=type_human, n_occur=n_occur)
-                for type_human, n_occur in devices_stats.items()
-            ],
-        )
+            devices_stats: defaultdict[str, int] = defaultdict(int)
+            for device in devices:
+                devices_stats[device.type_human] += 1
+
+            projects_stats = ProjectsStats(
+                avg_n_fittings=avg_n_fittings,
+                avg_sewer_length=avg_sewer_length,
+                devices=[
+                    DeviceStats(type_human=type_human, n_occur=n_occur)
+                    for type_human, n_occur in devices_stats.items()
+                ],
+            )
         return projects_stats
 
     async def _create_excels_for_variants(self, project_id: uuid.UUID) -> None:
