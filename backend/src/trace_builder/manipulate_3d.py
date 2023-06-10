@@ -577,7 +577,7 @@ def rotate_otvod_45_upper_second(obj, pipe, cum_z, bias=90):
             obj.y += bias_2
 
         if pipe.coordinates.start.x > pipe.coordinates.end.x:
-            obj.x += bias_1 + 5
+            obj.x += bias_1 - 5
         else:
             obj.x -= bias_1 - 5
     else:
@@ -789,16 +789,16 @@ def build_stuff_mesh_87(pipe: Pipe, material_graph: PipeGraph):
 
 
 def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
-    bias_1 = 160 if diameter == 110 else 90
+    bias_1 = 160 if diameter == 110 else 110
     bias_2 = 37 if diameter == 110 else 0
-    bias_3 = 55
+    bias_3 = 55 if diameter == 110 else 55
     if is_parallel_X(pipe.coordinates):
         if pipe.coordinates.end.y > riser_projections.y:  # pipe above riser
             if pipe.coordinates.start.x < pipe.coordinates.end.x:  # right
                 obj.rotate([0, 0, 1], math.radians(180))
                 obj.rotate([0, 1, 0], math.radians(90))
                 obj.y += bias_2
-                obj.x -= bias_1 - 37
+                obj.x -= bias_1 - 47
             else:
                 obj.rotate([0, 0, 1], math.radians(180))
                 obj.rotate([0, 1, 0], math.radians(-90))
@@ -810,7 +810,7 @@ def rotate_otvod_link_knee(obj, pipe, riser_projections, diameter=110):
                 obj.x -= bias_3
             else:
                 obj.rotate([0, 1, 0], math.radians(-90))
-                obj.x += bias_1 - 40
+                obj.x += bias_1 - 40 if diameter == 110 else bias_1
                 obj.y += bias_1
                 obj.y -= bias_1 if diameter == 50 else 0
     else:
